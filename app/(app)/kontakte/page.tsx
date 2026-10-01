@@ -5,7 +5,7 @@ import { Auswahl, Feld, Pruefen, Tu, type Zeile as ListZeile } from '@/component
 import { Abschnitt, Etikett, Leer, Vermutung, Verlauf, type VerlaufEintrag } from '@/components/kg';
 import { faellig, monat, tag } from '@/lib/format';
 import { contactList, orgDetail, personDetail } from '@/lib/views/contacts';
-import { ROLLE } from '../b/[key]/detail';
+import { Fragen, ROLLE } from '../b/[key]/detail';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,6 +106,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
             <label htmlFor="p-notiz">Notiz</label>
             <Feld id="p-notiz" wert={person.notes ?? ''} mehrzeilig label="Notiz" change={{ type: 'person.update', base: { id: person.id }, key: 'notes' }} />
           </div>
+          <Fragen bezug={{ type: 'person', id: person.id }} kontext={`${person.name} · ${person.timeline.length} Einträge`} />
           <Abschnitt id="p-bei" titel="Beteiligt an" anzahl={person.matters.length}>
             {person.matters.map((m) => <div key={m.id} className="gz"><Etikett>{m.area}</Etikett><a className="kg-bezug" href={`/m/${m.id}`}>{m.title}</a></div>)}
           </Abschnitt>
@@ -133,6 +134,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
             <span className="fl">Domains</span>
             <span className="mono" style={{ lineHeight: '28px' }}>{org.domains.join(', ') || '–'}</span>
           </div>
+          <Fragen bezug={{ type: 'org', id: org.id }} kontext={`${org.name} · ${org.timeline.length} Einträge`} />
           <Abschnitt id="o-personen" titel="Personen" anzahl={org.people.length}>
             {org.people.map((p) => <div key={p.id} className="gz"><span className="mono">{ROLLE[p.role] ?? p.role}</span><a className="kg-bezug" href={url({ typ: 'person', id: p.id })}>{p.name}</a></div>)}
           </Abschnitt>

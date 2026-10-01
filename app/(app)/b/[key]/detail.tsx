@@ -2,6 +2,7 @@
 // parts are client components that run actions (components/bearbeiten.tsx).
 import { Fragment } from 'react';
 import { Auswahl, Erledigen, Feld, Gespraech, Tu, Uebergeben, Zeile } from '@/components/bearbeiten';
+import { EingabeStart } from '@/components/chat';
 import { Abschnitt, Privat, Quelle, Vermutung, Verlauf, Zusage, type VerlaufEintrag } from '@/components/kg';
 import { faellig, monat, tag } from '@/lib/format';
 import type { AreaInfo, Commitment, MatterDetail } from '@/lib/views/areas';
@@ -128,6 +129,15 @@ function FeldWert({ f, wert, ziel, ki }: { f: AreaInfo['fields'][number]; wert: 
   );
 }
 
+/** §11: the one input field, preloaded with this page (chat with context) */
+export function Fragen({ bezug, kontext }: { bezug: { type: 'matter' | 'org' | 'person'; id: string }; kontext: string }) {
+  return (
+    <Abschnitt id="d-fragen" titel="Kollege fragen">
+      <EingabeStart bezug={bezug} kontext={kontext} platzhalter="Frag oder notiere etwas dazu" />
+    </Abschnitt>
+  );
+}
+
 export function MatterAnsicht({ d, team, me, now }: { d: MatterDetail; team: Team; me: string; now: Date }) {
   const ziel = { type: 'matter.update', base: { id: d.id } };
   return (
@@ -156,6 +166,8 @@ export function MatterAnsicht({ d, team, me, now }: { d: MatterDetail; team: Tea
         </div>
         {d.outcome_note ? <div className="gz"><span className="mono">Wie lief’s</span><span>{d.outcome_note}</span></div> : null}
       </div>
+
+      <Fragen bezug={{ type: 'matter', id: d.id }} kontext={`${d.area.name_singular} · ${d.title} · ${d.timeline.length} Einträge`} />
 
       <Abschnitt id="d-naechster" titel="Nächster Schritt">
         {d.nextStep ? (
@@ -229,6 +241,8 @@ export function OrgAnsicht({ d, area, team, me, now }: { d: OrgDetail; area: Are
           <div key={p.id} className="gz"><span className="mono">{ROLLE[p.role] ?? p.role}</span><span><a className="kg-bezug" href={`/kontakte?typ=person&id=${p.id}`}>{p.name}</a> <span className="mono">{p.emails[0] ?? ''}</span></span></div>
         ))}
       </Abschnitt>
+
+      <Fragen bezug={{ type: 'org', id: d.id }} kontext={`${d.name} · ${d.timeline.length} Einträge`} />
 
       <Abschnitt id="d-gespraeche" titel="Gespräche" anzahl={gespraeche.length} aside="Beratungen, Telefonate, Treffen">
         <Gespraech targetType="org" targetId={d.id} heute={berlinDate(now)} />

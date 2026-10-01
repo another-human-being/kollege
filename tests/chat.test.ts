@@ -239,3 +239,12 @@ function stream(parts: Part[], finish: 'stop' | 'tool-calls') {
   const all = [...parts, { type: 'finish', usage, finishReason: { unified: finish, raw: undefined } }];
   return { stream: new ReadableStream({ start(c) { for (const p of all) c.enqueue(p); c.close(); } }) } as never;
 }
+
+describe('chat titles (ChatListe: from the first sentence, short, no final full stop)', async () => {
+  const { chatTitel } = await import('@/lib/views/chats');
+  it('takes the first sentence and cuts at 60 characters', () => {
+    expect(chatTitel('Was haben wir Solaro versprochen? Und bis wann?')).toBe('Was haben wir Solaro versprochen');
+    expect(chatTitel('Ab jetzt: Hinweise nur montags.')).toBe('Ab jetzt: Hinweise nur montags');
+    expect(chatTitel('Gerade Beratung mit Solaro, Pitchdeck bis Freitag, wir vermitteln Frau Weber')).toBe('Gerade Beratung mit Solaro, Pitchdeck bis Freitag, wir verm…');
+  });
+});

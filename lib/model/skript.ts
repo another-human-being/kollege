@@ -95,7 +95,8 @@ function schritt(prompt: LanguageModelV4Prompt): Schritt {
     const c = ergebnisse.get_contact.at(-1) as { commitments?: { we_owe: { title: string; due: string | null; status: string; source_id: string }[] } };
     const offen = (c.commitments?.we_owe ?? []).filter((t) => t.status !== 'done');
     if (!offen.length) return { text: `Offen ist gegenüber ${org.name} nichts, was wir zugesagt haben.` };
-    return { text: [`Gegenüber ${org.name} haben wir zugesagt:`, ...offen.map((t) => `- ${t.title}${t.due ? ` (bis ${t.due})` : ''} [[${t.source_id}]]`)].join('\n') };
+    const datum = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}.`;
+    return { text: [`Gegenüber ${org.name} haben wir zugesagt:`, ...offen.map((t) => `- ${t.title}${t.due ? ` (bis ${datum(t.due)})` : ''} [[${t.source_id}]]`)].join('\n') };
   }
 
   // "Ab jetzt …" → instruction

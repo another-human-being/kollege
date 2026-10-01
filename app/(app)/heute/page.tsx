@@ -1,5 +1,6 @@
 // Heute (§8.1, E39): always your items; below, "Im Team" with two kinds only.
 import { currentUserId } from '@/auth';
+import { EingabeStart } from '@/components/chat';
 import { Abschnitt, Aussage, Etikett, Hinweis, Leer } from '@/components/kg';
 import { faellig, seit, tag, uhrzeit } from '@/lib/format';
 import { navigation } from '@/lib/views/nav';
@@ -42,6 +43,8 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
     <main className="spalte">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <h1 className="kg-sr">Heute</h1>
+        {/* design Eingabe: on the overview at the top, above everything else */}
+        <EingabeStart />
         <div className="mono">{new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }).format(now)}</div>
         <div className="filterzeile" role="group" aria-label="Nach Bereich filtern">
           <span className="mono">Bereich</span>

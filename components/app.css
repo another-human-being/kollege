@@ -84,3 +84,12 @@ select.fe { cursor: pointer; }
 .fehler { color: var(--attention); font-size: 13px; }
 
 .anmelden { max-width: 420px; margin: 96px auto; display: flex; flex-direction: column; gap: 16px; padding: 0 16px; }
+
+/* chat (E35): log above, the input stays at the bottom */
+.spalte--chat { padding-bottom: 0; gap: 0; }
+.chat { display: flex; flex-direction: column; min-height: 100%; gap: var(--space-4); }
+.chat-verlauf { display: flex; flex-direction: column; gap: var(--space-2); flex-grow: 1; }
+.chat-karten { display: grid; gap: var(--space-3); padding-left: calc(var(--col-date) + var(--space-4)); }
+.chat-eingabe { position: sticky; bottom: 0; background: var(--paper); padding-block: var(--space-4) var(--space-6); }
+/* the frame shows focus (:focus-within); no second outline on the text field inside */
+.kg-eingabe textarea:focus-visible { outline: none; }

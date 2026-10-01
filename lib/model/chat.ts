@@ -59,7 +59,7 @@ export async function chatAntwort(o: AntwortOptionen): Promise<{ stream: Readabl
   const text = o.message.parts.filter((p) => p.type === 'text').map((p) => (p as { text: string }).text).join('\n').trim();
   if (!text) throw new Error('empty message');
   // only text from the browser – tool parts are made on the server
-  const message: UIMessage = { id: o.message.id || randomUUID(), role: 'user', parts: [{ type: 'text', text }] };
+  const message: UIMessage = { id: o.message.id || randomUUID(), role: 'user', metadata: { at: new Date().toISOString() }, parts: [{ type: 'text', text }] };
   await runAction({ type: 'user', userId: o.userId }, 'chat.append', { chat_id: chat.id, role: 'user', content: message });
 
   const k = { userId: o.userId, now, chatId: chat.id };
@@ -91,6 +91,8 @@ export async function chatAntwort(o: AntwortOptionen): Promise<{ stream: Readabl
     tools,
     originalMessages: messages,
     generateMessageId: randomUUID,
+    // when the answer started (the log column of the chat)
+    messageMetadata: ({ part }) => (part.type === 'start' ? { at: new Date().toISOString() } : undefined),
     onError: () => 'Das ging nicht – technischer Fehler beim Modell.',
     onEnd: async ({ responseMessage }) => {
       if (!responseMessage.parts.length) return;

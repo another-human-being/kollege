@@ -14,6 +14,7 @@ export function SeitenNav({ areas }: { areas: { key: string; name_plural: string
   return (
     <nav className="kg-seitennav" aria-label="Hauptnavigation">
       {link('/heute', 'heute')}
+      {link('/chat', 'chat')}
       <span className="nav-gruppe">Werkzeuge</span>
       {link('/aufgaben', 'aufgaben')}
       {link('/kontakte', 'kontakte')}

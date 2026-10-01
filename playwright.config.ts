@@ -6,6 +6,7 @@ const env = {
   DATABASE_URL: process.env.E2E_DATABASE_URL ?? 'postgres://kollege:kollege@localhost:5432/kollege_e2e',
   BLOB_DIR: '/tmp/kollege-e2e-blobs',
   MODEL_FAST: 'oracle',
+  MODEL_THINK: 'skript',
   TEAM_DOMAIN: 'gruendung.uni-augsburg.example',
   FREEMAIL_FILE: 'fixtures/freemail.json',
   AUTH_SECRET: 'e2e-secret-0123456789abcdef0123456789',

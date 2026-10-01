@@ -6,14 +6,14 @@
 
 - [x] 1 Kern: Schema, RLS, Aktionsschicht + Rückgängig, Seed, Fixture-Import
 - [x] 2 Oberfläche: Heute, Bereiche, Aufgaben, Kontakte, Einstellungen
-- [ ] 3 Eingabe & Chat
+- [x] 3 Eingabe & Chat
 - [ ] 4 Mail-Eingang
 - [ ] 5 Mail-Client
 - [ ] 6 Kalender
 - [ ] 7 Laufwerk
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 2 abgeschlossen (02.10.2026). Als Nächstes Stufe 3.
+**Aktuell:** Stufe 3 abgeschlossen (02.10.2026). Als Nächstes Stufe 4.
 
 ## Stufe 1 – erledigt
 
@@ -41,6 +41,19 @@
   - Bereich anlegen aus dem Namen.
 - Tests: 107 Vitest und 5 Playwright-Abnahmen (`npm run e2e`, eigene DB `kollege_e2e`). Die Abnahme aus §13 läuft damit automatisch statt von Hand. `npm run dev:reset -- --ja` baut die Dev-Datenbank aus den Testdaten neu auf.
 
+## Stufe 3 – erledigt
+
+- **Modellschicht** `lib/model/`: `getModel(role)` liest `MODEL_FAST`/`MODEL_THINK` (`anthropic:…`, `openai-compatible:…` mit `MODEL_BASE_URL`). Geprüfte IDs: `claude-haiku-4-5` (fast), `claude-sonnet-5-5` (think). Jeder Aufruf landet in `model_calls` (Rolle, Modell, Tokens, Dauer, Fehler – kein Inhalt).
+- **Chat** (`lib/model/chat.ts`, `/api/chat`): `streamText` mit Denkweise (`prompts/denkweise.md`, §9.2) und Kontext (Datum, Team, Bereiche, gültige Anweisungen persönlich > Bereich > Team, Seite des Chats).
+  - Lesewerkzeuge: `search`, `get_matter`, `get_contact`, `list_tasks`, `get_area_items`, `stats` (nur benannte Abfragen).
+  - Handeln: Jede interne Aktion, die der Akteur `model` darf, ist ein Werkzeug (aus der Registry erzeugt). Jede erzeugt eine Karte mit Rückgängig, Folgeschritten und angewandter Anweisung.
+- **Oberfläche:** Eingabefeld oben auf Heute; `/chat` und `/chat/:id` (Nachrichten, Quellen, Karten); Chatverlauf in der Seitenleiste (Anpinnen); „Kollege fragen“ auf Event-, Team-, Organisations- und Personenseiten (Kontext-Chat). Neue Weiterleitungen `/o/:id` und `/p/:id` wie `/m/:id`.
+- **Anweisungen per Chat:** Aktion `instruction.create` (persönlich, Bereich, Team), bestätigt mit einer Anweisungs-Karte.
+- **Tests:** 126 Vitest (davon 19 Chat) und 8 Playwright-Abnahmen. Beide Abnahmesätze aus §13 laufen im Browser. `tsc --noEmit` ist sauber.
+- **Ehrliche Grenze:** Ein echtes Modell lief noch nie. In dieser Umgebung gibt es keinen API-Schlüssel. Die Abnahmen laufen mit dem Stand-in `MODEL_THINK=skript`. Es versteht nur die Abnahmesätze, nutzt aber dieselben Werkzeuge, Rechte, Karten und Quellen.
+  - Damit ist die Verdrahtung geprüft, nicht das Urteil des Modells.
+  - Zum Prüfen: `.env` mit `ANTHROPIC_API_KEY` und `MODEL_THINK=anthropic:claude-sonnet-5-5`, `npm run dev`, dann die beiden Sätze aus §13 eingeben.
+
 ## Entscheidungen (mit Andreas, 01.10.2026)
 
 1. **Infrastruktur-Ausnahme:** Diese Schreibvorgänge laufen direkt, nicht über `runAction`: Rohspeicherung, `visible_to` erweitern, Verarbeitungsstand (`processing_state`, `summary`, `author_person_id`, `meta.skip_reason`), Cursor, Seed von `users`/`connections`. Alles mit Bedeutung läuft über Aktionen.
@@ -67,6 +80,17 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
     - **Mail-Versandverzögerung** (E43) kommt in Stufe 5, **Teilnahme je Person** (E48) in Stufe 6.
 16. **Heute nach E39** (ohne Umschalter Meins/Team, darunter „Im Team“: „Neu, niemand zuständig“ und „Hängt bei anderen“). Das widerspricht §8.1 nur in der Darstellung, die Abfragen bleiben dieselben. Für Darstellung ist das Design maßgeblich.
 17. **Seitenleiste nur mit Navigation und „+ Neuer Chat“** (E40). Punkte späterer Stufen erscheinen erst, wenn sie gebaut sind; es gibt keine toten Links.
+18. **Chats laufen über die Aktionsschicht** (`chat.create|update|append`), wie jede Datenänderung. Sie sind nicht umkehrbar: Eine gelöschte Nachricht würde das Protokoll verfälschen, auf das sich die Karten beziehen.
+    - Nutzernachrichten schreibt nur der Akteur `user`, Antworten nur `model`.
+    - `model_calls` ist ein Betriebsprotokoll wie `actions` selbst und wird direkt geschrieben. Für die App-Rolle gilt nur Einfügen eigener Zeilen, kein Lesen.
+19. **Das Modell bekommt alle internen Aktionen als Werkzeuge** außer `chat.*` (Infrastruktur) und `hint.create` (Rat kommt in Stufe 8). Externe Aktionen fehlen in der Werkzeugliste, und `runAction` lehnt sie für `model` zusätzlich ab.
+    - Was das Modell anlegt (Eintrag, Person, Organisation), ist nach §6 ungeprüft.
+    - Zuordnungen des Modells tragen `origin: model`. Das gilt auch für den Link einer Notiz, die das Modell ablegt: Das Ziel hat das Modell gewählt.
+20. **Quellen sind fälschungssicher:** Das Modell zitiert mit `[[ID]]`. Die Oberfläche zeigt eine Quelle nur, wenn ein Werkzeug derselben Antwort diese ID geliefert hat. Erfundene IDs bleiben unsichtbar.
+    - Eine Zusage aus einer Mail, die der Nutzer nicht lesen darf, zitiert die Aufgabe selbst, nie die Mail.
+21. **Stand-in `skript`** für die Rolle `think`, analog zum Orakel. Es ist deterministisch, nutzt nur die Werkzeuge und ist in Produktion gesperrt.
+22. **Eine begonnene Antwort läuft zu Ende,** auch wenn der Browser die Verbindung trennt. Begonnene Schritte werden fertig, und die Antwort wird gespeichert, damit keine halben Karten entstehen.
+23. **`task.create` nimmt eine Frist als Tag** (`due_date`, Ende des Tages in Berlin), wie `task.update`. Das Modell rechnet so keine Zeitzonen.
 
 ## Befunde aus dem Bau
 
@@ -88,7 +112,7 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 - **Rollen:** Es gibt eine Login-Rolle (eine `DATABASE_URL`, §14), die App wechselt per `SET LOCAL ROLE`. Strenger wäre ein eigener Login für die App ohne Mitgliedschaft in der Eigentümerrolle.
 - **Noch nicht gebaut**, weil in Stufe 1 nicht gebraucht:
   - Verschlüsselung von `connections.config` mit `APP_SECRET`: Fixture-Quellen haben keine Geheimnisse, das kommt mit Stufe 4.
-  - Tabelle `model_calls` (§9): kommt mit dem echten Modell.
+  - Tabelle `model_calls` (§9): seit Stufe 3 gebaut.
   - Ausschluss-Anweisungen im Filter: Anweisungen gibt es erst ab Stufe 3.
 - **Docker** ist hier nicht gelaufen, weil die Umgebung keinen Daemon hat. `docker compose config` ist gültig. Seed, Worker (Import, 8 Zeitpläne) und App (`next start`) habe ich lokal mit denselben Befehlen gefahren.
 - **`npm audit`** meldet 4 Fälle „moderate“ in `drizzle-kit` (esbuild-Dev-Server). Das betrifft nur die Entwicklung.
@@ -126,9 +150,22 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 - **Auth.js v5** ist weiterhin Beta. Die Version ist exakt gepinnt (`next-auth@5.0.0-beta.32`). Der Magic-Link wird Tabellen für Verifizierungs-Tokens brauchen, die nicht in §4 stehen.
 - **`next dev` schreibt** in CLAUDE.md einen eigenen Regelblock, sobald es einen KI-Agenten erkennt. Ich habe ihn zurückgenommen und nicht committet; für Rauchtests nutze ich `next start`.
 - **Noch nicht gebaut**, weil es zu späteren Stufen gehört bzw. nicht in der Abnahme steht:
-  - `matter.handover` (der Hinweis gehört zu Stufe 8),
-  - `person.merge` und `org.merge` (später, Entscheidung 14),
-  - Notizen anlegen (läuft per Chat, Stufe 3).
+  - der Hinweis zu `matter.handover` (gehört zu Stufe 8),
+  - `person.merge` und `org.merge` (später, Entscheidung 14).
+
+### Befunde Stufe 3
+
+Design (Logikfehler aufgelöst):
+- **Karte:** Das Bundle zeigt „Rückgängig gemacht“, bevor das Rückgängigmachen geklappt hat. Bei einem Fehler wäre das falsch. Jetzt wechselt die Karte erst nach Erfolg und zeigt sonst den Fehler.
+- **Karte „Wiederholen“** tut im Bundle nichts außer den Zustand umzuschalten. Ein echtes Wiederholen wäre eine neue Aktion, der die gespeicherte Karte nicht folgen kann; nach dem Neuladen könnte man doppelt wiederholen. Deshalb gibt es auf Karten kein „Wiederholen“, im Toast bleibt es.
+- **Eingabe:** Der Platzhalter „…zu diesem Vorgang“ verletzt die harte Regel zum Wort „Vorgang“. Jetzt heißt er „Frag oder notiere etwas dazu“.
+- **Eingabe:** Die README nennt sowohl „Merken“ als auch den Pfeil als Knopf. Gebaut ist der Pfeil („Abschicken“).
+- **Eingabe:** doppelter Fokusrahmen (Rahmen des Feldes und Textfeld). Jetzt zeigt nur noch der Rahmen den Fokus.
+- **Quittung und Karte** sind zwei Belege für dasselbe. Nach §11 öffnet jede Eingabe den Chat, deshalb gibt es einen Beleg: die Karte. „Alles rückgängig“ aus der Quittung ist nicht gebaut (Frage unten).
+
+Eigene Fehler, durch Tests gefunden:
+- `model_calls` protokollierte das Modell aus `.env` statt des tatsächlich benutzten. Der Fehler wurde still verschluckt.
+- React führt Effekte im Entwicklungsmodus doppelt aus und bricht dabei den ersten Versand ab. Dadurch kam die erste Eingabe von Heute nie an. Gelöst mit einem Timer, den das Aufräumen storniert.
 
 ## Offene Fragen an Andreas
 
@@ -140,7 +177,10 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
 - e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
-- Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (ab Stufe 3)
+- Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (Stufe 4)
+- Chats löschen (Design: ChatListe „Löschen“)? Steht nicht in der Bauvorlage. Die Karten verweisen auf ihren Chat; ich würde „Archivieren“ statt Löschen vorschlagen.
+- „Alles rückgängig“ für eine Antwort mit mehreren Karten (aus dem Design der Quittung)?
+- Was das Modell im Chat auf ausdrücklichen Wunsch anlegt („leg ein Event X an“), ist nach §6 trotzdem ungeprüft. So lassen oder bei Akteur `model` im Chat gleich übernehmen?
 
 ## Verbrauch
 

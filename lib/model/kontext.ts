@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { sql } from 'drizzle-orm';
-import { withUser } from '@/lib/db/client';
+import { withUser, type Tx } from '@/lib/db/client';
 import { berlinDate } from '@/lib/time';
 
 let denkweise: string | undefined;
@@ -25,6 +25,16 @@ export interface Anweisung {
   area: string | null;
 }
 
+/** what a chat belongs to: "Event" + "Pitch-Abend 19.11.", "Organisation" + "Solaro" */
+export async function bezugName(tx: Tx, bezug: ChatBezug): Promise<{ art: string; name: string } | null> {
+  const q = {
+    matter: sql`SELECT m.title AS name, a.name_singular AS art FROM matters m JOIN areas a ON a.id = m.area_id WHERE m.id = ${bezug.id}`,
+    org: sql`SELECT name, 'Organisation' AS art FROM orgs WHERE id = ${bezug.id}`,
+    person: sql`SELECT name, 'Person' AS art FROM people WHERE id = ${bezug.id}`,
+  }[bezug.type];
+  return (await tx.execute<{ name: string; art: string }>(q)).rows[0] ?? null;
+}
+
 export async function kontext(userId: string, now: Date, bezug?: ChatBezug | null) {
   return withUser(userId, async (tx) => {
     const team = (await tx.execute<{ id: string; name: string; email: string }>(sql`SELECT id, name, email FROM users ORDER BY name`)).rows;
@@ -37,16 +47,8 @@ export async function kontext(userId: string, now: Date, bezug?: ChatBezug | nul
       ORDER BY (e.instruction_user_id IS NOT NULL) DESC, (e.instruction_area_id IS NOT NULL) DESC, e.occurred_at`)).rows
       .map((a): Anweisung => ({ id: a.id, text: a.text, scope: a.personal ? 'personal' : a.area ? 'area' : 'team', area: a.area }));
 
-    let seite: string | null = null;
-    if (bezug) {
-      const q = {
-        matter: sql`SELECT m.title AS name, a.name_singular AS art FROM matters m JOIN areas a ON a.id = m.area_id WHERE m.id = ${bezug.id}`,
-        org: sql`SELECT name, 'Organisation' AS art FROM orgs WHERE id = ${bezug.id}`,
-        person: sql`SELECT name, 'Person' AS art FROM people WHERE id = ${bezug.id}`,
-      }[bezug.type];
-      const r = (await tx.execute<{ name: string; art: string }>(q)).rows[0];
-      if (r) seite = `${r.art} „${r.name}“ (type ${bezug.type}, ID ${bezug.id})`;
-    }
+    const b = bezug ? await bezugName(tx, bezug) : null;
+    const seite = b ? `${b.art} „${b.name}“ (type ${bezug!.type}, ID ${bezug!.id})` : null;
 
     const me = team.find((u) => u.id === userId);
     const wochentag = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long' }).format(now);

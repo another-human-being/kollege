@@ -5,6 +5,7 @@ import { refresh } from 'next/cache';
 import { ZodError } from 'zod';
 import { currentUserId } from '@/auth';
 import { ActionError, answerHint, runAction, undoAction } from '@/lib/actions';
+import { chatTitel } from '@/lib/views/chats';
 
 export type Result = { ok: true; actionId: string; result?: unknown } | { ok: false; error: string };
 
@@ -57,4 +58,9 @@ export async function answer(hintId: string, optionIndex: number): Promise<Resul
   } catch (e) {
     return { ok: false, error: message(e) };
   }
+}
+
+/** a new chat from the first input; the page then sends that input as first message */
+export async function chatAnlegen(text: string, bezug?: { type: 'matter' | 'org' | 'person'; id: string }): Promise<Result> {
+  return perform('chat.create', { title: chatTitel(text), ...(bezug ? { context_type: bezug.type, context_id: bezug.id } : {}) });
 }
