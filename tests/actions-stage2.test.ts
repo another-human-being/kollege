@@ -113,6 +113,13 @@ describe('tasks', () => {
     expect((await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.id, t!.id))))[0]).toMatchObject({ status: 'open', done_at: null });
   });
 
+  it('sets the due date from a date field: end of that day in Berlin', async () => {
+    const [t] = await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.title, 'Kontakt zur IHK für Jury/Mentoring prüfen')));
+    await runAction(as('andreas'), 'task.update', { id: t!.id, due_date: '2026-10-09' });
+    const [after] = await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.id, t!.id)));
+    expect(after!.due_at!.toISOString()).toBe('2026-10-09T21:59:59.000Z');
+  });
+
   it('"In Arbeit" only for our own tasks', async () => {
     const [ours] = await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.title, 'Raum mit Beamer für Sitzung 3 buchen (40 Personen)')));
     const [theirs] = await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.title, 'Folien für Sitzung 3 schicken')));

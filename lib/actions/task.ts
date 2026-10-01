@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { tasks } from '@/lib/db/schema';
+import { berlinEndOfDay } from '@/lib/time';
 import { ALL_ACTORS, defined, updateWithInverse } from './helpers';
 import { defineAction } from './registry';
 import { ActionError } from './types';
@@ -47,13 +48,16 @@ export const taskUpdate = defineAction({
     id: z.uuid(),
     title: z.string().min(1).optional(),
     due_at: z.iso.datetime({ offset: true }).nullable().optional(),
+    /** a day (date field): due at its end in Berlin, like deadlines from the intake */
+    due_date: z.iso.date().nullable().optional(),
     matter_id: z.uuid().nullable().optional(),
     org_id: z.uuid().nullable().optional(),
   }),
   external: false,
   allowedActors: ALL_ACTORS,
-  async apply(tx, { id, due_at, ...p }) {
-    const set = defined({ ...p, due_at: due_at === undefined ? undefined : due_at === null ? null : new Date(due_at) });
+  async apply(tx, { id, due_at, due_date, ...p }) {
+    const due = due_date !== undefined ? (due_date === null ? null : berlinEndOfDay(due_date)) : due_at;
+    const set = defined({ ...p, due_at: due === undefined ? undefined : due === null ? null : new Date(due) });
     if (!Object.keys(set).length) throw new ActionError('nothing to change');
     return { result: { id }, inverse: [await updateWithInverse(tx, tasks, 'tasks', id, set)] };
   },
