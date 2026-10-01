@@ -31,17 +31,19 @@ class Component extends DCLogic {
       titel: st.msgs.length ? 'Beratung Solaro' : 'Neuer Chat',
       leer: st.msgs.length === 0,
       laden: st.laden,
-      antworten: ['Ja', 'Andere Person'],
+      antworten: ['Ja', 'Andere Person', 'Neu anlegen'],
       beantworten: function (a) { self.setState({ antwort: a }); },
-      wartet: !st.antwort,
-      wartetStil: st.antwort ? '' : 'opacity: 0.45; pointer-events: none',
+      zuruecknehmen: function () { self.setState({ antwort: null }); },
+      wartet: !st.antwort || st.antwort === 'Neu anlegen',
+      gesperrtText: st.antwort === 'Neu anlegen' ? 'Wartet, bis „Frau Weber“ als Kontakt angelegt ist.' : 'Wartet auf deine Antwort oben.',
+      neuAnlegen: st.antwort === 'Neu anlegen',
       startText: 'Gerade Beratung mit Solaro gehabt, sie schicken bis Freitag das Pitchdeck, wir vermitteln Kontakt zu Frau Weber.',
       senden: function (t) { self.senden(t); },
       nachrichten: msgs.map(function (m) {
         return Object.assign({ punkte: [], folgen: '', streamt: false }, m, {
           istDu: m.typ === 'du', istKollege: m.typ === 'kollege', istKarte: m.typ === 'karte', istAussage: m.typ === 'aussage',
-          istKlaerung: m.typ === 'klaerung', istEntwurf: m.typ === 'entwurf' && !st.gesendet && (!st.antwort || st.antwort === 'Ja'), istGesendet: m.typ === 'entwurf' && st.gesendet,
-          gesendetPunkte: ['Mail an Anna Weber über dein Postfach gesendet'],
+          istKlaerung: m.typ === 'klaerung', istEntwurf: m.typ === 'entwurf' && !st.gesendet && st.antwort !== 'Andere Person', istEntfallen: m.typ === 'entwurf' && st.antwort === 'Andere Person', istGesendet: m.typ === 'entwurf' && st.gesendet,
+          gesendetPunkte: ['Mail an Anna Weber über dein Postfach gesendet', 'Zusage „Kontakt zu Frau Weber vermitteln“ als erledigt markiert'],
           senden: function () { self.setState({ gesendet: !self.state.gesendet }); }
         });
       })

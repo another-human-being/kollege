@@ -98,6 +98,12 @@ Offen in Stufe 2:
 
 ## Offene Fragen an Andreas
 
+- Design-Stand 01.10. (`design/ENTSCHEIDUNGEN.md` E42–E50) geht an einigen Stellen über die Bauvorlage hinaus. Übernehmen in die Bauvorlage? (bis Stufe 2)
+  - Aufgaben: Status „In Arbeit“ für `ours` (Bauvorlage: `open|done`); „wartet“ bleibt berechnet aus `theirs` (E44)
+  - Übergabe wartet auf Annahme, bisherige Person bleibt bis dahin zuständig (E45; passt zu Hinweis `handover`)
+  - Mail: Versand 10 s verzögert und so lange zurückholbar; angefangene Mails automatisch als Entwurf (E43)
+  - Kalender: Teilnahme je Person, „Änderung nicht verschickt“ bis „Änderung senden“, Termine anderer nur lesbar (E48; bis Stufe 6)
+  - Gründungsteams: Phase „ruht“; Gespräche mit Datum, Art, Teilnehmenden (E50)
 - Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
 - EU-Modell für den Betrieb (parallel zum Test)

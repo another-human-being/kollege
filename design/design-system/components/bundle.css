@@ -222,3 +222,6 @@
 .kg-chat-aktionen button:focus-visible { outline: 2px solid var(--accent); }
 .kg-chat-leer { font-size: 13px; color: var(--ink-muted); padding: 6px 8px; }
 .kg-chat-hinweis { margin-top: var(--space-3); }
+
+.kg-entwurf--gesperrt{opacity:.55}
+.kg-entwurf--gesperrt .kg-aktion{cursor:not-allowed}

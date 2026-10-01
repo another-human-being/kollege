@@ -1,4 +1,4 @@
-Kollege ist ein ruhiger, mitdenkender Kollege für ein kleines Team: Er merkt sich, was passiert, verknüpft es und erinnert an Zusagen. Die Oberfläche ist ein Logbuch mit einem Schreibfeld, das zugleich Chat ist – aber kein Widget-Dashboard. Der Chat ist der Eingang, der Record (Vorgänge, Personen, Zusagen) bleibt die Wahrheit. Alles hier dient einer Frage: **Kann ich dem, was da steht, trauen – und woher weiß das System das?**
+Kollege ist ein ruhiger, mitdenkender Kollege für ein kleines Team: Er merkt sich, was passiert, verknüpft es und erinnert an Zusagen. Die Oberfläche ist ein Logbuch mit einem Schreibfeld, das zugleich Chat ist – aber kein Widget-Dashboard. Der Chat ist der Eingang, der Record (Bereiche, Personen, Zusagen) bleibt die Wahrheit. Alles hier dient einer Frage: **Kann ich dem, was da steht, trauen – und woher weiß das System das?**
 
 ## Grundsätze
 
@@ -6,7 +6,7 @@ Kollege ist ein ruhiger, mitdenkender Kollege für ein kleines Team: Er merkt si
 2. **Herkunft ist sichtbar.** Jede Begründung ist eine `Aussage` mit Art und Quelle. Belegt, berechnet und eingeschätzt sehen verschieden aus – durch die Schrift, nicht durch Farbe.
 3. **Rahmen = Grenze.** Nur zwei Dinge haben einen Rahmen: die `Eingabe` (was hereinkommt) und der `Entwurf` (was hinausgeht). Alles andere steht rahmenlos auf `paper`. Wer einen Rahmen sieht, weiß: hier wird die Organisation berührt.
 4. **Das System tut leise, der Mensch entscheidet laut.** Interne Schritte passieren still und sind mit einem Klick rückgängig. Alles nach außen braucht einen bewussten Klick auf `primaer`.
-5. **Chat rein, Record raus.** Jede Antwort, die etwas ablegt, endet mit einer `Karte`: was eingetragen wurde, Link zum Vorgang, Rückgängig – und welche Folgeschritte Rückgängig mit entfernt. Ohne Karte ist nichts passiert.
+5. **Chat rein, Record raus.** Jede Antwort, die etwas ablegt, endet mit einer `Karte`: was eingetragen wurde, Link zum Eintrag, Rückgängig – und welche Folgeschritte Rückgängig mit entfernt. Ohne Karte ist nichts passiert.
 6. **Lieber Lücke als Raten.** Reicht das Wissen nicht, sagt das System „Dazu habe ich noch zu wenig Erfahrung“ (`Wissensluecke`) statt einer plausiblen Vermutung.
 7. **Farbe heißt Handlung.** `accent` = du kannst jetzt etwas tun. `attention` = etwas ist überfällig. Sonst ist alles Tinte auf Papier.
 
@@ -64,12 +64,14 @@ IBM Plex als Familie mit drei Stimmen – verwandt, aber unterscheidbar. Fallbac
 
 ## Layout
 
-- Links eine schmale Seitenleiste (264px): Navigation als Schrägstrich-Pfade, darunter der Chatverlauf (`ChatListe`). Keine Widgets.
+- Links eine schmale Seitenleiste (264px): Navigation als Schrägstrich-Pfade in Gruppen (Werkzeuge, Bereiche), darunter nur „+ Neuer Chat“. Kein Chatverlauf, keine Zähler, keine Widgets – frühere und angepinnte Chats stehen auf der Chat-Seite.
 - Daneben eine Spalte, links ausgerichtet, maximal `measure` breit, oberer Rand `space-7`.
-- Der Chat nutzt dieselbe Zeitspalte: wer und wann links, Text rechts.
-- Links eine schmale Zeitspalte (`col-date`, 96px, Mono): Übersicht, Quittung und Verlauf teilen diese Kante. Das Datum steht vorn, wie in einem Logbuch.
+- Der Chat folgt gewohnten Chat-Programmen: eigene Nachrichten rechts als Blase, Kollege links ohne Blase, Belege eingerückt mit Linie.
+- Links eine schmale Zeitspalte (`col-date`, 96px, Mono): Heute, Quittung und Verlauf teilen diese Kante. Das Datum steht vorn, wie in einem Logbuch.
 - Abschnitte trennt `space-6` Weißraum plus eine Haarlinie unter dem Label. Einträge trennt eine `rule`-Linie.
 - Keine Karten, keine Schatten. Einzige Ausnahme: das Blatt „Entwurf ansehen“ (`shadow-sheet`).
+- Rahmen nur für Eingaben, Entwürfe und gestrichelte KI-Vermutungen. Alles andere trennt eine Linie oben.
+- Farben mit Bedeutung: `attention` nur für Überfälliges, `accent` für Fokus und Aufforderungen, `ink-faint` nie für lesbaren Text. `primaer` nur für Senden und Merken.
 - Radien: `radius-0` für alles, `radius-1` (2px) für Knöpfe und Etiketten, `radius-2` (4px) für Eingabe und Entwurf.
 
 ## Bewegung und Zustände
@@ -82,7 +84,7 @@ IBM Plex als Familie mit drei Stimmen – verwandt, aber unterscheidbar. Fallbac
 
 ## Privat
 
-- Notizen und Verlaufseinträge können privat sein: Schloss (`Privat`) vor dem Text, nur die Besitzerin sieht sie.
+- Notizen und Verlaufseinträge können privat sein: Schloss (`Privat`) vor dem Text, nur die Besitzerin sieht sie. Beim ersten Auftreten auf einer Seite steht das Wort dabei; gehört der Eintrag jemand anderem, sagt `Privat` wem („nur Julia“).
 - Chats sind grundsätzlich persönlich. Was ein Chat im Record ablegt, sieht das Team – die `Karte` sagt, wenn ein Eintrag privat abgelegt wurde.
 
 ## Zeichen statt Icons
@@ -105,17 +107,17 @@ Das System nutzt keine Icon-Bibliothek. Einzige Ausnahme ist das Schloss für �
 Für Eingaben direkt nach einem Gespräch.
 
 - Die `Eingabe` klebt unten über der Tastatur, volle Breite, Knopf „Merken“ 44px.
-- Darüber nur die Übersicht, Zeitspalte über dem Titel statt links. Seitenrand `space-4`.
-- Navigation scrollt waagerecht; `/klärung` mit Zahl bleibt erreichbar.
+- Darüber nur Heute (deine Punkte, darunter zugeklappt „Im Team“), Zeitspalte über dem Titel statt links. Seitenrand `space-4`.
+- „Kurz klären“ steht oben auf Heute; eine eigene Klärungsseite gibt es nicht.
 
 ## Screens und Bausteine
 
 | Screen | Bausteine |
 | --- | --- |
-| Übersicht | Seitenleiste mit `ChatListe`, `Eingabe`, „Kurz klären“ mit `Klaerung`, `Abschnitt` × 4 mit `Hinweis`, `Umschalter` Meins/Team, `Leer` |
-| Chat | `Nachricht`, `Aussage`/`Quelle`, `Karte` (Quittung oder Anweisung), `Klaerung`, `Entwurf`, `Wissensluecke`, `Eingabe` |
-| Vorgang | `title-1`, `Etikett`, `Eingabe` mit `kontext`, `Hinweis` (nächster Schritt), `Zusage` in zwei Spalten, `Verlauf` mit Herkunft und `Privat`, „Übergeben an…“ |
-| Person / Team | `title-1`, alle Adressen, „Mit anderer Person zusammenführen“, `Eingabe` mit `kontext`, `Verlauf` über alle Vorgänge, `Zusage` |
+| Heute | Seitenleiste, `Eingabe`, Bereichsfilter, „Kurz klären“ mit `Klaerung`, `Abschnitt` × 5 mit `Hinweis` (Bereich als `Etikett`), zuklappbar „Im Team“, `Leer` |
+| Chat | Startseite mit `Eingabe` und früheren Chats (Angepinnt zuerst); im Chat `Nachricht`, `Aussage`/`Quelle`, `Karte` (Quittung oder Anweisung), `Klaerung`, `Entwurf` (auch gesperrt oder geplant), `Wissensluecke`, `Eingabe` |
+| Bereich (Liste + Detail) | Felder des Bereichs (KI-Vermutung bis bestätigt), nächster Schritt, `Zusage` in zwei Spalten (aus Aufgaben), Bezüge, `Verlauf` mit Herkunft und `Privat`, „Übergeben an …“ mit Zustand „wartet auf Annahme“; Gründungsteam = Beratungsakte mit Personen und Gesprächen |
+| Kontakte | Personen und Organisationen (über ID verknüpft), alle Adressen, Zusammenführen mit Vorschau und feldweiser Auswahl, `Verlauf` über alle Bereiche |
 | Liste & Suche | `Eingabe` als Suchfeld, Filter mit `Umschalter`, Antwort als `Aussage`n mit `Quelle` |
 | Einstellungen | Anweisungen (`Anweisung` × n), Postfächer & Kalender (Status, letzte Synchronisierung), Ausschlüsse |
 | Einrichtung | `Laden` je Quelle, danach `Klaerung` („Das habe ich gefunden – bitte prüfen“) |

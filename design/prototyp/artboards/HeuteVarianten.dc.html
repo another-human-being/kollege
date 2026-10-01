@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Übergabe an Julia</title>
+<title>Heute: Meins / Team – drei Varianten</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="ds/kollege/tokens.css">
 <link rel="stylesheet" href="ds/kollege/components/bundle.css">
@@ -38,104 +38,71 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 .ld--zu .ld-detail{display:none}.ld--zu .ld-liste{flex:1;width:auto}.ld-zu{position:sticky;top:-28px;z-index:2;display:flex;justify-content:flex-end;margin:-28px -40px -20px;padding:8px 16px;background:linear-gradient(var(--paper) 70%,transparent)}.ld-zu button{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:2px;font-size:20px;line-height:1;color:var(--ink-muted)}.ld-zu button:hover{background:var(--paper-sunk);color:var(--ink)}.ld-zu button:focus-visible{outline:2px solid var(--accent)}
 .ansicht-hinweis{font-size:12px;color:var(--ink-muted)}
 .ch{display:flex;flex-direction:column;gap:18px}.ch-du{align-self:flex-end;max-width:82%;box-sizing:border-box;background:var(--paper-sunk);border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:15px;line-height:24px;white-space:pre-line}.ch-ko{display:flex;flex-direction:column;gap:8px;max-width:100%}.ch-ko-text{font-size:15px;line-height:24px;white-space:pre-line}.ch-wer{font-size:12px;line-height:16px;font-weight:500;color:var(--ink-muted);display:flex;gap:8px;align-items:baseline}.ch-belege{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-left:2px solid var(--rule)}.ch-start{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:40px 0 16px}.ch-start h2{margin:0;font-size:22px;line-height:30px;font-weight:500}.ch-vorschlaege{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.ch-vorschlag{all:unset;cursor:pointer;font-size:13px;line-height:18px;padding:6px 10px;border:1px solid var(--line-control);border-radius:14px;color:var(--ink)}.ch-vorschlag:hover{background:var(--paper-sunk)}.ch-vorschlag:focus-visible{outline:2px solid var(--accent)}.x-knopf{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:2px;font-size:20px;line-height:1;color:var(--ink-muted)}.x-knopf:hover{background:var(--paper-sunk);color:var(--ink)}.x-knopf:focus-visible{outline:2px solid var(--accent)}
-
+.vz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;padding:40px 48px}.v{display:flex;flex-direction:column;gap:12px}.v h2{margin:0;font-size:18px;line-height:26px;font-weight:500}.skizze{border:1px solid var(--rule);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--paper);min-height:300px;font-size:12px}.sk-z{display:flex;gap:6px;align-items:center;padding:5px 6px;border-bottom:1px solid var(--rule)}.sk-b{height:8px;border-radius:2px;background:var(--rule);flex:1}.sk-e{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);border:1px solid var(--rule);border-radius:2px;padding:0 4px;white-space:nowrap}.sk-k{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);padding-top:6px}.pc{font-size:14px;line-height:22px;margin:0;padding-left:18px}.empf{border:1px solid var(--ink);border-radius:4px;padding:2px 8px;font-size:12px;align-self:flex-start}
 </style>
 </helmet>
-<div class="kg" style="width: 1280px; height: 1300px; box-sizing: border-box; position: relative; display: flex; background: var(--paper); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
-<aside style="width: 264px; flex-shrink: 0; box-sizing: border-box; height: 100%; border-right: 1px solid var(--rule); padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto">
-<div style="font-weight: 600; padding: 0 8px">Kollege</div>
-<nav class="kg-seitennav" aria-label="Hauptnavigation">
-<a href="Main.dc.html" aria-current="page"><span class="kg-nav-slash">/</span>heute</a>
-<a href="Chat.dc.html"><span class="kg-nav-slash">/</span>chat</a>
-<span class="nav-gruppe">Werkzeuge</span>
-<a href="Mail.dc.html"><span class="kg-nav-slash">/</span>mail</a>
-<a href="Kalender.dc.html"><span class="kg-nav-slash">/</span>kalender</a>
-<a href="Aufgaben.dc.html"><span class="kg-nav-slash">/</span>aufgaben</a>
-<a href="Dateien.dc.html"><span class="kg-nav-slash">/</span>dateien</a>
-<a href="Kontakte.dc.html"><span class="kg-nav-slash">/</span>kontakte</a>
-<span class="nav-gruppe">Bereiche</span>
-<a href="Gruendungsteams.dc.html"><span class="kg-nav-slash">/</span>gründungsteams</a>
-<a href="Events.dc.html"><span class="kg-nav-slash">/</span>events</a>
-<a href="Lehre.dc.html"><span class="kg-nav-slash">/</span>lehre</a>
-<a href="SocialMedia.dc.html"><span class="kg-nav-slash">/</span>social media</a>
-<a href="Einstellungen.dc.html" class="nav-plus">+ Bereich</a>
-<span class="nav-luecke" aria-hidden="true"></span>
-<a href="Einstellungen.dc.html"><span class="kg-nav-slash">/</span>einstellungen</a>
-</nav>
-<div style="padding: 0 8px"><a class="kg-aktion kg-aktion--sekundaer" href="Chat.dc.html" style="display: flex; justify-content: center">+ Neuer Chat</a></div>
-<div style="margin-top: auto; font-size: 13px; color: var(--ink-muted); padding: 0 8px">Julia · Gründungszentrum</div>
-</aside>
-<div style="flex-grow: 1; min-width: 0; height: 100%; position: relative; overflow: hidden">
-<main style="height: 100%; box-sizing: border-box; overflow-y: auto; padding: 40px 72px 96px; display: flex; flex-direction: column; gap: 28px">
-<div class="mono">Julias Ansicht · Heute · heute 15:10</div>
-<section style="display: flex; flex-direction: column; gap: 20px; max-width: 816px; border-top: 1px solid var(--ink); padding-top: 14px">
-<div style="display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap">
-<span class="label">Übergabe an dich</span>
-<span class="mono" style="margin-left: auto">heute 15:10</span>
+<div class="kg" style="width: 1280px; height: 1000px; box-sizing: border-box; position: relative; display: flex; background: var(--paper); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<div style="flex-grow: 1; min-width: 0; height: 100%; position: relative">
+<main style="height: 100%; overflow-y: auto">
+<div style="padding: 40px 48px 0; display: flex; flex-direction: column; gap: 8px; max-width: 960px">
+<div class="mono">Zum Kommentar „Umschalten zwischen Meins und Team macht Heute unübersichtlich“</div>
+<h1 class="h1">Heute ohne Umschalter: drei Varianten</h1>
+<div class="mono" style="color: var(--ink)">Entschieden am 01.10.: Variante B</div>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Problem heute: Der Umschalter tauscht fast die ganze Seite aus – man verliert den Ort und weiß nicht, was „Team“ zusätzlich zeigt. Grundfrage: Was muss ich auf Heute vom Team sehen, um handeln zu können? Nur zwei Dinge verlangen meine Handlung: Neues ohne Zuständigkeit und Dinge, die bei anderen hängen und auf mich wirken. Alles andere ist Information.</p>
 </div>
-<h1 class="h1" style="font-size: 22px; line-height: 30px">Andreas hat dir die Beratung von <a class="kg-bezug" href="Gruendungsteams.dc.html">Solaro</a> übergeben</h1>
-<div style="font-size: 15px">„Frau Weber kennst du vom Pitch-Abend – magst du das übernehmen?“ <span class="mono">– Andreas</span></div>
-
-<div style="display: grid; grid-template-columns: 140px minmax(0, 1fr); column-gap: 16px; row-gap: 20px">
-<div class="label" style="color: var(--ink-muted); line-height: 24px">Stand</div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div>Phase <b style="font-weight: 500">Vorgründung</b> · = wartet auf Solaro: finales Pitchdeck (Entwurf kam gestern, ohne Finanzteil).</div>
-<x-import component-from-global-scope="Kollege.Aussage" art="berechnet">EXIST-Einreichung geplant 30.10. = in 30 Tagen</x-import>
+<div class="vz">
+<section class="v" aria-label="Variante A">
+<span class="mono">Variante A</span>
+<h2>Ein Strom, Person als Etikett</h2>
+<div class="skizze">
+<div style="display: flex; gap: 4px; flex-wrap: wrap"><span class="sk-e" style="background: var(--ink); color: var(--paper)">Ich</span><span class="sk-e" style="background: var(--ink); color: var(--paper)">niemand zuständig</span><span class="sk-e">Julia</span><span class="sk-e">Mehmet</span></div>
+<span class="sk-k">Heute</span>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">Ich</span></div>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">niemand</span></div>
+<span class="sk-k">Wartet auf uns</span>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">Ich</span></div>
+<div class="sk-z" style="opacity: .45"><span class="sk-b"></span><span class="sk-e">Julia</span></div>
+<span class="sk-k">Hängt</span>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">Ich</span></div>
 </div>
-
-<div class="label" style="color: var(--ink-muted); line-height: 24px">Nächster Schritt</div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div>Pitchdeck abwarten (bis Fr 02.10.), dann <strong style="font-weight: 500">Termin mit Frau Weber</strong> vereinbaren.</div>
-<x-import component-from-global-scope="Kollege.Aussage" art="belegt" quelle="Chat Andreas 30.09.">Solaro hat das Pitchdeck bis Freitag zugesagt</x-import>
-</div>
-
-<div class="label" style="color: var(--ink-muted); line-height: 24px">Offene Zusagen</div>
-<div class="kg-zusagen">
-<div><h3 class="kg-zusagen-titel">Wir</h3>
-<x-import component-from-global-scope="Kollege.Zusage" faellig="heute" quelle="Mail 26.09.">Feedback zum Finanzplan an Tom</x-import>
-<x-import component-from-global-scope="Kollege.Zusage" faellig="offen" quelle="Chat 30.09.">Kontakt zu Frau Weber vermitteln</x-import>
-<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 13.11." quelle="deine Mail 23.09.">Pitch-Slot beim Pitch-Abend bestätigen</x-import>
-</div>
-<div><h3 class="kg-zusagen-titel">Solaro</h3>
-<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 02.10." quelle="Chat 30.09.">Pitchdeck final inkl. Finanzteil</x-import>
-<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 15.10." quelle="Notiz 22.09.">Finanzplan überarbeiten</x-import>
-</div>
-</div>
-
-<div class="label" style="color: var(--ink-muted); line-height: 24px">Zuletzt</div>
-<x-import component-from-global-scope="Kollege.Verlauf" eintraege="{{letzte}}" label="Letzte Ereignisse"></x-import>
-</div>
-
-<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: var(--paper-sunk); border-radius: 4px">
-<x-import component-from-global-scope="Kollege.Privat">Andreas’ private Notizen zu Tom bleiben bei Andreas</x-import>
-</div>
-
-<sc-if value="{{offen}}" hint-placeholder-val="{{ true }}">
-<div class="kg-aktionen">
-<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{uebernehmen}}">Übernehmen</button>
-<button type="button" class="kg-aktion kg-aktion--text" onClick="{{rueckfrage}}">Rückfrage an Andreas</button>
-<a class="kg-aktion kg-aktion--text" href="Gruendungsteams.dc.html">Ganze Beratungsakte ansehen</a>
-</div>
-</sc-if>
-<sc-if value="{{fragt}}" hint-placeholder-val="{{ false }}">
-<form onSubmit="{{fragen}}" style="display: flex; gap: 8px; align-items: center; max-width: 640px">
-<label for="rf" class="kg-sr">Rückfrage</label>
-<input id="rf" defaultValue="Hat Frau Weber schon von Solaro gehört?" style="flex-grow: 1; font: inherit; font-size: 15px; padding: 6px 10px; border: 1px solid var(--line-control); border-radius: 2px; background: var(--paper); color: var(--ink)">
-<button type="submit" class="kg-aktion kg-aktion--primaer" aria-label="Rückfrage abschicken">→</button>
-</form>
-</sc-if>
-<sc-if value="{{uebernommen}}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="Kollege.Karte" titel="Übernommen" punkte="{{punkte}}" link-text="Zur Beratungsakte: Solaro" link-href="Gruendungsteams.dc.html" folgen="gibt Solaro an Andreas zurück" on-rueckgaengig="{{zurueck}}"></x-import>
-</sc-if>
-<sc-if value="{{gefragt}}" hint-placeholder-val="{{ false }}">
-<div class="kg-aktionen" style="font-size: 14px; color: var(--ink-muted)"><span>✓ Rückfrage an Andreas gestellt · Übergabe bleibt offen, bis du übernimmst</span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{uebernehmen}}">Trotzdem übernehmen</button></div>
-</sc-if>
+<p style="margin: 0; font-size: 14px; line-height: 22px">Eine Liste, gleiche Abschnitte. Personen sind Filter-Chips wie die Bereiche; Standard: „Ich“ + „niemand zuständig“. Weitere Personen dazuschalten fügt nur Zeilen hinzu – die Seite bleibt dieselbe.</p>
+<ul class="pc"><li>Kein Ortswechsel, gleiche Logik wie der Bereichsfilter</li><li>Wer zuständig ist, steht an jeder Zeile</li><li>− Bei vielen Personen lang; Teamblick erfordert Klicks</li></ul>
 </section>
+<section class="v" aria-label="Variante B">
+<span class="mono">Variante B</span>
+<h2>Meins oben, „Im Team“ als Abschnitt</h2>
+<div class="skizze">
+<span class="sk-k">Heute</span>
+<div class="sk-z"><span class="sk-b"></span></div>
+<div class="sk-z"><span class="sk-b"></span></div>
+<span class="sk-k">Wartet auf uns · Wir warten auf · Hängt</span>
+<div class="sk-z"><span class="sk-b"></span></div>
+<div class="sk-z"><span class="sk-b"></span></div>
+<span class="sk-k" style="color: var(--ink)">Im Team · 5 ▾</span>
+<div class="sk-z"><span class="sk-e">Neu, niemand zuständig 3</span><span class="sk-b"></span></div>
+<div class="sk-z"><span class="sk-e">Hängt bei anderen 2</span><span class="sk-b"></span></div>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px">Heute zeigt immer deine Dinge. Darunter ein Abschnitt „Im Team“ mit genau zwei Arten: Neues ohne Zuständigkeit (Übernehmen/Zuweisen) und was bei anderen hängt. Zugeklappt mit Zahl, aufgeklappt bleibt er aufgeklappt.</p>
+<ul class="pc"><li>Fokus bleibt bei dem, was ich tun muss</li><li>Team nur dort, wo es Handlung verlangt</li><li>− Kein Gesamtbild „Was macht Julia heute?“ (gehört eher in Aufgaben → Team)</li></ul>
+<span class="empf" style="background: var(--ink); color: var(--paper)">Entschieden · umgesetzt in „1 · Heute“</span>
+</section>
+<section class="v" aria-label="Variante C">
+<span class="mono">Variante C</span>
+<h2>Zwei Spalten: Meins | Team</h2>
+<div class="skizze" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="sk-k">Meins</span><div class="sk-z"><span class="sk-b"></span></div><div class="sk-z"><span class="sk-b"></span></div><div class="sk-z"><span class="sk-b"></span></div><div class="sk-z"><span class="sk-b"></span></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px; border-left: 1px solid var(--rule); padding-left: 10px"><span class="sk-k">Team</span><div class="sk-z"><span>niemand</span><span class="sk-e">3</span></div><div class="sk-z"><span>Julia</span><span class="sk-e">4</span></div><div class="sk-z"><span>Mehmet</span><span class="sk-e">2 hängt</span></div></div>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px">Links deine Liste, rechts eine schmale Team-Spalte mit Zahlen je Person und „niemand zuständig“. Klick auf eine Person zeigt deren Punkte links – mit klarer Überschrift „Julias Punkte“. Mobil wird die Team-Spalte ein Tab.</p>
+<ul class="pc"><li>Beides gleichzeitig sichtbar</li><li>Gut für die Person, die das Team steuert</li><li>− Braucht Breite, mehr Unruhe; doppelte Einstiege</li></ul>
+</section>
+</div>
+<p style="padding: 0 48px 48px; margin: 0; font-size: 14px; line-height: 22px; max-width: 960px; color: var(--ink-muted)">Warum B: Heute ist zum Handeln da. Aus dem Team verlangen nur „niemand zuständig“ und „hängt bei anderen“ eine Handlung von mir – genau das zeigt B, ohne die Seite umzubauen. Wer im Team steuert (Teamleitung), bekommt mit A den vollständigeren Blick. Offen: Gibt es bei euch eine Person, die das ganze Team im Blick haben muss? Dann A, sonst B.</p>
 </main>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1300}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
 class Component extends DCLogic {
   kgChats() {
     return [
@@ -369,30 +336,8 @@ class Component extends DCLogic {
     };
   }
 
-  constructor(props) {
-    super(props);
-    this.state = { phase: 'offen' };
-  }
-  renderVals() {
-    var self = this, st = this.state;
-    return {
-      sidebarChats: this.kgChats().slice(3),
-      letzte: [
-        { monat: 'September 2026', datum: '30.09.', art: 'Notiz', text: 'Beratung: Pitchdeck bis Freitag; wir vermitteln Frau Weber.', quelle: 'Andreas' },
-        { monat: 'September 2026', datum: '28.09.', art: 'Mail', text: 'An Lisa: Rückfrage zum Pitchdeck-Format', quelle: 'Mail', herkunft: 'über Kollege' },
-        { monat: 'September 2026', datum: '26.09.', art: 'Mail', text: 'Tom Kraus: Finanzplan v2 mit Bitte um Feedback', quelle: 'Mail' }
-      ],
-      offen: st.phase === 'offen',
-      fragt: st.phase === 'fragt',
-      gefragt: st.phase === 'gefragt',
-      uebernommen: st.phase === 'uebernommen',
-      uebernehmen: function () { self.setState({ phase: 'uebernommen' }); },
-      rueckfrage: function () { self.setState({ phase: 'fragt' }); },
-      fragen: function (e) { if (e && e.preventDefault) e.preventDefault(); self.setState({ phase: 'gefragt' }); },
-      zurueck: function () { self.setState({ phase: 'offen' }); },
-      punkte: ['Du bist jetzt zuständig für „Solaro – EXIST-Antrag“', '2 offene Zusagen von uns liegen jetzt bei dir', 'Erinnerung Fr 02.10., 17:00 geht jetzt an dich', 'Andreas bleibt informiert']
-    };
-  }
+  constructor(props) { super(props); this.state = {}; }
+  renderVals() { return {}; }
 }
 </script>
 </body>

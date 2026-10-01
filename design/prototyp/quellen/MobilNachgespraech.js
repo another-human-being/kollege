@@ -8,7 +8,7 @@ class Component extends DCLogic {
     this.setState({ msgs: this.state.msgs.concat([{ typ: 'du', text: text }]), laden: true });
     var voll = 'Danke. Ich lege das bei Kitchen Loop ab: Ben klärt die Hygieneschulung bis 15.10., du fragst beim Studierendenwerk nach dem Pilotstart.';
     var rest = [
-      { typ: 'karte', punkte: ['Beratung vom 30.09. im Verlauf von „Kitchen Loop – Mensa-Kooperation“ abgelegt', 'Zusage Kitchen Loop: Hygieneschulung bis 15.10.', 'Aufgabe für dich: Studierendenwerk zum Pilotstart fragen'], folgen: 'entfernt auch 1 Aufgabe' },
+      { typ: 'karte', punkte: ['Beratung vom 30.09. in der Beratungsakte von Kitchen Loop abgelegt', 'Zusage Kitchen Loop: Hygieneschulung bis 15.10.', 'Aufgabe für dich: Studierendenwerk zum Pilotstart fragen'], folgen: 'entfernt auch 1 Aufgabe' },
       { typ: 'aussage', text: 'der Pilot kann vermutlich erst im November starten' }
     ];
     self.vollText = voll;

@@ -34,10 +34,10 @@ Leer, Laden, Fehler|1280|1500|.fall{display:flex;flex-direction:column;gap:16px;
 <div class="fall-titel">Suche ohne Treffer</div>
 <x-import component-from-global-scope="Kollege.Leer" titel="Dazu habe ich nichts gefunden." text="Gesucht in 4 Bereichen, 1.380 Mails und 88 Terminen. Versuch einen Namen, ein Team oder ein Datum."></x-import>
 <div class="fall-titel" style="margin-top: 24px">Chat · zu wenig Erfahrung statt geratener Antwort</div>
-<x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="09:40">Wie lange dauert es bei EXIST bis zur Bewilligung?</x-import>
-<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="Ich kenne zwei EXIST-Anträge aus euren Mails, aber keinen bis zur Bewilligung. Raten will ich nicht."></x-import></div>
-<div class="fall-titel" style="margin-top: 24px">Chatverlauf leer</div>
-<div style="width: 248px"><x-import component-from-global-scope="Kollege.ChatListe" chats="{{keineChats}}"></x-import></div>
+<div class="ch"><div class="ch-du">Wie lange dauert es bei EXIST bis zur Bewilligung?</div>
+<div><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="Ich kenne zwei EXIST-Anträge aus euren Mails, aber keinen bis zur Bewilligung. Raten will ich nicht."></x-import></div></div>
+<div class="fall-titel" style="margin-top: 24px">Chat-Seite, noch keine Chats</div>
+<x-import component-from-global-scope="Kollege.Leer" titel="Noch keine Chats." text="Oben eintippen – frühere Chats erscheinen dann hier, Angepinnte zuerst."></x-import>
 </div>
 
 <div class="fall">

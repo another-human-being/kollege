@@ -1,6 +1,6 @@
-Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;padding-block:12px;border-top:1px solid var(--rule)}.schritt-nr{font-family:var(--font-mono);font-size:13px;color:var(--ink-muted)}.schritt-ok{color:var(--ink)}.schritt-offen{color:var(--attention)}.balken{height:4px;background:var(--paper-sunk);border-radius:2px;overflow:hidden}.balken span{display:block;height:100%;background:var(--ink)}.qz{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding-block:8px;border-top:1px solid var(--rule);font-size:14px}.neu-form{display:flex;gap:6px}.neu-form input{flex:1}
+Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;padding-block:12px;border-top:1px solid var(--rule)}.schritt-nr{font-family:var(--font-mono);font-size:13px;color:var(--ink-muted)}.schritt-ok{color:var(--ink)}.schritt-offen{color:var(--ink);font-weight:500}.balken{height:4px;background:var(--paper-sunk);border-radius:2px;overflow:hidden}.balken span{display:block;height:100%;background:var(--ink)}.qz{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding-block:8px;border-top:1px solid var(--rule);font-size:14px}.neu-form{display:flex;gap:6px}.neu-form input{flex:1}
 @@SIDE:einstellungen@@
-<div class="ld">
+<div class="{{ldKlasse}}">
 <div class="ld-liste">
 <div class="ld-kopf">
 <h1>Einstellungen</h1>
@@ -31,6 +31,7 @@ Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(
 </div>
 
 <div class="ld-detail">
+<div class="ld-zu"><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
 <!-- Einrichtung -->
 <sc-if value="{{dEinrichtung}}" hint-placeholder-val="{{ true }}">
 <div><h2 class="h1" style="font-size: 24px">Einrichtung</h2><p style="margin: 6px 0 0; color: var(--ink-muted); font-size: 14px">{{einrichtungZeile}}</p></div>
@@ -42,10 +43,10 @@ Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(
 </div>
 <sc-if value="{{vorschlagOffen}}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px dashed var(--line-control); border-radius: 4px">
-<div style="display: flex; gap: 8px; align-items: baseline"><b style="font-weight: 500">Ich schlage diese Bereiche vor – passt das?</b><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import></div>
+<div style="display: flex; gap: 8px; align-items: baseline"><b style="font-weight: 500">{{vorschlagTitel}}</b><sc-if value="{{vorschlagFrage}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import></sc-if></div>
 <sc-for list="{{vorschlag}}" as="vs" hint-placeholder-count="4"><div class="qz"><span style="font-weight: 500">{{vs.name}}</span><span style="font-size: 13px"><span style="color: var(--ink-muted)">{{vs.grund}}</span><br><span class="mono">Spalten: {{vs.spalten}}</span></span><span></span></div></sc-for>
 <div class="qz"><span style="color: var(--ink-muted)">nicht vorgeschlagen</span><span style="font-size: 13px; color: var(--ink-muted)">Partner und Kooperationen (Stadtwerke, IHK) – nur 9 Mails; bleiben ohne Bereich, bis ihr einen anlegt.</span><span></span></div>
-<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{vorschlagPasst}}">Passt</button><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{vorschlagAnpassen}}">Anpassen</button><span class="mono">Der Import ordnet erst danach zu.</span></div>
+<div class="kg-aktionen"><sc-if value="{{vorschlagFrage}}" hint-placeholder-val="{{ true }}"><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{vorschlagPasst}}">Passt</button></sc-if><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{vorschlagAnpassen}}">Anpassen</button><sc-if value="{{vorschlagFrage}}" hint-placeholder-val="{{ true }}"><span class="mono">Der Import ordnet erst danach zu.</span></sc-if></div>
 </div>
 </sc-if>
 <div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>214 Einträge aus dem Import sind noch ungeprüft.</span><span style="flex-grow: 1"></span><a class="kg-aktion kg-aktion--sekundaer" href="Gruendungsteams.dc.html">Gründungsteams prüfen</a><a class="kg-aktion kg-aktion--text" href="Kontakte.dc.html">Kontakte prüfen</a></div>
@@ -71,7 +72,7 @@ Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(
 <p style="margin: 0; font-size: 14px; line-height: 22px; max-width: 600px">{{q.erklaerung}}</p>
 <div class="kg-aktionen">
 <sc-if value="{{q.verbunden}}" hint-placeholder-val="{{ true }}"><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{q.sync}}">Jetzt abgleichen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{q.trennen}}">Trennen</button></sc-if>
-<sc-if value="{{q.getrennt}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{q.verbinden}}">Verbinden</button></sc-if>
+<sc-if value="{{q.getrennt}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{q.verbinden}}">Verbinden</button></sc-if>
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{zuAusschluessen}}">Ausschlüsse ({{ausAnzahl}})</button>
 </div>
 </sc-if>
@@ -98,7 +99,7 @@ Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(
 <x-import component-from-global-scope="Kollege.Umschalter" optionen="{{zeitraeume}}" wert="{{zeitraum}}" label="Zeitraum" on-wechsel="{{setZeitraum}}"></x-import>
 <div style="display: flex; gap: 16px; font-size: 14px"><sc-for list="{{importQuellen}}" as="x" hint-placeholder-count="3"><label style="display: inline-flex; gap: 6px; align-items: center"><input type="checkbox" checked="{{x.an}}" onChange="{{x.toggle}}" style="accent-color: var(--ink)">{{x.name}}</label></sc-for></div>
 <span class="mono">= {{schaetzung}}</span>
-<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{importStarten}}" disabled="{{importLaeuft}}">Import starten</button><span style="font-size: 13px; color: var(--ink-muted)">läuft im Hintergrund; Neues landet als „ungeprüft“</span></div>
+<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{importStarten}}" disabled="{{importLaeuft}}">Import starten</button><span style="font-size: 13px; color: var(--ink-muted)">läuft im Hintergrund; Neues landet als „ungeprüft“</span></div>
 <sc-for list="{{teile}}" as="x" hint-placeholder-count="0"><div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px"><span>{{x.text}} <span class="mono">{{x.zahl}}</span></span><div class="balken"><span style="{{x.breite}}"></span></div></div></sc-for>
 </section>
 </sc-if>
@@ -114,6 +115,7 @@ Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(
 <span class="fl">Von</span><span style="font-size: 14px; line-height: 28px">{{a.von}} · {{a.datum}}</span>
 <span class="fl">Angewandt</span><span class="mono" style="line-height: 28px">= {{a.angewandt}}</span>
 <sc-if value="{{a.hatBeziehung}}" hint-placeholder-val="{{ false }}"><span class="fl">Vorrang</span><span style="font-size: 14px; line-height: 22px; padding-top: 3px">{{a.beziehung}}</span></sc-if>
+<sc-if value="{{a.hatHerkunft}}" hint-placeholder-val="{{ false }}"><span class="fl">Herkunft</span><span style="font-size: 14px; line-height: 22px; padding-top: 3px">{{a.herkunft}}</span></sc-if>
 </div>
 <p style="margin: 0; font-size: 13px; line-height: 20px; color: var(--ink-muted); max-width: 600px">Gilt für: alle Bereiche, einen Bereich oder nur dich. Reihenfolge bei Widerspruch: Bereich vor „Alle“ · spezieller vor allgemeiner · persönlich vor Team (nur für dich) · neuer vor älter. Widersprüche zeige ich hier an, statt still eine zu wählen.</p>
 <div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{a.loeschen}}">Löschen</button></div>
