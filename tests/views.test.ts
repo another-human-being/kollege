@@ -207,6 +207,10 @@ describe('Heute nach E39', () => {
       'Raum mit Beamer für Sitzung 3 buchen (40 Personen)', 'Feedback zum Finanzplan an Tom Kraus', 'Erstberatung Greenbyte',
     ]);
     expect(p.review.map((h) => h.title)).toEqual(['20 ungeprüft – prüfen']);
+    // 3 teams + 3 topics, 3 events, 1 course, 1 post; contacts: 7 people + IHK + Uni
+    expect(p.reviewCounts.map((c) => [c.label, c.n])).toEqual([
+      ['Gründungsteams', 6], ['Events', 3], ['Lehre', 1], ['Social Media', 1], ['Kontakte', 9],
+    ]);
     // StartHub mailbox: nobody responsible
     expect(p.team.unowned.map((m) => m.title).sort()).toEqual(['EXIST-Antrag', 'Erstberatung']);
     // Julia's Gründungsnacht 2025: last entry 28.11.2025

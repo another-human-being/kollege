@@ -3,7 +3,7 @@
 //    default config/freemail.json) – decision 2026-10-01
 //  - seed data (team, mailboxes, start areas): fixtures/config.json
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { z } from 'zod';
 
 export const AreaField = z.object({
@@ -35,8 +35,9 @@ const TeamConfig = z.object({
 });
 export type TeamConfig = z.infer<typeof TeamConfig>;
 
-export const fixturesDir = fileURLToPath(new URL('../fixtures', import.meta.url));
-const defaultFreemailFile = fileURLToPath(new URL('../config/freemail.json', import.meta.url));
+// paths relative to the project directory: the same for app (Next bundles this file), worker and tests
+export const fixturesDir = join(process.cwd(), 'fixtures');
+const defaultFreemailFile = join(process.cwd(), 'config', 'freemail.json');
 
 let cached: TeamConfig | undefined;
 

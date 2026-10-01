@@ -26,7 +26,7 @@ export interface TodayItem {
 }
 
 export interface Today {
-  hints: (TodayItem & { kind: string; options: { label: string }[] })[];
+  hints: (TodayItem & { kind: string; options: { label: string }[]; source: { kind: string; at: string } | null })[];
   due: TodayItem[];
   waitingOnUs: TodayItem[];
   weWaitFor: TodayItem[];
@@ -48,6 +48,8 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
   return withUser(userId, async (tx) => {
     const hints = await tx.execute<Record<string, unknown>>(sql`
       SELECT h.id, h.kind, h.text AS title, h.reason, h.options, h.target_type, h.target_id, h.created_at,
+             (SELECT e.occurred_at FROM entries e WHERE h.target_type = 'entry' AND e.id = h.target_id) AS source_at,
+             (SELECT e.kind FROM entries e WHERE h.target_type = 'entry' AND e.id = h.target_id) AS source_kind,
              a.name_singular AS area, a.key AS area_key,
              CASE WHEN h.target_type = 'matter' THEN h.target_id END AS matter_id,
              CASE WHEN h.target_type = 'entry' THEN h.target_id END AS entry_id
@@ -108,6 +110,8 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
         at: iso(h.created_at),
         overdue: false,
         options: ((h.options as { label: string }[]) ?? []).map((o) => ({ label: o.label })),
+        // the evidence is the entry, not the moment the hint was created
+        source: h.source_at ? { kind: h.source_kind as string, at: iso(h.source_at)! } : null,
       })),
       due: due.rows.map((t) => ({
         id: t.id as string,
@@ -178,6 +182,8 @@ export interface TodayPage {
   stale: MatterItem[];
   handoversToMe: (MatterItem & { from: string | null })[];
   review: Today['hints'];
+  /** live count of unreviewed items per area and for contacts (H2) */
+  reviewCounts: { key: string; label: string; href: string; n: number }[];
   team: { unowned: MatterItem[]; stuckAtOthers: MatterItem[] };
 }
 
@@ -218,7 +224,26 @@ export async function todayPage(userId: string, now = new Date(), areaKey?: stri
   const inArea = <T extends { area_key: string | null }>(xs: T[]) => (areaKey ? xs.filter((x) => x.area_key === areaKey) : xs);
   const today_ = [...t.due, ...t.events].sort((a, b) => (a.at ?? '').localeCompare(b.at ?? ''));
 
+  const counts = await withUser(userId, (tx) =>
+    tx.execute<{ key: string; label: string; n: number }>(sql`
+      SELECT a.key, a.name_plural AS label, a.sort,
+             CASE WHEN a.matter_kind = 'org_based'
+                  THEN (SELECT count(*) FROM orgs o WHERE o.role = 'founding_team' AND o.review_state = 'unreviewed' AND o.merged_into_id IS NULL)
+                     + (SELECT count(*) FROM matters m WHERE m.area_id = a.id AND m.review_state = 'unreviewed')
+                  ELSE (SELECT count(*) FROM matters m WHERE m.area_id = a.id AND m.review_state = 'unreviewed') END::int AS n
+      FROM areas a
+      UNION ALL
+      SELECT 'contacts', 'Kontakte', 1000,
+             ((SELECT count(*) FROM people p WHERE p.review_state = 'unreviewed' AND p.merged_into_id IS NULL)
+            + (SELECT count(*) FROM orgs o WHERE o.role <> 'founding_team' AND o.review_state = 'unreviewed' AND o.merged_into_id IS NULL))::int
+      ORDER BY sort`),
+  );
+  const reviewCounts = counts.rows
+    .filter((c) => c.n > 0 && (!areaKey || c.key === areaKey))
+    .map((c) => ({ ...c, href: c.key === 'contacts' ? '/kontakte?ungeprueft=1' : `/b/${c.key}?ungeprueft=1` }));
+
   return {
+    reviewCounts,
     clarify: inArea(t.hints.filter((h) => h.kind === 'clarify')),
     today: inArea(today_),
     waitingOnUs: inArea(t.waitingOnUs),
