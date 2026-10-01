@@ -7,14 +7,14 @@
 <sc-if value="{{pruefHatAuswahl}}" hint-placeholder-val="{{ false }}">
 <div class="kg-aktionen">
 <button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefUebernehmen}}">Übernehmen</button>
-<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefWarumAuf}}">Verwerfen</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefWarumAuf}}">{{pruefVerwerfenLabel}}</button>
 </div>
 </sc-if>
 <sc-if value="{{pruefWarumOffen}}" hint-placeholder-val="{{ false }}">
 <form onSubmit="{{pruefVerwerfen}}" style="display: flex; gap: 6px; align-items: center">
 <label for="pruef-warum" class="kg-sr">Warum verwerfen?</label>
 <input id="pruef-warum" value="{{pruefWarum}}" onChange="{{pruefWarumTippen}}" placeholder="Warum? (optional) z. B. „Rechnungen sind keine Gründungsteams“" class="such" style="flex: 1">
-<button type="submit" class="kg-aktion kg-aktion--sekundaer">Verwerfen</button>
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">{{pruefVerwerfenLabel}}</button>
 </form>
 </sc-if>
 </div>

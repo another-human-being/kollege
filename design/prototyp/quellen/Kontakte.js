@@ -1,7 +1,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = Object.assign(this.basisState(), this.kcState(), { ansicht: 'Personen', filter: 'alle', suche: '', sel: 'lisa', oSel: 'solaro', merge: null, mWahl: null });
+    this.state = Object.assign(this.basisState(), this.kcState(), { tSort: null, mKonf: {}, ansicht: 'Personen', filter: 'alle', liste: 'Alle Listen', sortierung: 'Name A–Z', suche: '', sel: 'lisa', oSel: 'solaro', merge: null, mWahl: null });
   }
   kcCfg() {
     var p = this.aktPerson();
@@ -11,55 +11,25 @@ class Component extends DCLogic {
       luecke: 'Wie Lisa zu Terminen am Wochenende steht, kann ich aus ihren Mails nicht sagen.' };
   }
   personen() {
-    var P = [
-      { id: 'lisa', name: 'Lisa Meier', rolle: 'Gründer:in', org: 'Solaro', tage: 1, letzter: 'gestern · Mail', ueber: 'Andreas', mails: 'Andreas 9 Mails · Julia 2 Mails', telefon: '0151 2345 6789',
-        adressen: [{ adresse: 'lisa@solaro.de', info: 'Hauptadresse · 9 Mails' }, { adresse: 'l.meier@gmx.de', info: '1 Mail · bestätigt 30.09.' }, { adresse: 'lisa.meier@uni-augsburg.de', info: 'Kalender · 2 Termine' }],
-        notiz: 'Ansprechpartnerin für alles rund um den EXIST-Antrag. Antwortet meist abends.' },
-      { id: 'tom', name: 'Tom Kraus', rolle: 'Gründer:in', org: 'Solaro', tage: 4, letzter: 'vor 4 T. · Mail', ueber: 'Andreas', mails: 'Andreas 4 Mails · Julia 1 Mail', adressen: [{ adresse: 'tom@solaro.de', info: 'Hauptadresse · 5 Mails' }] },
-      { id: 'sara', name: 'Sara Yilmaz', rolle: 'Gründer:in', org: 'Kitchen Loop', tage: 2, letzter: 'vor 2 T. · Mail', ueber: 'Julia', mails: 'Julia 6 Mails · Andreas 1 Mail', adressen: [{ adresse: 'sara@kitchenloop.de', info: 'Hauptadresse · 7 Mails' }] },
-      { id: 'ben', name: 'Ben Hofer', rolle: 'Gründer:in', org: 'Kitchen Loop', tage: 6, letzter: 'vor 6 T. · Termin', ueber: 'Julia', mails: 'Julia 3 Mails · Mehmet 2 Mails', adressen: [{ adresse: 'ben@kitchenloop.de', info: 'Hauptadresse · 5 Mails' }] },
-      { id: 'jonas', name: 'Jonas Berg', rolle: 'Gründer:in', org: 'Nordlicht Analytics', tage: 23, letzter: 'vor 23 T. · Termin', ueber: 'Andreas', mails: 'Andreas 2 Mails', adressen: [{ adresse: 'jonas@nordlicht-analytics.de', info: 'Hauptadresse · 2 Mails' }] },
-      { id: 'weber', name: 'Anna Weber', rolle: 'Partner', org: 'IHK Schwaben', tage: 12, letzter: 'vor 12 T. · Mail', ueber: 'Julia', mails: 'Julia 3 Mails', adressen: [{ adresse: 'anna.weber@schwaben.ihk.de', info: 'Hauptadresse · 3 Mails' }], notiz: 'Soll Jurorin beim Pitch-Abend werden; Rückmeldung steht aus.' },
-      { id: 'vogt', name: 'Karin Vogt', rolle: 'Partner', org: 'Stadtwerke Augsburg', tage: 1, letzter: 'gestern · Mail', ueber: 'Andreas', mails: 'Andreas 2 Mails', adressen: [{ adresse: 'k.vogt@stadtwerke-augsburg.de', info: 'Hauptadresse · 2 Mails' }] },
-      { id: 'lang', name: 'Petra Lang', rolle: 'Partner', org: 'Studierendenwerk Augsburg', tage: 12, letzter: 'vor 12 T. · Telefon', ueber: 'Julia', mails: 'Julia 4 Mails', adressen: [{ adresse: 'p.lang@studentenwerk-augsburg.de', info: 'Hauptadresse · 4 Mails' }] },
-      { id: 'albrecht', name: 'Dr. Kerstin Albrecht', rolle: 'Mentor:in', org: 'Albrecht Consulting', tage: 34, letzter: 'vor 34 T. · Mail', ueber: 'Andreas', mails: 'Andreas 3 Mails', adressen: [{ adresse: 'k.albrecht@albrecht-consulting.de', info: 'Hauptadresse · 3 Mails' }] },
-      { id: 'hartmann', name: 'Prof. Dr. Martin Hartmann', rolle: 'Uni-intern', org: 'Universität Augsburg', tage: 2, letzter: 'vor 2 T. · Mail', ueber: 'Andreas', mails: 'Andreas 6 Mails', adressen: [{ adresse: 'hartmann@uni-augsburg.de', info: 'Hauptadresse · 6 Mails' }] },
-      { id: 'lmeier2', ungeprueft: true, name: 'L. Meier', rolle: 'Gründer:in', org: 'Solaro', tage: 40, letzter: 'vor 40 T. · Termin', ueber: 'Andreas', mails: 'Andreas 1 Mail', adressen: [{ adresse: 'l.meier@solaro-energy.de', info: '2 Termine, 1 Mail' }], grund: 'Absender in 2 Terminen und 1 Mail', quelle: 'Import Kalender' },
-      { id: 'nora', ungeprueft: true, name: 'Nora Kim', rolle: 'Gründer:in', org: 'Greenbyte', tage: 1, letzter: 'gestern · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'nora@greenbyte.io', info: '1 Mail' }], grund: 'Anfrage über das StartHub-Postfach', quelle: 'Mail 29.09.' },
-      { id: 'max', ungeprueft: true, name: 'Max Brandt', rolle: 'Gründer:in', org: '–', tage: 1, letzter: 'gestern · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'max.brandt@student.uni-augsburg.de', info: '1 Mail' }], grund: 'Anfrage Gründungsstipendium', quelle: 'Mail 29.09.' },
-      { id: 'ott', ungeprueft: true, name: 'Sven Ott', rolle: 'Partner', org: 'Kitchen Loop Catering', tage: 7, letzter: 'vor 7 T. · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'ott@kl-catering.de', info: '1 Mail' }], grund: 'CC in einer Mail an Kitchen Loop', quelle: 'Mail 23.09.' },
-      { id: 'redaktion', ungeprueft: true, name: 'Redaktion Augsburger Allgemeine', rolle: 'Sonstige', org: 'Augsburger Allgemeine', tage: 0, letzter: 'heute · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'redaktion@augsburger-allgemeine.de', info: '1 Mail' }], grund: 'Presseanfrage', quelle: 'Mail heute 08:05' },
-      { id: 'lmeyer', ungeprueft: true, name: 'Lisa Meyer', rolle: 'Sonstige', org: '–', tage: 90, letzter: 'vor 90 T. · Mail', ueber: 'Andreas', mails: 'Andreas 1 Mail', adressen: [{ adresse: 'lisa.meyer@student.uni-augsburg.de', info: '1 Mail' }], grund: 'Absenderin einer Mail zu Sprechzeiten', quelle: 'Import Mail 02.07.' }
-    ];
-    return this.wert('_neu', 'personen', []).concat(P);
+    return this.wert('_neu', 'personen', []).concat(this.kontaktDaten().personen);
   }
   orgs() {
-    var O = [
-      { id: 'solaro', name: 'Solaro', art: 'Gründungsteam', web: 'solaro.de', ort: 'Augsburg', ueber: 'Andreas', notiz: 'Solarspeicher für Balkonkraftwerke. EXIST-Antrag in Arbeit.' },
-      { id: 'kl', name: 'Kitchen Loop', art: 'Gründungsteam', web: 'kitchenloop.de', ort: 'Augsburg', ueber: 'Julia' },
-      { id: 'nord', name: 'Nordlicht Analytics', art: 'Gründungsteam', web: 'nordlicht-analytics.de', ort: 'Augsburg', ueber: 'Andreas' },
-      { id: 'ihk', name: 'IHK Schwaben', art: 'Partner', web: 'ihk.de/schwaben', ort: 'Augsburg', ueber: 'Julia' },
-      { id: 'swa', name: 'Stadtwerke Augsburg', art: 'Partner', web: 'sw-augsburg.de', ort: 'Augsburg', ueber: 'Andreas' },
-      { id: 'stw', name: 'Studierendenwerk Augsburg', art: 'Partner', web: '', ort: 'Augsburg', ueber: 'Julia' },
-      { id: 'ac', name: 'Albrecht Consulting', art: 'Mentor:in', web: '', ort: 'München', ueber: 'Andreas' },
-      { id: 'uni', name: 'Universität Augsburg', art: 'Uni-intern', web: 'uni-augsburg.de', ort: 'Augsburg', ueber: 'Andreas' },
-      { id: 'green', ungeprueft: true, name: 'Greenbyte', art: 'Gründungsteam', web: 'greenbyte.io', ort: '', ueber: 'StartHub-Postfach', grund: 'aus der Mail von Nora Kim' },
-      { id: 'klc', ungeprueft: true, name: 'Kitchen Loop Catering', art: 'Partner', web: '', ort: '', ueber: 'StartHub-Postfach', grund: 'aus einer Mail-Signatur' },
-      { id: 'aa', ungeprueft: true, name: 'Augsburger Allgemeine', art: 'Sonstige', web: 'augsburger-allgemeine.de', ort: 'Augsburg', ueber: 'StartHub-Postfach', grund: 'Presseanfrage' }
-    ];
-    return this.wert('_neu', 'orgs', []).concat(O);
+    return this.wert('_neu', 'orgs', []).concat(this.kontaktDaten().orgs);
   }
-  vorgaengeFuer(org) {
+  vorgaengeFuer(orgId) {
     return ({
-      'Solaro': [{ titel: 'Gründungsteams · Solaro', info: 'Vorgründung · Andreas', href: 'Gruendungsteams.dc.html' }, { titel: 'Events · Pitch-Abend', info: 'pitcht', href: 'Events.dc.html' }],
-      'Kitchen Loop': [{ titel: 'Gründungsteams · Kitchen Loop', info: 'Vorgründung · Julia', href: 'Gruendungsteams.dc.html' }],
-      'Nordlicht Analytics': [{ titel: 'Gründungsteams · Nordlicht Analytics', info: 'hängt · 23 T.', href: 'Gruendungsteams.dc.html' }],
-      'IHK Schwaben': [{ titel: 'Events · Pitch-Abend', info: 'Jury', href: 'Events.dc.html' }],
-      'Studierendenwerk Augsburg': [{ titel: 'Gründungsteams · Kitchen Loop', info: 'Mensa-Pilot', href: 'Gruendungsteams.dc.html' }],
-      'Universität Augsburg': [{ titel: 'Lehre · Entrepreneurship Basics', info: 'WS 26/27', href: 'Lehre.dc.html' }],
-      'Greenbyte': [{ titel: 'Gründungsteams · Greenbyte', info: 'ungeprüft', href: 'Gruendungsteams.dc.html' }]
-    })[org] || [];
+      solaro: [{ titel: 'Gründungsteams · Solaro', info: 'Vorgründung · Andreas', href: 'Gruendungsteams.dc.html' }, { titel: 'Events · Pitch-Abend', info: 'pitcht', href: 'Events.dc.html' }],
+      kl: [{ titel: 'Gründungsteams · Kitchen Loop', info: 'Vorgründung · Julia', href: 'Gruendungsteams.dc.html' }],
+      nord: [{ titel: 'Gründungsteams · Nordlicht Analytics', info: 'hängt seit 23 Tagen', href: 'Gruendungsteams.dc.html' }],
+      ihk: [{ titel: 'Events · Pitch-Abend', info: 'Jury', href: 'Events.dc.html' }],
+      stw: [{ titel: 'Gründungsteams · Kitchen Loop', info: 'Mensa-Pilot', href: 'Gruendungsteams.dc.html' }],
+      uni: [{ titel: 'Lehre · Entrepreneurship Basics', info: 'WS 26/27', href: 'Lehre.dc.html' }],
+      green: [{ titel: 'Gründungsteams · Greenbyte', info: 'ungeprüft', href: 'Gruendungsteams.dc.html' }]
+    })[orgId] || [];
   }
+  listenStart() { return { lisa: ['Gründerinnen-Porträts'], weber: ['Jury'], albrecht: ['Mentor:innen', 'Jury'], hartmann: ['Jury', 'Lehre'], vogt: ['Partner'], lang: ['Partner'], sara: ['Newsletter'], ben: ['Newsletter'], tom: ['Newsletter'], jonas: ['Newsletter'] }; }
+  alleListen() { return ['Jury', 'Mentor:innen', 'Partner', 'Newsletter', 'Gründerinnen-Porträts', 'Lehre']; }
+  orgName(x) { var id = this.wert(x.id, 'orgId', x.orgId); if (!id) return '–'; var o = this.orgs().filter(function (y) { return y.id === id; })[0]; return o ? this.wert(o.id, 'name', o.name) : '–'; }
   lebend(x) { return !this.wert(x.id, 'geloescht', false) && this.wert(x.id, 'geprueft', '') !== 'weg' && !this.wert(x.id, 'zusammengefuehrt', false); }
   aktPerson() { var self = this; return this.personen().filter(function (p) { return p.id === self.state.sel && self.lebend(p); })[0]; }
   renderVals() {
@@ -67,30 +37,46 @@ class Component extends DCLogic {
     var alleP = this.personen(), alleO = this.orgs();
     var roh = istP ? alleP : alleO;
     var pruef = st.filter === 'ungeprüft';
-    var P = this.pruefVals(roh, istP ? 88 : 31, istP ? 'Personen' : 'Organisationen');
+    var P = this.pruefVals(roh, istP ? 57 : 31, istP ? 'Personen' : 'Organisationen');
     var ung = function (x) { return !!x.ungeprueft && !self.wert(x.id, 'geprueft', ''); };
     var q = st.suche.trim().toLowerCase();
+    var LS = this.listenStart();
     var liste = roh.filter(function (x) {
       if (!self.lebend(x)) return false;
       if (pruef) return ung(x);
+      if (st.filter === 'Dubletten?') return !!x.dublette;
       if (ung(x)) return false;
       var rolle = istP ? self.wert(x.id, 'rolle', x.rolle) : self.wert(x.id, 'art', x.art);
       if (st.filter !== 'alle' && rolle !== st.filter) return false;
-      var text = istP ? self.wert(x.id, 'name', x.name) + ' ' + self.wert(x.id, 'org', x.org) + ' ' + self.wert(x.id, 'adressen', x.adressen).map(function (a) { return a.adresse; }).join(' ') : self.wert(x.id, 'name', x.name);
+      if (istP && st.liste !== 'Alle Listen' && self.wert(x.id, 'listen', LS[x.id] || []).indexOf(st.liste) < 0) return false;
+      var text = istP ? self.wert(x.id, 'name', x.name) + ' ' + self.orgName(x) + ' ' + self.wert(x.id, 'adressen', x.adressen).map(function (a) { return a.adresse; }).join(' ') : self.wert(x.id, 'name', x.name);
       return !q || text.toLowerCase().indexOf(q) >= 0;
     });
+    if (st.sortierung === 'Name A–Z') liste = liste.slice().sort(function (a, b) { return self.wert(a.id, 'name', a.name).replace(/^(Prof\. |Dr\. )+/, '') < self.wert(b.id, 'name', b.name).replace(/^(Prof\. |Dr\. )+/, '') ? -1 : 1; });
+    if (st.sortierung === 'Zuletzt kontaktiert') liste = liste.slice().sort(function (a, b) { return (a.tage || 0) - (b.tage || 0); });
+    if (st.sortierung === 'Organisation') liste = liste.slice().sort(function (a, b) { return self.orgName(a) < self.orgName(b) ? -1 : 1; });
+    if (st.sortierung === 'Art') liste = liste.slice().sort(function (a, b) { return self.wert(a.id, 'art', a.art) < self.wert(b.id, 'art', b.art) ? -1 : 1; });
+    var tabelle = liste.map(function (x) {
+      var adr = istP ? self.wert(x.id, 'adressen', x.adressen) : [];
+      return { id: x.id, tage: x.tage || 0, aktiv: (istP ? x.id === st.sel : x.id === st.oSel) ? 'true' : 'false', zellen: istP ? [self.wert(x.id, 'name', x.name), self.orgName(x), self.wert(x.id, 'rolle', x.rolle), adr.length ? adr[0].adresse : '–', self.wert(x.id, 'telefon', x.telefon || '–'), self.wert(x.id, 'ueber', x.ueber), x.letzter, self.wert(x.id, 'listen', LS[x.id] || []).join(', ') || '–']
+        : [self.wert(x.id, 'name', x.name), self.wert(x.id, 'art', x.art), self.wert(x.id, 'web', x.web || '–'), self.wert(x.id, 'ort', x.ort || '–'), self.wert(x.id, 'ueber', x.ueber)],
+        los: function () { var s = { zu: false, merge: null, kcOffen: false }; if (istP) s.sel = x.id; else s.oSel = x.id; self.setState(s); } };
+    });
+    if (st.tSort) tabelle.sort(function (a, b) { var i = st.tSort.i, x = istP && i === 6 ? a.tage : a.zellen[i], y = istP && i === 6 ? b.tage : b.zellen[i]; var r = x < y ? -1 : x > y ? 1 : 0; return st.tSort.auf ? r : -r; });
+    var kopfNamen = istP ? ['Name', 'Organisation', 'Rolle', 'E-Mail', 'Telefon', 'Kontakt über', 'letzter Kontakt', 'Listen'] : ['Organisation', 'Art', 'Website', 'Ort', 'Kontakt über'];
+    var tabelleKopf = kopfNamen.map(function (n, i) { var an = st.tSort && st.tSort.i === i; return { name: n + (an ? (st.tSort.auf ? ' ↑' : ' ↓') : ''), sort: an ? (st.tSort.auf ? 'ascending' : 'descending') : 'none', los: function () { var t = self.state.tSort; self.setState({ tSort: { i: i, auf: !(t && t.i === i && t.auf) } }); } }; });
     var zeilen = liste.map(function (x) {
       var aktiv = istP ? x.id === st.sel : x.id === st.oSel;
       var unter;
-      if (istP) unter = self.wert(x.id, 'rolle', x.rolle) + ' · ' + self.wert(x.id, 'org', x.org) + ' · ' + (pruef ? x.grund : 'zuletzt ' + x.letzter);
-      else { var n = alleP.filter(function (p) { return self.lebend(p) && self.wert(p.id, 'org', p.org) === self.wert(x.id, 'name', x.name); }).length; unter = self.wert(x.id, 'art', x.art) + ' · ' + n + (n === 1 ? ' Person' : ' Personen') + (pruef ? ' · ' + x.grund : ''); }
+      if (istP) unter = self.wert(x.id, 'rolle', x.rolle) + ' · ' + self.orgName(x) + ' · ' + (pruef ? x.grund : 'zuletzt ' + x.letzter);
+      else { var n = alleP.filter(function (p) { return self.lebend(p) && self.wert(p.id, 'orgId', p.orgId) === x.id; }).length; unter = self.wert(x.id, 'art', x.art) + ' · ' + n + (n === 1 ? ' Person' : ' Personen') + (pruef ? ' · ' + x.grund : ''); }
       return { titel: self.wert(x.id, 'name', x.name), ueber: self.wert(x.id, 'ueber', x.ueber), unter: unter,
-        unterStil: istP && x.tage >= 30 ? 'color: var(--ink-faint)' : '',
+        unterStil: '',
         pruef: pruef, normal: !pruef, aktiv: aktiv ? 'true' : 'false',
         gewaehlt: P.pruefIstGewaehlt(x.id), waehlen: P.pruefWaehle(x.id),
-        los: function () { var s = { merge: null, mWahl: null, kcOffen: false }; if (istP) s.sel = x.id; else s.oSel = x.id; self.setState(s); } };
+        los: function () { var s = { zu: false, merge: null, mWahl: null, kcOffen: false }; if (istP) s.sel = x.id; else s.oSel = x.id; self.setState(s); } };
     });
-    var orgNamen = ['–'].concat(alleO.filter(function (o) { return self.lebend(o); }).map(function (o) { return self.wert(o.id, 'name', o.name); }));
+    var orgNamen = [{ id: '', name: '–' }].concat(alleO.filter(function (o) { return self.lebend(o); }).map(function (o) { return { id: o.id, name: self.wert(o.id, 'name', o.name) }; }));
 
     // ——— Person ———
     var p = istP ? this.aktPerson() : null, pv = {};
@@ -103,17 +89,18 @@ class Component extends DCLogic {
         { monat: 'September 2026', datum: '29.09.', art: 'Mail', text: 'Pitchdeck-Entwurf (ohne Finanzteil)', quelle: 'Mail', herkunft: 'Eingang' },
         { monat: 'September 2026', datum: '28.09.', art: 'Mail', text: 'Lisa (gmx): Kurze Frage zum Termin', quelle: 'Mail', herkunft: 'Eingang' },
         { monat: 'September 2026', datum: '24.09.', art: 'Mail', text: 'EXIST-Merkblatt an Lisa', quelle: 'Mail', herkunft: 'aus Outlook' },
-        { monat: 'September 2026', datum: '21.09.', art: 'Mail', text: 'Mail von Julia an Lisa Meier · Inhalt nur für Julia', privat: true },
+        { monat: 'September 2026', datum: '21.09.', art: 'Mail', text: 'Mail von Julia an Lisa Meier · Inhalt nur für Julia', privat: true, privatFuer: 'Julia' },
         { monat: 'September 2026', datum: '12.09.', art: 'Mail', text: 'Fragen zum Gründungsstipendium', quelle: 'Mail', herkunft: 'Eingang' }
-      ] : [{ monat: 'September 2026', datum: p.tage === 0 ? '30.09.' : 'vor ' + p.tage + ' T.', art: p.letzter.split('· ')[1] || 'Mail', text: 'Letzter Kontakt', quelle: p.letzter.split(' · ')[1] || 'Mail' }];
-      var vgs = this.vorgaengeFuer(this.wert(p.id, 'org', p.org));
+      ] : [{ monat: 'September 2026', datum: p.tage === 0 ? '30.09.' : 'vor ' + p.tage + ' Tagen', art: p.letzter.split('· ')[1] || 'Mail', text: 'Letzter Kontakt', quelle: p.letzter.split(' · ')[1] || 'Mail' }];
+      var vgs = this.vorgaengeFuer(this.wert(p.id, 'orgId', p.orgId));
       pv = {
         f: this.feld(p.id, p, 'Kontakt'),
-        name: this.wert(p.id, 'name', p.name), rolle: this.wert(p.id, 'rolle', p.rolle), org: this.wert(p.id, 'org', p.org),
+        name: this.wert(p.id, 'name', p.name), rolle: this.wert(p.id, 'rolle', p.rolle), orgId: this.wert(p.id, 'orgId', p.orgId) || '',
+        notizFokus: function () { try { document.getElementById('k-notiz').focus(); } catch (e) {} },
         telefon: this.wert(p.id, 'telefon', p.telefon || ''), notiz: this.wert(p.id, 'notiz', p.notiz || ''),
         ueber: this.wert(p.id, 'ueber', p.ueber), ueberBerechnet: p.mails,
         letzter: p.letzter, letzterStil: p.tage >= 30 ? 'color: var(--attention)' : '',
-        zurOrg: function () { var n = self.wert(p.id, 'org', p.org); var o = alleO.filter(function (o) { return self.wert(o.id, 'name', o.name) === n; })[0]; if (o) self.setState({ ansicht: 'Organisationen', oSel: o.id, filter: 'alle', merge: null }); },
+        zurOrg: function () { var n = self.wert(p.id, 'orgId', p.orgId); var o = alleO.filter(function (o) { return o.id === n; })[0]; if (o) self.setState({ ansicht: 'Organisationen', oSel: o.id, filter: 'alle', merge: null }); },
         adressen: adr.map(function (a, i) {
           return { adresse: a.adresse, info: a.info || 'von Hand', htmlId: 'k-adr-' + i,
             fokus: function (e) { self._adrAlt = adr; },
@@ -124,6 +111,11 @@ class Component extends DCLogic {
         adresseDazu: function () { setAdr(adr.concat([{ adresse: '', info: 'neu · von Hand' }]), 'Adresszeile ergänzt – jetzt eintippen'); },
         vorgaenge: vgs, vorgaengeAnzahl: vgs.length, keineVorgaenge: vgs.length === 0,
         verlauf: verlauf,
+        listen: self.wert(p.id, 'listen', LS[p.id] || []).map(function (l) { var cur = self.wert(p.id, 'listen', LS[p.id] || []); return { name: l, wegLabel: 'Aus Liste entfernen: ' + l, weg: function () { self.aendere([{ id: p.id, feld: 'listen', wert: cur.filter(function (y) { return y !== l; }), basis: LS[p.id] || [] }], 'Aus „' + l + '“ entfernt'); } }; }),
+        listenMoeglich: self.alleListen().filter(function (l) { return self.wert(p.id, 'listen', LS[p.id] || []).indexOf(l) < 0; }),
+        listeDazu: function (e) { var l = e.target.value; if (!l) return; self.aendere([{ id: p.id, feld: 'listen', wert: self.wert(p.id, 'listen', LS[p.id] || []).concat([l]), basis: LS[p.id] || [] }], 'Zu „' + l + '“ hinzugefügt'); },
+        telHref: 'tel:' + String(self.wert(p.id, 'telefon', p.telefon || '')).replace(/\s/g, ''), hatTel: !!self.wert(p.id, 'telefon', p.telefon || ''),
+        anrufen: function () { self.aendere([], 'Anruf über dein Telefon – danach fragt Kollege „Was kam raus?“', true); },
         loeschen: function () { self.aendere([{ id: p.id, feld: 'geloescht', wert: true, basis: false }], 'Gelöscht: ' + self.wert(p.id, 'name', p.name)); },
         istUngeprueft: ung(p), grund: p.grund || '', quelle: p.quelle || '',
         uebernehmen: function () { self.aendere([{ id: p.id, feld: 'geprueft', wert: 'ok', basis: '' }], 'Übernommen: ' + p.name); },
@@ -134,11 +126,14 @@ class Component extends DCLogic {
     var o = !istP ? alleO.filter(function (x) { return x.id === st.oSel && self.lebend(x); })[0] : null, ov = {};
     if (o) {
       var oname = this.wert(o.id, 'name', o.name);
-      var leute = alleP.filter(function (x) { return self.lebend(x) && self.wert(x.id, 'org', x.org) === oname; });
-      var ovg = this.vorgaengeFuer(oname);
+      var leute = alleP.filter(function (x) { return self.lebend(x) && self.wert(x.id, 'orgId', x.orgId) === o.id; });
+      var ovg = this.vorgaengeFuer(o.id);
       ov = {
         f: this.feld(o.id, o, 'Organisation'),
-        name: oname, art: this.wert(o.id, 'art', o.art), web: this.wert(o.id, 'web', o.web || ''), ort: this.wert(o.id, 'ort', o.ort || ''), ueber: this.wert(o.id, 'ueber', o.ueber), notiz: this.wert(o.id, 'notiz', o.notiz || ''),
+        name: oname, art: this.wert(o.id, 'art', o.art), web: this.wert(o.id, 'web', o.web || ''), ort: this.wert(o.id, 'ort', o.ort || ''), telefon: this.wert(o.id, 'telefon', o.telefon || ''), mail: this.wert(o.id, 'mail', o.mail || ''),
+        verlauf: leute.slice().sort(function (a, b) { return (a.tage || 0) - (b.tage || 0); }).map(function (x) { return { monat: 'September 2026', datum: x.tage === 0 ? 'heute' : 'vor ' + x.tage + (x.tage === 1 ? ' Tag' : ' Tagen'), art: (x.letzter || '').split(' · ')[1] || 'Mail', text: self.wert(x.id, 'name', x.name) + ': letzter Kontakt', quelle: (x.letzter || '').split(' · ')[1] || '' }; }),
+        keinVerlauf: leute.length === 0,
+        loeschen: function () { self.setState({ oSel: null }); self.aendere([{ id: o.id, feld: 'geloescht', wert: true, basis: false }], 'Gelöscht: ' + oname + (leute.length ? ' – ' + leute.length + (leute.length === 1 ? ' Person bleibt' : ' Personen bleiben') + ' ohne Organisation erhalten' : '')); }, ueber: this.wert(o.id, 'ueber', o.ueber), notiz: this.wert(o.id, 'notiz', o.notiz || ''),
         personen: leute.map(function (x) { return { name: self.wert(x.id, 'name', x.name), rolle: self.wert(x.id, 'rolle', x.rolle), ueber: self.wert(x.id, 'ueber', x.ueber), los: function () { self.setState({ ansicht: 'Personen', sel: x.id, filter: 'alle', merge: null }); } }; }),
         personenAnzahl: leute.length, vorgaenge: ovg, keineVorgaenge: ovg.length === 0,
         istTeam: this.wert(o.id, 'art', o.art) === 'Gründungsteam',
@@ -147,47 +142,70 @@ class Component extends DCLogic {
         verwerfen: function () { self.aendere([{ id: o.id, feld: 'geprueft', wert: 'weg', basis: '' }], 'Verworfen: ' + o.name); }
       };
     }
-    // ——— Zusammenführen ———
-    var kand = [];
-    if (p) {
-      var nm = this.wert(p.id, 'name', p.name).split(' ').pop().toLowerCase().replace('meyer', 'meier');
-      kand = alleP.filter(function (x) { return x.id !== p.id && self.lebend(x) && (self.wert(x.id, 'name', x.name).toLowerCase().replace('meyer', 'meier').indexOf(nm) >= 0); });
-      if (!kand.length) kand = alleP.filter(function (x) { return x.id !== p.id && self.lebend(x) && ung(x); }).slice(0, 2);
+    // ——— Zusammenführen: Kandidaten, Vorschau, Konflikte feldweise (Personen und Organisationen) ———
+    var ziel = istP ? p : o, kand = [];
+    var alleZ = istP ? alleP : alleO;
+    if (ziel) {
+      var nm = this.wert(ziel.id, 'name', ziel.name).split(' ')[istP ? this.wert(ziel.id, 'name', ziel.name).split(' ').length - 1 : 0].toLowerCase().replace('meyer', 'meier');
+      kand = alleZ.filter(function (x) { return x.id !== ziel.id && self.lebend(x) && (self.wert(x.id, 'name', x.name).toLowerCase().replace('meyer', 'meier').indexOf(nm) >= 0); });
+      if (!kand.length) kand = alleZ.filter(function (x) { return x.id !== ziel.id && self.lebend(x) && ung(x); }).slice(0, 2);
     }
-    var grundFuer = function (x) { return x.id === 'lmeier2' ? 'wahrscheinlich dieselbe Person: gleicher Nachname, Domain ähnlich wie Solaro' : x.id === 'lmeyer' ? 'eher eine andere Person: andere Schreibweise, Studierendenadresse' : 'keine Gemeinsamkeit erkannt – nur wählen, wenn du sicher bist'; };
-    var w = st.mWahl ? alleP.filter(function (x) { return x.id === st.mWahl; })[0] : null;
+    var grundFuer = function (x) { return x.id === 'lmeier2' ? 'wahrscheinlich dieselbe Person: gleicher Nachname, Domain ähnlich wie Solaro' : x.id === 'lmeyer' ? 'eher eine andere Person: andere Schreibweise, Studierendenadresse' : x.id === 'solaro2' ? 'wahrscheinlich dieselbe Organisation: gleicher Name, Termine mit Lisa Meier' : 'keine Gemeinsamkeit erkannt – nur wählen, wenn du sicher bist'; };
+    var w = st.mWahl ? alleZ.filter(function (x) { return x.id === st.mWahl; })[0] : null;
+    var FELDER = istP ? [['rolle', 'Rolle'], ['orgId', 'Organisation'], ['telefon', 'Telefon']] : [['art', 'Art'], ['web', 'Website'], ['ort', 'Ort'], ['telefon', 'Telefon']];
+    var anzeige = function (x, f) { var v = self.wert(x.id, f, x[f]); return f === 'orgId' ? self.orgName(x) : (v || ''); };
+    var konflikte = w && ziel ? FELDER.filter(function (f) { var a = anzeige(ziel, f[0]), b = anzeige(w, f[0]); return a && b && a !== '–' && b !== '–' && a !== b; }).map(function (f) {
+      var nimmB = st.mKonf[f[0]] === 'b';
+      var setze = function (wert) { return function () { var m = Object.assign({}, self.state.mKonf); m[f[0]] = wert; self.setState({ mKonf: m }); }; };
+      return { feld: f[0], label: f[1], name: 'konf-' + f[0], a: anzeige(ziel, f[0]), b: anzeige(w, f[0]), aGewaehlt: !nimmB, bGewaehlt: nimmB, waehleA: setze('a'), waehleB: setze('b'), idA: 'konf-' + f[0] + '-a', idB: 'konf-' + f[0] + '-b' };
+    }) : [];
+    var leuteVon = function (x) { return alleP.filter(function (y) { return self.lebend(y) && self.wert(y.id, 'orgId', y.orgId) === x.id; }); };
+    var mPunkte = !w || !ziel ? [] : istP
+      ? ['„' + w.name + '“ wird Teil von ' + this.wert(ziel.id, 'name', ziel.name), 'Adresse ' + w.adressen[0].adresse + ' kommt dazu', w.adressen[0].info + ' hängen danach an ' + this.wert(ziel.id, 'name', ziel.name), 'Rückgängig bleibt möglich']
+      : ['„' + w.name + '“ wird Teil von ' + this.wert(ziel.id, 'name', ziel.name), leuteVon(w).length + (leuteVon(w).length === 1 ? ' Person wechselt' : ' Personen wechseln') + ' zu ' + this.wert(ziel.id, 'name', ziel.name) + (leuteVon(w).length ? ': ' + leuteVon(w).map(function (y) { return y.name; }).join(', ') : ''), 'Bereiche und Verlauf hängen danach an ' + this.wert(ziel.id, 'name', ziel.name), 'Rückgängig bleibt möglich'];
     var fl = function (label, key) { return { label: label, an: st.filter === key ? 'true' : 'false', los: function () { self.setState({ filter: key, pAuswahl: {}, pAlle: false }); } }; };
-    return Object.assign(this.kcVals(), this.toastVals(), P, {
+    return Object.assign(this.kcVals(), this.toastVals(), this.detailVals(), P, {
       sidebarChats: this.kgChats(),
       zaehler: pruef ? P.pruefGesamt + ' ungeprüft' : zeilen.length + (istP ? ' Personen' : ' Organisationen'),
-      ansichten: ['Personen', 'Organisationen'], ansicht: st.ansicht, setAnsicht: function (x) { self.setState({ ansicht: x, filter: 'alle', merge: null, pAuswahl: {}, pAlle: false }); },
+      ansichten: ['Personen', 'Organisationen'], ansicht: st.ansicht, setAnsicht: function (x) { self.setState({ ansicht: x, filter: 'alle', merge: null, pAuswahl: {}, pAlle: false, sortierung: 'Name A–Z', tSort: null, liste: 'Alle Listen' }); },
       suche: st.suche, sucheTippen: function (e) { self.setState({ suche: e.target.value }); },
-      filter: (istP ? [fl('alle', 'alle'), fl('Gründer:in', 'Gründer:in'), fl('Partner', 'Partner'), fl('Mentor:in', 'Mentor:in')] : [fl('alle', 'alle'), fl('Gründungsteam', 'Gründungsteam'), fl('Partner', 'Partner')]).concat([fl('ungeprüft · ' + P.pruefGesamt, 'ungeprüft')]),
+      filter: [fl('alle', 'alle')].concat((istP ? ['Gründer:in', 'Mentor:in', 'Partner', 'Referent:in', 'Uni-intern', 'Sonstige'] : ['Gründungsteam', 'Partner', 'Mentor:in', 'Uni-intern', 'Sonstige']).map(function (r) { return fl(r, r); })).concat([fl('Dubletten?', 'Dubletten?'), fl('ungeprüft · ' + P.pruefGesamt, 'ungeprüft')]),
+      istPersonen: istP,
       pruefModus: pruef,
-      kopfZeile: !pruef && zeilen.length > 0, spalteLinks: istP ? 'Name' : 'Organisation',
+      listenOptionen: ['Alle Listen'].concat(this.alleListen()), listeWahl: st.liste, setListe: function (e) { self.setState({ liste: e.target.value }); },
+      sortierungen: istP ? ['Name A–Z', 'Zuletzt kontaktiert', 'Organisation'] : ['Name A–Z', 'Art'], sortierung: st.sortierung, setSortierung: function (e) { self.setState({ sortierung: e.target.value, tSort: null }); },
+      tabelleKopf: tabelleKopf,
+      tabelleRaster: istP ? 'grid-template-columns: 1.3fr 1fr 0.8fr 1.5fr 1fr 0.8fr 0.9fr 1fr' : 'grid-template-columns: 1.3fr 1fr 1.2fr 1fr 1fr',
+      tabelle: tabelle, istTabelle: !!st.zu && !pruef, istZeilen: !st.zu || pruef,
+      importExport: function (e) { var w = e.target.value; if (!w) return; self.aendere([], w === 'csv-export' ? 'Export: ' + zeilen.length + ' Kontakte als CSV (aktuelle Filter)' : w === 'vcf' ? 'vCard-Import: 3 neue Kontakte – als „ungeprüft“ angelegt' : 'CSV-Import: Spalten zuordnen, dann prüfen', true); },
+      kopfZeile: !pruef && zeilen.length > 0 && !st.zu, spalteLinks: istP ? 'Name' : 'Organisation',
       zeilen: zeilen, keine: zeilen.length === 0,
       neu: function () {
         var id = 'n' + Date.now();
-        if (istP) { var np = { id: id, name: 'Neuer Kontakt', rolle: 'Gründer:in', org: '–', tage: 0, letzter: 'noch keiner', ueber: 'Andreas', mails: 'noch keine Mails', adressen: [{ adresse: '', info: 'neu · von Hand' }] };
-          self.setState({ sel: id, filter: 'alle', merge: null }); self.aendere([{ id: '_neu', feld: 'personen', wert: [np].concat(self.wert('_neu', 'personen', [])), basis: [] }], 'Kontakt angelegt – Name oben ändern'); }
+        if (istP) { var np = { id: id, name: 'Neuer Kontakt', rolle: 'Gründer:in', orgId: '', tage: 0, letzter: 'noch keiner', ueber: 'Andreas', mails: 'noch keine Mails', adressen: [{ adresse: '', info: 'neu · von Hand' }] };
+          self.setState({ zu: false, sel: id, filter: 'alle', suche: '', liste: 'Alle Listen', merge: null }); self.aendere([{ id: '_neu', feld: 'personen', wert: [np].concat(self.wert('_neu', 'personen', [])), basis: [] }], 'Kontakt angelegt – Name oben ändern'); }
         else { var no = { id: id, name: 'Neue Organisation', art: 'Gründungsteam', web: '', ort: '', ueber: 'Andreas' };
-          self.setState({ oSel: id, filter: 'alle', merge: null }); self.aendere([{ id: '_neu', feld: 'orgs', wert: [no].concat(self.wert('_neu', 'orgs', [])), basis: [] }], 'Organisation angelegt – Name oben ändern'); }
+          self.setState({ zu: false, oSel: id, filter: 'alle', suche: '', merge: null }); self.aendere([{ id: '_neu', feld: 'orgs', wert: [no].concat(self.wert('_neu', 'orgs', [])), basis: [] }], 'Organisation angelegt – Name oben ändern'); }
       },
       zeigePerson: !!p, p: pv, zeigeOrg: !!o, o: ov, nichtsOffen: istP ? !p : !o,
       rollen: ['Gründer:in', 'Mentor:in', 'Partner', 'Referent:in', 'Uni-intern', 'Sonstige'], orgArten: ['Gründungsteam', 'Partner', 'Mentor:in', 'Uni-intern', 'Sonstige'],
       orgNamen: orgNamen, ueberOptionen: ['Andreas', 'Julia', 'Mehmet', 'StartHub-Postfach'],
       mOffen: !!st.merge, mSuche: st.merge === 'suche', mVorschau: st.merge === 'vorschau' && !!w,
-      mTitel: istP ? (p ? 'Mit ' + this.wert(p.id, 'name', p.name) + ' zusammenführen' : '') : (o ? 'Mit ' + this.wert(o.id, 'name', o.name) + ' zusammenführen' : ''),
-      mergeAuf: function () { self.setState({ merge: 'suche', mWahl: null }); },
+      mTitel: ziel ? 'Mit ' + this.wert(ziel.id, 'name', ziel.name) + ' zusammenführen' : '', mFrage: istP ? 'Wer ist dieselbe Person? Kollege schlägt vor, du entscheidest.' : 'Welche Organisation ist dieselbe? Kollege schlägt vor, du entscheidest.',
+      konflikte: konflikte, hatKonflikte: konflikte.length > 0, keineKandidaten: kand.length === 0,
+      mergeAuf: function () { self.setState({ merge: 'suche', mWahl: null, mKonf: {} }); },
       mergeZu: function () { self.setState({ merge: null, mWahl: null }); },
       mergeZurueck: function () { self.setState({ merge: 'suche', mWahl: null }); },
-      kandidaten: kand.map(function (x) { return { name: self.wert(x.id, 'name', x.name), adresse: self.wert(x.id, 'adressen', x.adressen)[0].adresse, umfang: x.adressen[0].info, grund: grundFuer(x), waehlen: function () { self.setState({ merge: 'vorschau', mWahl: x.id }); } }; }),
-      mPunkte: w && p ? ['„' + w.name + '“ wird Teil von ' + this.wert(p.id, 'name', p.name), 'Adresse ' + w.adressen[0].adresse + ' kommt dazu', w.adressen[0].info + ' hängen danach an ' + this.wert(p.id, 'name', p.name), 'Rückgängig bleibt möglich'] : [],
+      kandidaten: kand.map(function (x) { return { name: self.wert(x.id, 'name', x.name), adresse: istP ? self.wert(x.id, 'adressen', x.adressen)[0].adresse : (x.web || ''), umfang: istP ? x.adressen[0].info : leuteVon(x).length + (leuteVon(x).length === 1 ? ' Person' : ' Personen'), grund: grundFuer(x), waehlen: function () { self.setState({ merge: 'vorschau', mWahl: x.id }); } }; }),
+      mPunkte: mPunkte,
       mergeLos: function () {
-        if (!w || !p) return;
-        var adr = self.wert(p.id, 'adressen', p.adressen);
-        self.setState({ merge: null, mWahl: null });
-        self.aendere([{ id: w.id, feld: 'zusammengefuehrt', wert: true, basis: false }, { id: p.id, feld: 'adressen', wert: adr.concat([{ adresse: w.adressen[0].adresse, info: 'übernommen von „' + w.name + '“' }]), basis: p.adressen }], 'Zusammengeführt: ' + w.name + ' → ' + self.wert(p.id, 'name', p.name));
+        if (!w || !ziel) return;
+        var ch = [{ id: w.id, feld: 'zusammengefuehrt', wert: true, basis: false }];
+        konflikte.forEach(function (k) { if (self.state.mKonf[k.feld] === 'b') ch.push({ id: ziel.id, feld: k.feld, wert: self.wert(w.id, k.feld, w[k.feld]), basis: ziel[k.feld] }); });
+        if (istP) { var adr = self.wert(ziel.id, 'adressen', ziel.adressen); ch.push({ id: ziel.id, feld: 'adressen', wert: adr.concat([{ adresse: w.adressen[0].adresse, info: 'übernommen von „' + w.name + '“' }]), basis: ziel.adressen }); }
+        else leuteVon(w).forEach(function (y) { ch.push({ id: y.id, feld: 'orgId', wert: ziel.id, basis: y.orgId }); });
+        self.setState({ merge: null, mWahl: null, mKonf: {} });
+        self.aendere(ch, 'Zusammengeführt: ' + w.name + ' → ' + self.wert(ziel.id, 'name', ziel.name));
       }
     });
   }

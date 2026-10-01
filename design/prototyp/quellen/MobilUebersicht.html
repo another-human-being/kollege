@@ -2,17 +2,15 @@ Heute mobil|390|844|.kg-klaerung .kg-aktionen{gap:8px}.kg-hinweis{grid-template-
 <div style="height: 844px; display: flex; flex-direction: column">
 <header style="display: flex; align-items: baseline; justify-content: space-between; padding: 16px 16px 12px; border-bottom: 1px solid var(--rule)">
 <span style="font-weight: 600">Kollege</span>
-<a href="MobilEingabe.dc.html" style="font-size: 14px; color: var(--ink-muted); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center">Chats</a>
+<a href="MobilEingabe.dc.html" style="font-size: 14px; color: var(--ink-muted); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center">+ Neuer Chat</a>
 </header>
 <div style="flex-grow: 1; overflow-y: auto; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 32px">
 <a href="MobilNachgespraech.dc.html" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 8px 12px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink)">
 <span style="display: flex; flex-direction: column"><span style="font-size: 14px"><strong style="font-weight: 500">Beratung Kitchen Loop</strong> vorbei</span><span class="mono">heute 10:00–10:45 · Sara Yilmaz, Ben Hofer</span></span>
-<span style="font-size: 14px; color: var(--attention); white-space: nowrap">Was kam raus? →</span>
+<span style="font-size: 14px; color: var(--accent); white-space: nowrap">Was kam raus? →</span>
 </a>
-<div style="display: flex; justify-content: space-between; align-items: baseline">
-<span style="font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted)">Mi 30.09.</span>
-<x-import component-from-global-scope="Kollege.Umschalter" label="Wessen Aufgaben"></x-import>
-</div>
+<h1 class="kg-sr">Heute</h1>
+<span style="font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted)">Mi 30.09. · deine Hinweise</span>
 <section class="kg-abschnitt" aria-label="Kurz klären">
 <div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Kurz klären</h2><span class="kg-abschnitt-zahl">1</span></div>
 <x-import component-from-global-scope="Kollege.Klaerung" frage="Ist „Lisa“ (l.meier@gmx.de) Lisa Meier von Solaro?" grund="Signatur „Lisa – Solaro“" quelle="Mail 28.09." antworten="{{antworten}}"></x-import>
@@ -35,7 +33,7 @@ Heute mobil|390|844|.kg-klaerung .kg-aktionen{gap:8px}.kg-hinweis{grid-template-
 </article>
 </section>
 <section class="kg-abschnitt" aria-label="Wir warten auf">
-<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Wir warten auf</h2><span class="kg-abschnitt-zahl">2</span></div>
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Wir warten auf</h2><span class="kg-abschnitt-zahl">1</span></div>
 <article class="kg-hinweis">
 <div class="kg-hinweis-zeit">bis Fr</div>
 <div class="kg-hinweis-body">
@@ -45,14 +43,24 @@ Heute mobil|390|844|.kg-klaerung .kg-aktionen{gap:8px}.kg-hinweis{grid-template-
 <div class="kg-aktionen kg-hinweis-aktionen"><a class="kg-aktion kg-aktion--sekundaer" href="Mail.dc.html">Entwurf ansehen</a></div>
 </div>
 </article>
+</section>
+<details class="kg-abschnitt">
+<summary class="kg-abschnitt-kopf" style="cursor: pointer; min-height: 44px; align-items: center"><span class="kg-abschnitt-titel">Im Team</span><span class="kg-abschnitt-zahl">2</span><span class="kg-abschnitt-aside">nur, was eine Handlung braucht</span></summary>
 <article class="kg-hinweis">
-<div class="kg-hinweis-zeit">seit 9 T.</div>
+<div class="kg-hinweis-zeit">seit 9 Tagen</div>
 <div class="kg-hinweis-body">
-<div class="kg-hinweis-titel">Frau Weber hat nicht auf die <strong>Juryanfrage</strong> geantwortet.</div>
-<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung">Jury wird knapp, falls sie absagt</x-import>
+<div class="kg-hinweis-titel">Pitch-Abend: <strong>Jury unvollständig</strong> – Frau Weber hat nicht geantwortet. <span class="mono">Julia</span></div>
+<x-import component-from-global-scope="Kollege.Aussage" art="berechnet">zugesagte Antwort seit 5 Tagen überfällig</x-import>
 </div>
 </article>
-</section>
+<article class="kg-hinweis">
+<div class="kg-hinweis-zeit">seit 25 Tagen</div>
+<div class="kg-hinweis-body">
+<div class="kg-hinweis-titel">Rückblick Sommerfest: <strong>Entwurf liegt</strong>. <span class="mono">Mehmet</span></div>
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung">vermutlich zurückgestellt wegen Pitch-Abend</x-import>
+</div>
+</article>
+</details>
 </div>
 <div style="padding: 12px 16px 24px; border-top: 1px solid var(--rule); background: var(--paper)">
 <a href="MobilEingabe.dc.html" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; box-sizing: border-box; padding: 8px 8px 8px 16px; border: 1px solid var(--line-control); border-radius: 4px; background: var(--paper-sunk); color: var(--ink-muted); text-decoration: none; font-size: 17px">

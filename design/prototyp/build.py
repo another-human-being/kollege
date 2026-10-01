@@ -12,7 +12,7 @@ NAV = [('Main.dc.html', 'heute', 'main'), ('Chat.dc.html', 'chat', 'chat'),
        ('Einstellungen.dc.html', '+ Bereich', 'plus'),
        ('#', '', None),
        ('Einstellungen.dc.html', 'einstellungen', 'einstellungen')]
-ZAHLEN = {'mail': '4'}
+ZAHLEN = {}
 # Bereich-Vorlage: eine Quelle (Bereich.html/.js), vier Artboards
 BEREICHE = {'Gruendungsteams': ('gruendungsteams', 'Gründungsteams'), 'Events': ('events', 'Events'), 'Lehre': ('lehre', 'Lehre'), 'SocialMedia': ('socialmedia', 'Social Media')}
 
@@ -36,7 +36,7 @@ def side(active):
     return """<aside style="width: 264px; flex-shrink: 0; box-sizing: border-box; height: 100%; border-right: 1px solid var(--rule); padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto">
 <div style="font-weight: 600; padding: 0 8px">Kollege</div>
 """ + nav_html(active) + """
-<x-import component-from-global-scope="Kollege.ChatListe" chats="{{sidebarChats}}" neu-href="Main.dc.html"></x-import>
+<div style="padding: 0 8px"><a class="kg-aktion kg-aktion--sekundaer" href="Chat.dc.html" style="display: flex; justify-content: center">+ Neuer Chat</a></div>
 <div style="margin-top: auto; font-size: 13px; color: var(--ink-muted); padding: 0 8px">@@WER@@ · Gründungszentrum</div>
 </aside>
 <div style="flex-grow: 1; min-width: 0; height: 100%; position: relative; overflow: hidden">
@@ -72,8 +72,8 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{{text-decoration:none}}
 .kg-seitennav a:hover{{color:var(--ink)}}
 .kg-seitennav a[aria-current="page"]{{color:var(--ink);background:var(--paper-sunk)}}
 .nav-luecke{{display:block;height:12px}}
-.nav-gruppe{{display:block;padding:14px 8px 4px;font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}}
-.kg-seitennav a.nav-plus{{color:var(--ink-faint);font-size:13px}}
+.nav-gruppe{{display:block;padding:14px 8px 4px;font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}}
+.kg-seitennav a.nav-plus{{color:var(--ink-muted);font-size:13px}}
 .h1{{margin:0;font-size:28px;line-height:34px;font-weight:500;letter-spacing:-0.01em}}
 .label{{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}}
 .mono{{font-family:var(--font-mono);font-size:12px;line-height:16px;color:var(--ink-muted)}}

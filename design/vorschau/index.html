@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kollege – Komponenten</title>
+<link rel="stylesheet" href="../design-system/tokens.css">
+<link rel="stylesheet" href="../design-system/components/bundle.css">
+<style>
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans)}
+header{position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--rule);padding:12px 24px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;z-index:2}
+header b{font-weight:600} header nav{font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);flex:1} header nav a{color:inherit}
+main{max-width:880px;padding:24px;margin:0 auto}
+section{padding-block:24px;border-bottom:1px solid var(--rule)}
+h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.sum{font-size:13px;color:var(--ink-muted);margin:0 0 12px}
+</style>
+</head>
+<body class="kg">
+<header><b>Kollege · Komponenten</b><nav><a href="#Cover">Cover</a> · <a href="#Eingabe">Eingabe</a> · <a href="#Nachricht">Nachricht</a> · <a href="#Karte">Karte</a> · <a href="#Aussage">Aussage</a> · <a href="#Quelle">Quelle</a> · <a href="#Bezug">Bezug</a> · <a href="#Privat">Privat</a> · <a href="#Wissensluecke">Wissensluecke</a> · <a href="#Hinweis">Hinweis</a> · <a href="#Abschnitt">Abschnitt</a> · <a href="#Entwurf">Entwurf</a> · <a href="#Klaerung">Klaerung</a> · <a href="#Zusage">Zusage</a> · <a href="#Verlauf">Verlauf</a> · <a href="#Anweisung">Anweisung</a> · <a href="#ChatListe">ChatListe</a> · <a href="#Etikett">Etikett</a> · <a href="#Aktion">Aktion</a> · <a href="#Umschalter">Umschalter</a> · <a href="#Leer">Leer</a> · <a href="#Laden">Laden</a> · <a href="#Navigation">Navigation</a> · <a href="#Quittung">Quittung</a></nav><button type="button" class="kg-aktion kg-aktion--sekundaer" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">Hell/Dunkel</button></header>
+<main>
+<p class="sum">Lokale Vorschau aller Bausteine. Lädt tokens.css, bundle.css und bundle.js aus <code>../design-system/</code>; React 18 kommt vom CDN (cdnjs). Einfach im Browser öffnen.</p>
+<section id="Cover"><h2>Cover</h2><div style="overflow-x:auto"><style>
+
+.cv{position:relative;width:960px;height:288px;overflow:hidden;background:var(--paper)}
+.cv svg{position:absolute;inset:0}
+.ink{fill:var(--ink)}.acc{fill:var(--accent)}.soft{fill:var(--accent-soft)}.att{fill:var(--attention)}
+.hair{stroke:var(--line-control);stroke-width:1}
+.tile{rx:var(--radius-2)}
+.txt{position:absolute;left:40px;bottom:32px;max-width:440px}
+.name{font-family:var(--font-sans);font-weight:600;font-size:100px;line-height:.92;letter-spacing:-0.03em;color:var(--ink);margin:0}
+.tag{font-family:var(--font-sans);font-size:14px;line-height:20px;color:var(--ink-muted);margin:16px 0 0}
+</style>
+<div class="cv">
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+<!--
+  blocks: ink 192×312 (bleeds top) · accent 120×144 · accent-soft 120×168 (bleeds top/right) · attention 48×48 — sides are 24px multiples (body line height), corners radius-0, one block radius-2
+  arrangement: flush modular grid on the 24px baseline, one tall slab with satellites, weighted to ink (the brand is ink on paper)
+  pattern row: editorial, "borders not shadows", hairline rules = ruled logbook paper; four line-control hairlines on the 24px grid pass behind the blocks
+  steps/radii: space-5 (24) pitch, space-7 (72) offsets, col-date (96) gap rhythm, radius-0 / radius-2
+-->
+<line class="hair" x1="480" y1="48.5" x2="960" y2="48.5"/>
+<line class="hair" x1="480" y1="120.5" x2="960" y2="120.5"/>
+<line class="hair" x1="480" y1="192.5" x2="960" y2="192.5"/>
+<line class="hair" x1="480" y1="264.5" x2="960" y2="264.5"/>
+<rect class="ink" x="504" y="-24" width="192" height="312"/>
+<rect class="acc" x="720" y="72" width="120" height="144"/>
+<rect class="soft tile" x="864" y="-24" width="120" height="168"/>
+<rect class="att" x="864" y="168" width="48" height="48"/>
+</svg>
+<div class="txt"><p class="name">Kollege</p><p class="tag">Schreibt mit, merkt sich, erinnert. Mit Quelle.</p></div>
+</div>
+</div></section>
+<section id="Eingabe"><h2>Eingabe</h2><p class="sum">Das zentrale Eingabefeld und zugleich der Chat: man schreibt in eigenen Worten, was passiert ist, fragt etwas oder gibt eine Anweisung. Wichtigste Bedienung der App.</p><div id="r_Eingabe" class="kg vorschau"></div></section>
+<section id="Nachricht"><h2>Nachricht</h2><p class="sum">Eine Zeile im Chat. Der Chat ist ein Logbuch: wer und wann links in der Zeitspalte, Text rechts.</p><div id="r_Nachricht" class="kg vorschau"></div></section>
+<section id="Karte"><h2>Karte</h2><p class="sum">Kompakte Quittung im Chat: was das System gerade im Record abgelegt hat – mit Link zum Vorgang und Rückgängig.</p><div id="r_Karte" class="kg vorschau"></div></section>
+<section id="Aussage"><h2>Aussage</h2><p class="sum">Eine Zeile Wissen mit sichtbarer Herkunftsart. Das Kernstück des Systems: jede Begründung eines Hinweises ist eine Aussage.</p><div id="r_Aussage" class="kg vorschau"></div></section>
+<section id="Quelle"><h2>Quelle</h2><p class="sum">Verweis auf den Beleg, aus dem eine Aussage stammt: Kanal + Datum, in Mono, gepunktet unterstrichen, öffnet den Beleg.</p><div id="r_Quelle" class="kg vorschau"></div></section>
+<section id="Bezug"><h2>Bezug</h2><p class="sum">Link auf eine Person, ein Team oder einen Vorgang mitten im Text – führt zur Detailseite.</p><div id="r_Bezug" class="kg vorschau"></div></section>
+<section id="Privat"><h2>Privat</h2><p class="sum">Kleines Schloss: Dieser Eintrag ist nur für dich sichtbar. Das einzige Piktogramm im System.</p><div id="r_Privat" class="kg vorschau"></div></section>
+<section id="Wissensluecke"><h2>Wissensluecke</h2><p class="sum">Ehrlicher Zustand statt geratener Antwort: „Dazu habe ich noch zu wenig Erfahrung.“</p><div id="r_Wissensluecke" class="kg vorschau"></div></section>
+<section id="Hinweis"><h2>Hinweis</h2><p class="sum">Ein Eintrag der Übersicht: was ansteht, warum, woher wir das wissen, und was das System anbietet.</p><div id="r_Hinweis" class="kg vorschau"></div></section>
+<section id="Abschnitt"><h2>Abschnitt</h2><p class="sum">Gliedert die Übersicht in „Heute“, „Wartet auf uns“, „Wir warten auf“, „Hängt“ – Versalien-Label, Zahl in Mono, Haarlinie.</p><div id="r_Abschnitt" class="kg vorschau"></div></section>
+<section id="Entwurf"><h2>Entwurf</h2><p class="sum">Alles, was die Organisation verlässt – Mail, Einladung, Post – erscheint nur als fertiger Entwurf mit „Ansehen“ und „Senden“.</p><div id="r_Entwurf" class="kg vorschau"></div></section>
+<section id="Klaerung"><h2>Klaerung</h2><p class="sum">Eine unsichere Zuordnung als konkrete Frage mit Antwortknöpfen. Erscheint direkt in der Übersicht (Abschnitt „Kurz klären“) und im Chat, wenn die Unsicherheit gerade entsteht – keine eigene Seite.</p><div id="r_Klaerung" class="kg vorschau"></div></section>
+<section id="Zusage"><h2>Zusage</h2><p class="sum">Eine offene Zusage – von uns oder vom Gegenüber – mit Frist und Quelle. Im Vorgang in zwei Spalten: „Wir“ und der Name der anderen Seite.</p><div id="r_Zusage" class="kg vorschau"></div></section>
+<section id="Verlauf"><h2>Verlauf</h2><p class="sum">Chronik eines Vorgangs, einer Person oder eines Teams: Datum, Art, ein Satz, Quelle. Neueste oben.</p><div id="r_Verlauf" class="kg vorschau"></div></section>
+<section id="Anweisung"><h2>Anweisung</h2><p class="sum">Eine Regel in Alltagssprache, die das System befolgt. Die Liste auf `/anweisungen` besteht nur aus diesen.</p><div id="r_Anweisung" class="kg vorschau"></div></section>
+<section id="ChatListe"><h2>ChatListe</h2><p class="sum">Seitenleiste mit dem Chatverlauf: „Neuer Chat“, Suche, angepinnte und frühere Chats.</p><div id="r_ChatListe" class="kg vorschau"></div></section>
+<section id="Etikett"><h2>Etikett</h2><p class="sum">Art eines Vorgangs als schlichtes Etikett: Beratung, Event, Beitrag, Lehre, Sonstiges. Auch für „Team“/„Persönlich“ bei Anweisungen.</p><div id="r_Etikett" class="kg vorschau"></div></section>
+<section id="Aktion"><h2>Aktion</h2><p class="sum">Knöpfe und Textaktionen. Vier Varianten, jede mit fester Bedeutung.</p><div id="r_Aktion" class="kg vorschau"></div></section>
+<section id="Umschalter"><h2>Umschalter</h2><p class="sum">Zwei bis drei gleichrangige Ansichten, z. B. „Meins / Team“ auf der Übersicht.</p><div id="r_Umschalter" class="kg vorschau"></div></section>
+<section id="Leer"><h2>Leer</h2><p class="sum">Leerer Zustand in Worten: ein Satz, was hier stehen würde, und wie es dahin kommt.</p><div id="r_Leer" class="kg vorschau"></div></section>
+<section id="Laden"><h2>Laden</h2><p class="sum">Laden als ehrlicher Text: was gerade gelesen wird und wie weit. Keine Spinner, keine Skelett-Blöcke.</p><div id="r_Laden" class="kg vorschau"></div></section>
+<section id="Navigation"><h2>Navigation</h2><p class="sum">Obere Leiste als Schrägstrich-Pfade: `/übersicht /vorgänge /personen /klärung 3 /anweisungen`.</p><div id="r_Navigation" class="kg vorschau"></div></section>
+<section id="Quittung"><h2>Quittung</h2><p class="sum">Antwort des Systems direkt nach einer Eingabe: was es verstanden hat, was es still erledigt hat, was es vorschlägt.</p><div id="r_Quittung" class="kg vorschau"></div></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="../design-system/components/bundle.js"></script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Eingabe')).render(h('div',{style:{display:'grid',gap:'24px'}},
+ h(K.Eingabe,{id:'e1'}),
+ h(K.Eingabe,{id:'e2',wert:'Gerade Beratung mit Solaro gehabt, sie schicken bis Freitag das Pitchdeck, wir vermitteln Kontakt zu Frau Weber.'}),
+ h(K.Eingabe,{id:'e3',zustand:'verarbeitet',wert:'Gerade Beratung mit Solaro gehabt, sie schicken bis Freitag das Pitchdeck, wir vermitteln Kontakt zu Frau Weber.'})));
+}catch(e){console.error("Eingabe",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Nachricht')).render(h('div',null,
+ h(K.Nachricht,{von:'du',zeit:'14:32'},'Gerade Beratung mit Solaro gehabt, sie schicken bis Freitag das Pitchdeck, wir vermitteln Kontakt zu Frau Weber.'),
+ h(K.Nachricht,{von:'kollege',zeit:'14:32'},'Verstanden: Beratung mit Solaro (Lisa Meier, Tom Kraus) zum EXIST-Antrag. Das Pitchdeck war eigentlich schon am 29.09. fällig ',h(K.Quelle,null,'Notiz 22.09.'),' – ich habe die Frist auf Freitag verschoben.'),
+ h(K.Nachricht,{von:'kollege',streamt:true},'Frau Weber ist vermutlich Anna Weber von der IHK Schwaben')));
+}catch(e){console.error("Nachricht",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Karte')).render(h('div',{style:{display:'grid',gap:'24px'}},
+ h(K.Karte,{zeit:'14:32',punkte:['Zusage bei Solaro eingetragen: Pitchdeck bis Fr 02.10.','Aufgabe für dich angelegt: Kontakt zu Frau Weber vermitteln'],linkText:'Zum Vorgang: Solaro – EXIST-Antrag',folgen:'entfernt auch 1 Aufgabe und 1 Erinnerung'}),
+ h(K.Karte,{art:'anweisung',geltung:'persoenlich',punkte:['„Hinweise zu Social Media nur montags.“'],linkText:'Zur Anweisungsliste'}),
+ h(K.Karte,{titel:'Erledigt',punkte:['Einladung zur Gründungsnacht als Entwurf vorbereitet'],anweisung:'Events: Einladung 4 Wochen vorher',linkText:'Zum Vorgang: Gründungsnacht 20.11.',zurueck:true})));
+}catch(e){console.error("Karte",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Aussage')).render(h('div',{style:{display:'grid',gap:'4px'}},
+ h(K.Aussage,{art:'belegt',quelle:'Mail 12.09.'},'Lisa Meier: „Pitchdeck schicken wir bis Freitag.“'),
+ h(K.Aussage,{art:'berechnet'},'seit 9 Tagen keine Antwort'),
+ h(K.Aussage,{art:'berechnet',dringend:true},'1 Tag überfällig'),
+ h(K.Aussage,{art:'einschaetzung'},'möglicherweise gefährdet – EXIST-Frist ist in 3 Wochen')));
+}catch(e){console.error("Aussage",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Quelle')).render(h('div',{style:{display:'flex',gap:'16px',flexWrap:'wrap',alignItems:'baseline'}},
+ h(K.Quelle,null,'Mail 12.09.'),h(K.Quelle,null,'Notiz Julia 24.09.'),h(K.Quelle,null,'Termin 20.11.'),h(K.Quelle,null,'Pitchdeck_v3.pdf'),
+ h('span',null,'Frau Weber ist Ansprechpartnerin bei der IHK ',h(K.Bezug,{art:'Person'},'Anna Weber'))));
+}catch(e){console.error("Quelle",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Bezug')).render(h('div',null,'Beratung mit ',h(K.Bezug,{art:'Team'},'Solaro'),' (',h(K.Bezug,{art:'Person'},'Lisa Meier'),', ',h(K.Bezug,{art:'Person'},'Tom Kraus'),') zu ',h(K.Bezug,{art:'Vorgang'},'EXIST-Antrag'),'.'));
+}catch(e){console.error("Bezug",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Privat')).render(h('div',{style:{display:'grid',gap:'8px'}},
+ h('div',null,h(K.Privat,{nurSymbol:true}),' Gespräch mit Tom über seine Finanzierungssorgen ',h(K.Quelle,null,'Notiz 26.09.')),
+ h('div',null,h(K.Privat,null)),
+ h('div',null,h(K.Privat,null,'Chats sind persönlich'))));
+}catch(e){console.error("Privat",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Wissensluecke')).render(h(K.Wissensluecke,{bekannt:'Ich kenne zwei EXIST-Anträge aus eurem Postfach, aber keinen bis zur Bewilligung. Wie lange es bei der Uni Augsburg dauert, kann ich daraus nicht ableiten.',aktionen:h(React.Fragment,null,h(K.Aktion,{variante:'sekundaer'},'Julia fragen'),h(K.Aktion,{variante:'text'},'Als Notiz ergänzen'))}));
+}catch(e){console.error("Wissensluecke",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Hinweis')).render(h('div',null,
+ h(K.Hinweis,{zeit:'gestern',dringend:true,
+   titel:h(F,null,h(K.Bezug,{art:'Team'},'Solaro'),' hat das ',h('strong',null,'Pitchdeck'),' nicht geschickt.'),
+   kontext:h(F,null,h(K.Etikett,{art:'beratung'}),h('span',null,'EXIST-Antrag · Andreas')),
+   gruende:[{art:'belegt',text:'Zugesagt in der Beratung, fällig Freitag 25.09.',quelle:'Notiz 22.09.'},{art:'berechnet',text:'1 Tag überfällig',dringend:true}],
+   frage:'Soll ich nachfragen?',
+   aktionen:h(F,null,h(K.Aktion,{variante:'sekundaer'},'Entwurf ansehen'),h(K.Aktion,{variante:'text'},'Später'))}),
+ h(K.Hinweis,{zeit:'seit 9 T.',
+   titel:h(F,null,h(K.Bezug,{art:'Person'},'Frau Weber'),' hat nicht auf die ',h('strong',null,'Juryanfrage'),' geantwortet.'),
+   kontext:h(F,null,h(K.Etikett,{art:'event'}),h('span',null,'Pitch-Abend · Julia')),
+   gruende:[{art:'belegt',text:'Anfrage gesendet',quelle:'Mail 21.09.'},{art:'einschaetzung',text:'Jury wird knapp, wenn bis Mitte Oktober niemand zusagt'}]})));
+}catch(e){console.error("Hinweis",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Abschnitt')).render(h('div',null,
+ h(K.Abschnitt,{titel:'Heute',anzahl:2,aside:h(K.Umschalter,null)},
+   h(K.Hinweis,{zeit:'10:00',titel:h(F,null,h('strong',null,'Beratung Kitchen Loop'),' mit Mehmet'),gruende:[{art:'belegt',text:'Termin im Teamkalender',quelle:'Kalender'}]}),
+   h(K.Hinweis,{zeit:'bis 18:00',titel:h(F,null,h('strong',null,'Instagram-Beitrag'),' zur Gründungsnacht freigeben')})),
+ h(K.Abschnitt,{titel:'Hängt',anzahl:0,leer:h(K.Leer,{titel:'Nichts hängt.',text:'Wenn ein Vorgang länger als zwei Wochen ruht, steht er hier.'})})));
+}catch(e){console.error("Abschnitt",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Entwurf')).render(h(K.Entwurf,{kanal:'Mail',an:'Lisa Meier <lisa@solaro.de>',betreff:'Kurze Erinnerung: Pitchdeck',
+ auszug:'Hallo Lisa, wir hatten ja besprochen, dass ihr uns das Pitchdeck bis Freitag schickt. Kommt ihr dazu? Dann kann ich es vor dem Termin mit Frau Weber noch anschauen. Viele Grüße, Andreas',
+ grund:h(K.Aussage,{art:'belegt',quelle:'Notiz 22.09.'},'Zusage aus der Beratung')}));
+}catch(e){console.error("Entwurf",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Klaerung')).render(h('div',null,
+ h(K.Klaerung,{frage:'Ist „Lisa“ in der Mail vom 28.09. Lisa Meier von Solaro?',grund:'Gleiche Absenderdomain, aber neue Adresse',quelle:'Mail 28.09.',antworten:['Ja','Andere Person','Neu anlegen'],bestaetigt:function(a){return a==='Ja'?'Zugeordnet zu Lisa Meier (Solaro)':'Gemerkt: '+a}}),
+ h(K.Klaerung,{frage:'Gehört „Jury-Briefing“ zum Pitch-Abend oder zur Gründungsnacht?',grund:'Beide Events im November, beide mit Jury',quelle:'Termin 04.11.',antworten:['Pitch-Abend','Gründungsnacht','Keins davon']})));
+}catch(e){console.error("Klaerung",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Zusage')).render(h('div',{className:'kg-zusagen'},
+ h('div',null,h('h3',{className:'kg-zusagen-titel'},'Wir'),
+   h(K.Zusage,{quelle:'Notiz 24.09.',faellig:'offen'},'Kontakt zu Frau Weber vermitteln'),
+   h(K.Zusage,{status:'erledigt'},'EXIST-Merkblatt schicken')),
+ h('div',null,h('h3',{className:'kg-zusagen-titel'},'Solaro'),
+   h(K.Zusage,{status:'ueberfaellig',faellig:'fällig 25.09.',quelle:'Notiz 22.09.'},'Pitchdeck schicken'),
+   h(K.Zusage,{faellig:'bis 15.10.'},'Finanzplan überarbeiten'))));
+}catch(e){console.error("Zusage",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Verlauf')).render(h(K.Verlauf,{eintraege:[
+ {monat:'September 2026',datum:'29.09.',art:'System',text:'Erinnerung an Solaro vorgeschlagen'},
+ {monat:'September 2026',datum:'24.09.',art:'Termin',text:'Beratung mit Lisa Meier und Tom Kraus, 45 Min.',quelle:'Kalender'},
+ {monat:'September 2026',datum:'24.09.',art:'Notiz',text:'Tom wirkt unter Druck wegen Finanzierung',quelle:'Andreas',privat:true},
+ {monat:'September 2026',datum:'24.09.',art:'Mail',text:'An Lisa: EXIST-Merkblatt',quelle:'Mail',herkunft:'über Kollege'},
+ {monat:'September 2026',datum:'23.09.',art:'Mail',text:'An Tom: Termin bestätigt',quelle:'Mail',herkunft:'aus Outlook'},
+ {monat:'September 2026',datum:'12.09.',art:'Mail',text:'Lisa Meier: Fragen zum EXIST-Gründerstipendium',quelle:'Mail'},
+ {monat:'August 2026',datum:'28.08.',art:'Datei',text:'Businessplan_Entwurf.pdf',quelle:'Ablage'},
+ {monat:'August 2026',datum:'21.08.',art:'Mail',text:'Erstkontakt über Kontaktformular',quelle:'Mail'}]}));
+}catch(e){console.error("Verlauf",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Anweisung')).render(h('div',null,
+ h(K.Anweisung,{geltung:'team',von:'Julia · 03.09.',angewandt:'4× angewandt'},'Events: Einladung 4 Wochen vorher, Erinnerung 1 Woche vorher.'),
+ h(K.Anweisung,{geltung:'persoenlich',von:'Andreas',datum:'15.09.',angewandt:'6× angewandt',onLoeschen:function(){}},'Hinweise zu Social Media nur montags.'),
+ h(K.Anweisung,{geltung:'team',von:'Mehmet · 01.09.',angewandt:'11× angewandt'},'Beratungen ohne Folgetermin nach 3 Wochen als „hängt“ melden.')));
+}catch(e){console.error("Anweisung",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_ChatListe')).render(h('div',{style:{width:'248px'}},h(K.ChatListe,{chats:[
+ {id:'1',titel:'Beratung Solaro, Pitchdeck',datum:'heute',etikett:'Solaro – EXIST-Antrag',aktiv:true,angepinnt:true},
+ {id:'2',titel:'Social Media nur montags',datum:'heute'},
+ {id:'3',titel:'Was haben wir Solaro versprochen?',datum:'gestern',etikett:'Solaro'},
+ {id:'4',titel:'Jury für den Pitch-Abend',datum:'28.09.',etikett:'Pitch-Abend'},
+ {id:'5',titel:'Wie lange dauert EXIST?',datum:'25.09.'}]})));
+}catch(e){console.error("ChatListe",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Etikett')).render(h('div',{style:{display:'flex',gap:'8px',flexWrap:'wrap'}},['beratung','event','beitrag','lehre','sonstiges'].map(function(a){return h(K.Etikett,{key:a,art:a})})));
+}catch(e){console.error("Etikett",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Aktion')).render(h('div',{className:'kg-aktionen'},h(K.Aktion,{variante:'primaer'},'Senden'),h(K.Aktion,{variante:'sekundaer'},'Ansehen'),h(K.Aktion,{variante:'sekundaer'},'Übergeben an …'),h(K.Aktion,{variante:'text'},'Falsch zugeordnet?'),h(K.Aktion,{variante:'rueckgaengig'}),h(K.Aktion,{variante:'primaer',disabled:true},'Merken')));
+}catch(e){console.error("Aktion",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Umschalter')).render(h('div',{style:{display:'flex',gap:'24px'}},h(K.Umschalter,null),h(K.Umschalter,{optionen:['Offen','Erledigt','Alle']})));
+}catch(e){console.error("Umschalter",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Leer')).render(h('div',null,
+ h(K.Leer,{titel:'Nichts wartet auf euch.',text:'Wenn jemand eine Antwort von euch erwartet, steht es hier.'}),
+ h(K.Leer,{titel:'Noch keine Vorgänge.',text:'Schreib oben, was passiert ist – oder verbinde dein Postfach, dann lese ich die letzten 90 Tage.',aktion:h(K.Aktion,{variante:'sekundaer'},'Postfach verbinden')})));
+}catch(e){console.error("Leer",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Laden')).render(h('div',{style:{display:'grid',gap:'24px'}},
+ h(K.Laden,{text:'Lese Postfach andreas@uni-augsburg.de',wert:214,max:1380}),
+ h(K.Laden,{text:'Lese Kalender',wert:88,max:88}),
+ h('div',null,h(K.Laden,{inline:true,text:'Suche in 142 Vorgängen'}))));
+}catch(e){console.error("Laden",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Navigation')).render(h(K.Navigation,{eintraege:[{label:'übersicht',aktiv:true},{label:'vorgänge'},{label:'personen'},{label:'klärung',anzahl:3},{label:'anweisungen'}],rechts:'Andreas'}));
+}catch(e){console.error("Navigation",e)}</script>
+<script>try{
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('r_Quittung')).render(h(K.Quittung,{zeit:'heute 14:32',
+ verstanden:[{text:h(F,null,'Beratung mit ',h(K.Bezug,null,'Solaro'),' (',h(K.Bezug,null,'Lisa Meier'),', ',h(K.Bezug,null,'Tom Kraus'),') · Vorgang ',h(K.Bezug,null,'EXIST-Antrag'))}],
+ erledigt:[{text:'Termin „Beratung Solaro“ heute 13:30 im Verlauf abgelegt'},{text:h(F,null,'Zusage Solaro: Pitchdeck bis Fr 02.10. – Erinnerung am Fr 17:00')},{text:'Zusage wir: Kontakt zu Frau Weber vermitteln'}],
+ vorschlag:h(K.Entwurf,{kanal:'Mail',an:'Anna Weber, IHK Schwaben',betreff:'Vorstellung: Solaro (Solar-Startup, EXIST)',auszug:'Liebe Frau Weber, darf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? Die beiden bereiten gerade einen EXIST-Antrag vor und …',grund:h(K.Aussage,{art:'belegt',quelle:'Eingabe 14:32'},'„wir vermitteln Kontakt zu Frau Weber“')})}));
+}catch(e){console.error("Quittung",e)}</script>
+</body>
+</html>

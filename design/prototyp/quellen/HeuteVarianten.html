@@ -1,0 +1,57 @@
+Heute: Meins / Team – drei Varianten|1280|1000|.vz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;padding:40px 48px}.v{display:flex;flex-direction:column;gap:12px}.v h2{margin:0;font-size:18px;line-height:26px;font-weight:500}.skizze{border:1px solid var(--rule);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--paper);min-height:300px;font-size:12px}.sk-z{display:flex;gap:6px;align-items:center;padding:5px 6px;border-bottom:1px solid var(--rule)}.sk-b{height:8px;border-radius:2px;background:var(--rule);flex:1}.sk-e{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);border:1px solid var(--rule);border-radius:2px;padding:0 4px;white-space:nowrap}.sk-k{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);padding-top:6px}.pc{font-size:14px;line-height:22px;margin:0;padding-left:18px}.empf{border:1px solid var(--ink);border-radius:4px;padding:2px 8px;font-size:12px;align-self:flex-start}
+<main style="height: 100%; overflow-y: auto">
+<div style="padding: 40px 48px 0; display: flex; flex-direction: column; gap: 8px; max-width: 960px">
+<div class="mono">Zum Kommentar „Umschalten zwischen Meins und Team macht Heute unübersichtlich“</div>
+<h1 class="h1">Heute ohne Umschalter: drei Varianten</h1>
+<div class="mono" style="color: var(--ink)">Entschieden am 01.10.: Variante B</div>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Problem heute: Der Umschalter tauscht fast die ganze Seite aus – man verliert den Ort und weiß nicht, was „Team“ zusätzlich zeigt. Grundfrage: Was muss ich auf Heute vom Team sehen, um handeln zu können? Nur zwei Dinge verlangen meine Handlung: Neues ohne Zuständigkeit und Dinge, die bei anderen hängen und auf mich wirken. Alles andere ist Information.</p>
+</div>
+<div class="vz">
+<section class="v" aria-label="Variante A">
+<span class="mono">Variante A</span>
+<h2>Ein Strom, Person als Etikett</h2>
+<div class="skizze">
+<div style="display: flex; gap: 4px; flex-wrap: wrap"><span class="sk-e" style="background: var(--ink); color: var(--paper)">Ich</span><span class="sk-e" style="background: var(--ink); color: var(--paper)">niemand zuständig</span><span class="sk-e">Julia</span><span class="sk-e">Mehmet</span></div>
+<span class="sk-k">Heute</span>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">Ich</span></div>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">niemand</span></div>
+<span class="sk-k">Wartet auf uns</span>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">Ich</span></div>
+<div class="sk-z" style="opacity: .45"><span class="sk-b"></span><span class="sk-e">Julia</span></div>
+<span class="sk-k">Hängt</span>
+<div class="sk-z"><span class="sk-b"></span><span class="sk-e">Ich</span></div>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px">Eine Liste, gleiche Abschnitte. Personen sind Filter-Chips wie die Bereiche; Standard: „Ich“ + „niemand zuständig“. Weitere Personen dazuschalten fügt nur Zeilen hinzu – die Seite bleibt dieselbe.</p>
+<ul class="pc"><li>Kein Ortswechsel, gleiche Logik wie der Bereichsfilter</li><li>Wer zuständig ist, steht an jeder Zeile</li><li>− Bei vielen Personen lang; Teamblick erfordert Klicks</li></ul>
+</section>
+<section class="v" aria-label="Variante B">
+<span class="mono">Variante B</span>
+<h2>Meins oben, „Im Team“ als Abschnitt</h2>
+<div class="skizze">
+<span class="sk-k">Heute</span>
+<div class="sk-z"><span class="sk-b"></span></div>
+<div class="sk-z"><span class="sk-b"></span></div>
+<span class="sk-k">Wartet auf uns · Wir warten auf · Hängt</span>
+<div class="sk-z"><span class="sk-b"></span></div>
+<div class="sk-z"><span class="sk-b"></span></div>
+<span class="sk-k" style="color: var(--ink)">Im Team · 5 ▾</span>
+<div class="sk-z"><span class="sk-e">Neu, niemand zuständig 3</span><span class="sk-b"></span></div>
+<div class="sk-z"><span class="sk-e">Hängt bei anderen 2</span><span class="sk-b"></span></div>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px">Heute zeigt immer deine Dinge. Darunter ein Abschnitt „Im Team“ mit genau zwei Arten: Neues ohne Zuständigkeit (Übernehmen/Zuweisen) und was bei anderen hängt. Zugeklappt mit Zahl, aufgeklappt bleibt er aufgeklappt.</p>
+<ul class="pc"><li>Fokus bleibt bei dem, was ich tun muss</li><li>Team nur dort, wo es Handlung verlangt</li><li>− Kein Gesamtbild „Was macht Julia heute?“ (gehört eher in Aufgaben → Team)</li></ul>
+<span class="empf" style="background: var(--ink); color: var(--paper)">Entschieden · umgesetzt in „1 · Heute“</span>
+</section>
+<section class="v" aria-label="Variante C">
+<span class="mono">Variante C</span>
+<h2>Zwei Spalten: Meins | Team</h2>
+<div class="skizze" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="sk-k">Meins</span><div class="sk-z"><span class="sk-b"></span></div><div class="sk-z"><span class="sk-b"></span></div><div class="sk-z"><span class="sk-b"></span></div><div class="sk-z"><span class="sk-b"></span></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px; border-left: 1px solid var(--rule); padding-left: 10px"><span class="sk-k">Team</span><div class="sk-z"><span>niemand</span><span class="sk-e">3</span></div><div class="sk-z"><span>Julia</span><span class="sk-e">4</span></div><div class="sk-z"><span>Mehmet</span><span class="sk-e">2 hängt</span></div></div>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px">Links deine Liste, rechts eine schmale Team-Spalte mit Zahlen je Person und „niemand zuständig“. Klick auf eine Person zeigt deren Punkte links – mit klarer Überschrift „Julias Punkte“. Mobil wird die Team-Spalte ein Tab.</p>
+<ul class="pc"><li>Beides gleichzeitig sichtbar</li><li>Gut für die Person, die das Team steuert</li><li>− Braucht Breite, mehr Unruhe; doppelte Einstiege</li></ul>
+</section>
+</div>
+<p style="padding: 0 48px 48px; margin: 0; font-size: 14px; line-height: 22px; max-width: 960px; color: var(--ink-muted)">Warum B: Heute ist zum Handeln da. Aus dem Team verlangen nur „niemand zuständig“ und „hängt bei anderen“ eine Handlung von mir – genau das zeigt B, ohne die Seite umzubauen. Wer im Team steuert (Teamleitung), bekommt mit A den vollständigeren Blick. Offen: Gibt es bei euch eine Person, die das ganze Team im Blick haben muss? Dann A, sonst B.</p>
+</main>

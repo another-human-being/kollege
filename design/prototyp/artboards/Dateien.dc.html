@@ -21,8 +21,8 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 .kg-seitennav a:hover{color:var(--ink)}
 .kg-seitennav a[aria-current="page"]{color:var(--ink);background:var(--paper-sunk)}
 .nav-luecke{display:block;height:12px}
-.nav-gruppe{display:block;padding:14px 8px 4px;font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
-.kg-seitennav a.nav-plus{color:var(--ink-faint);font-size:13px}
+.nav-gruppe{display:block;padding:14px 8px 4px;font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.kg-seitennav a.nav-plus{color:var(--ink-muted);font-size:13px}
 .h1{margin:0;font-size:28px;line-height:34px;font-weight:500;letter-spacing:-0.01em}
 .label{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
 .mono{font-family:var(--font-mono);font-size:12px;line-height:16px;color:var(--ink-muted)}
@@ -34,6 +34,10 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 .ungeprueft-banner{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--line-control);border-radius:4px;font-size:14px}
 
 .pz{display:grid;grid-template-columns:36px minmax(0,1fr);align-items:start;border-bottom:1px solid var(--rule)}.pz .ld-zeile{border-bottom:0;padding-left:4px}.pz input{margin:14px 0 0 16px;accent-color:var(--ink)}
+
+.ld--zu .ld-detail{display:none}.ld--zu .ld-liste{flex:1;width:auto}.ld-zu{position:sticky;top:-28px;z-index:2;display:flex;justify-content:flex-end;margin:-28px -40px -20px;padding:8px 16px;background:linear-gradient(var(--paper) 70%,transparent)}.ld-zu button{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:2px;font-size:20px;line-height:1;color:var(--ink-muted)}.ld-zu button:hover{background:var(--paper-sunk);color:var(--ink)}.ld-zu button:focus-visible{outline:2px solid var(--accent)}
+.ansicht-hinweis{font-size:12px;color:var(--ink-muted)}
+.ch{display:flex;flex-direction:column;gap:18px}.ch-du{align-self:flex-end;max-width:82%;box-sizing:border-box;background:var(--paper-sunk);border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:15px;line-height:24px;white-space:pre-line}.ch-ko{display:flex;flex-direction:column;gap:8px;max-width:100%}.ch-ko-text{font-size:15px;line-height:24px;white-space:pre-line}.ch-wer{font-size:12px;line-height:16px;font-weight:500;color:var(--ink-muted);display:flex;gap:8px;align-items:baseline}.ch-belege{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-left:2px solid var(--rule)}.ch-start{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:40px 0 16px}.ch-start h2{margin:0;font-size:22px;line-height:30px;font-weight:500}.ch-vorschlaege{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.ch-vorschlag{all:unset;cursor:pointer;font-size:13px;line-height:18px;padding:6px 10px;border:1px solid var(--line-control);border-radius:14px;color:var(--ink)}.ch-vorschlag:hover{background:var(--paper-sunk)}.ch-vorschlag:focus-visible{outline:2px solid var(--accent)}.x-knopf{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:2px;font-size:20px;line-height:1;color:var(--ink-muted)}.x-knopf:hover{background:var(--paper-sunk);color:var(--ink)}.x-knopf:focus-visible{outline:2px solid var(--accent)}
 .baum-spalte{width:210px;flex-shrink:0;border-right:1px solid var(--rule);padding:20px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}.baum{display:flex;flex-direction:column;gap:1px}.baum button{all:unset;cursor:pointer;font-size:13px;line-height:20px;padding:3px 8px;border-radius:2px;color:var(--ink-muted);display:flex;justify-content:space-between;gap:8px}.baum button[aria-pressed="true"]{background:var(--paper-sunk);color:var(--ink)}.baum button:focus-visible{outline:2px solid var(--accent)}.ld-liste--schmal{width:340px}.tagz{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.tag{display:inline-flex;gap:4px;align-items:baseline;font-size:13px;padding:1px 4px 1px 8px;border:1px solid var(--rule);border-radius:2px}.tag button{all:unset;cursor:pointer;color:var(--ink-muted);padding:0 4px}.tag button:focus-visible{outline:2px solid var(--accent)}.pfad{font-family:var(--font-mono);font-size:12px;line-height:18px;color:var(--ink-muted);word-break:break-all}
 </style>
 </helmet>
@@ -44,7 +48,7 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 <a href="Main.dc.html"><span class="kg-nav-slash">/</span>heute</a>
 <a href="Chat.dc.html"><span class="kg-nav-slash">/</span>chat</a>
 <span class="nav-gruppe">Werkzeuge</span>
-<a href="Mail.dc.html"><span class="kg-nav-slash">/</span>mail<span class="kg-nav-zahl" style="color: var(--ink-muted)">4</span></a>
+<a href="Mail.dc.html"><span class="kg-nav-slash">/</span>mail</a>
 <a href="Kalender.dc.html"><span class="kg-nav-slash">/</span>kalender</a>
 <a href="Aufgaben.dc.html"><span class="kg-nav-slash">/</span>aufgaben</a>
 <a href="Dateien.dc.html" aria-current="page"><span class="kg-nav-slash">/</span>dateien</a>
@@ -58,11 +62,11 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 <span class="nav-luecke" aria-hidden="true"></span>
 <a href="Einstellungen.dc.html"><span class="kg-nav-slash">/</span>einstellungen</a>
 </nav>
-<x-import component-from-global-scope="Kollege.ChatListe" chats="{{sidebarChats}}" neu-href="Main.dc.html"></x-import>
+<div style="padding: 0 8px"><a class="kg-aktion kg-aktion--sekundaer" href="Chat.dc.html" style="display: flex; justify-content: center">+ Neuer Chat</a></div>
 <div style="margin-top: auto; font-size: 13px; color: var(--ink-muted); padding: 0 8px">Andreas · Gründungszentrum</div>
 </aside>
 <div style="flex-grow: 1; min-width: 0; height: 100%; position: relative; overflow: hidden">
-<div class="ld">
+<div class="{{ldKlasse}}">
 <nav class="baum-spalte" aria-label="Ordner auf dem Netzlaufwerk">
 <div class="label" style="color: var(--ink-muted)">Netzlaufwerk</div>
 <div class="pfad">\\fs.uni-augsburg.de\gruendung</div>
@@ -89,14 +93,14 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 <sc-if value="{{pruefHatAuswahl}}" hint-placeholder-val="{{ false }}">
 <div class="kg-aktionen">
 <button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefUebernehmen}}">Übernehmen</button>
-<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefWarumAuf}}">Verwerfen</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefWarumAuf}}">{{pruefVerwerfenLabel}}</button>
 </div>
 </sc-if>
 <sc-if value="{{pruefWarumOffen}}" hint-placeholder-val="{{ false }}">
 <form onSubmit="{{pruefVerwerfen}}" style="display: flex; gap: 6px; align-items: center">
 <label for="pruef-warum" class="kg-sr">Warum verwerfen?</label>
 <input id="pruef-warum" value="{{pruefWarum}}" onChange="{{pruefWarumTippen}}" placeholder="Warum? (optional) z. B. „Rechnungen sind keine Gründungsteams“" class="such" style="flex: 1">
-<button type="submit" class="kg-aktion kg-aktion--sekundaer">Verwerfen</button>
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">{{pruefVerwerfenLabel}}</button>
 </form>
 </sc-if>
 </div>
@@ -117,16 +121,17 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 </div>
 
 <div class="ld-detail">
+<div class="ld-zu"><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
 <sc-if value="{{hatDetail}}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{d.istUngeprueft}}" hint-placeholder-val="{{ false }}">
-<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Zuordnung von Kollege – {{d.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Verwerfen</button></div>
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Zuordnung von Kollege – {{d.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Zuordnung verwerfen</button></div>
 </sc-if>
 <div style="display: flex; flex-direction: column; gap: 12px">
 <label for="d-name" class="kg-sr">Dateiname</label>
 <input id="d-name" class="fe fe-titel" data-feld="name" value="{{d.name}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" style="font-family: var(--font-mono); font-size: 20px">
 <div class="pfad">{{d.pfad}}</div>
 <div class="kg-aktionen">
-<button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{d.oeffnen}}">{{d.oeffnenLabel}}</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.oeffnen}}">{{d.oeffnenLabel}}</button>
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.pfadKopieren}}">Pfad kopieren</button>
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
 </div>
@@ -165,40 +170,37 @@ a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
 </div>
 </div>
 <sc-if value="{{kcOffen}}" hint-placeholder-val="{{ false }}">
-<div role="dialog" aria-label="Chat zum Kontext" style="position: absolute; top: 0; right: 0; bottom: 0; width: 520px; box-sizing: border-box; background: var(--paper); box-shadow: var(--shadow-sheet); border-left: 1px solid var(--rule); display: flex; flex-direction: column; z-index: 5">
-<div style="display: flex; align-items: baseline; gap: 8px; padding: 16px 24px; border-bottom: 1px solid var(--rule); flex-wrap: wrap">
-<span class="label">Chat</span>
+<div role="dialog" aria-label="Kollege fragen" style="position: absolute; top: 0; right: 0; bottom: 0; width: 480px; box-sizing: border-box; background: var(--paper); box-shadow: var(--shadow-sheet); border-left: 1px solid var(--rule); display: flex; flex-direction: column; z-index: 5">
+<div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 24px; border-bottom: 1px solid var(--rule)">
+<b style="font-weight: 500">Kollege fragen</b>
 <x-import component-from-global-scope="Kollege.Etikett">{{kcName}}</x-import>
-<x-import component-from-global-scope="Kollege.Privat">persönlich</x-import>
 <span style="flex-grow: 1"></span>
-<a class="kg-aktion kg-aktion--text" href="Chat.dc.html">Im Chatverlauf</a>
-<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcZu}}">Schließen</button>
+<a class="kg-aktion kg-aktion--text" href="Chat.dc.html" style="font-size: 13px">Im Chatverlauf</a>
+<button type="button" class="x-knopf" onClick="{{kcZu}}" aria-label="Chat schließen" title="Schließen">×</button>
 </div>
-<div style="flex-grow: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 8px">
-<div class="mono">Kontext geladen: {{kcKontext}}</div>
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 24px">
+<sc-if value="{{kcLeer}}" hint-placeholder-val="{{ true }}">
+<div class="ch-start">
+<h2>Was möchtest du zu {{kcName}} wissen?</h2>
+<span class="mono">Ich kenne: {{kcKontext}}</span>
+<div class="ch-vorschlaege"><sc-for list="{{kcVorschlaege}}" as="v" hint-placeholder-count="3"><button type="button" class="ch-vorschlag" onClick="{{v.los}}">{{v.text}}</button></sc-for></div>
+<span style="font-size: 13px; color: var(--ink-muted)">Oder notiere etwas – ich lege es im Verlauf ab.</span>
+</div>
+</sc-if>
+<div class="ch">
 <sc-for list="{{kcMsgs}}" as="m" hint-placeholder-count="2">
-<sc-if value="{{m.istDu}}" hint-placeholder-val="{{ true }}">
-<x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="jetzt">{{m.text}}</x-import>
-</sc-if>
-<sc-if value="{{m.istKollege}}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="Kollege.Nachricht" von="kollege" streamt="{{m.streamt}}">{{m.text}}</x-import>
-</sc-if>
-<sc-if value="{{m.istAussage}}" hint-placeholder-val="{{ false }}">
-<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Aussage" art="{{m.art}}" quelle="{{m.quelle}}">{{m.text}}</x-import></div>
-</sc-if>
-<sc-if value="{{m.istKarte}}" hint-placeholder-val="{{ false }}">
-<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Karte" punkte="{{m.punkte}}" privat="{{m.privat}}" folgen="{{m.folgen}}" link-text="{{m.linkText}}" link-href="{{m.linkHref}}"></x-import></div>
-</sc-if>
-<sc-if value="{{m.istLuecke}}" hint-placeholder-val="{{ false }}">
-<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="{{m.bekannt}}"></x-import></div>
-</sc-if>
+<sc-if value="{{m.istDu}}" hint-placeholder-val="{{ true }}"><div class="ch-du">{{m.text}}</div></sc-if>
+<sc-if value="{{m.istKollege}}" hint-placeholder-val="{{ false }}"><div class="ch-ko"><span class="ch-wer">Kollege</span><div class="ch-ko-text">{{m.text}}</div></div></sc-if>
+<sc-if value="{{m.istAussage}}" hint-placeholder-val="{{ false }}"><div class="ch-belege"><x-import component-from-global-scope="Kollege.Aussage" art="{{m.art}}" quelle="{{m.quelle}}">{{m.text}}</x-import></div></sc-if>
+<sc-if value="{{m.istKarte}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Karte" punkte="{{m.punkte}}" privat="{{m.privat}}" folgen="{{m.folgen}}" link-text="{{m.linkText}}" link-href="{{m.linkHref}}"></x-import></sc-if>
+<sc-if value="{{m.istLuecke}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="{{m.bekannt}}"></x-import></sc-if>
 </sc-for>
-<sc-if value="{{kcLaden}}" hint-placeholder-val="{{ false }}">
-<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Lese den Kontext"></x-import></div>
-</sc-if>
+<sc-if value="{{kcLaden}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Lese den Kontext"></x-import></sc-if>
 </div>
-<div style="padding: 16px 24px; border-top: 1px solid var(--rule)">
-<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe-2" platzhalter="Weiter fragen oder notieren" on-senden="{{kcSenden}}"></x-import>
+</div>
+<div style="padding: 12px 24px 16px; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 6px">
+<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe-2" platzhalter="{{kcPlatzhalter}}" on-senden="{{kcSenden}}"></x-import>
+<label style="display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-muted)"><input type="checkbox" checked="{{kcPrivat}}" onChange="{{kcPrivatToggle}}"> Notiz nur für mich (privat)</label>
 </div>
 </div>
 </sc-if>
@@ -275,19 +277,113 @@ class Component extends DCLogic {
       kcHatMsgs: (st.kcMsgs || []).length > 0,
       kcPrivat: !!st.kcPrivat,
       kcPrivatToggle: function () { self.setState({ kcPrivat: !self.state.kcPrivat }); },
-      kcNotizen: st.kcNotizen || []
+      kcNotizen: st.kcNotizen || [],
+      kcLeer: !(st.kcMsgs || []).length && !st.kcStream && !st.kcLaden,
+      kcVorschlaege: (cfg.vorschlaege || ['Was ist der Stand?', 'Was haben wir zugesagt?', 'Was ist offen?']).map(function (t) { return { text: t, los: function () { self.kcSenden(t); } }; })
     };
   }
   // „Gründungsteams · Solaro“ → Seite des Bereichs
   bereichHref(v) { var b = String(v || '').split(' · ')[0]; return ({ 'Gründungsteams': 'Gruendungsteams.dc.html', 'Events': 'Events.dc.html', 'Lehre': 'Lehre.dc.html', 'Social Media': 'SocialMedia.dc.html' })[b] || 'Main.dc.html'; }
   zuordnungen() { return ['Gründungsteams · Solaro', 'Gründungsteams · Kitchen Loop', 'Gründungsteams · Nordlicht Analytics', 'Gründungsteams · Greenbyte', 'Gründungsteams · Lern-App (Max Brandt)', 'Events · Gründungsnacht 2026', 'Events · Pitch-Abend', 'Lehre · Entrepreneurship Basics', 'Lehre · Design Thinking Workshop', 'Social Media · Pitch-Abend ankündigen', 'Social Media · Rückblick Sommerfest', 'Social Media · Porträt: Lisa Meier (Solaro)', '– (ohne Bereich)']; }
+  // ——— Aufgaben = Zusagen: ein Datenbestand für Aufgaben und Beratungsakten (E46) ———
+  heuteIso() { return '2026-09-30'; }
+  datumText(iso, zeit) {
+    if (!iso) return 'ohne Datum';
+    var h = this.heuteIso(); if (iso === h) return 'heute' + (zeit ? ' ' + zeit : '');
+    var p = iso.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]), W = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    return W[d.getDay()] + ' ' + p[2] + '.' + p[1] + '.' + (p[0] !== '2026' ? p[0] : '') + (zeit ? ' ' + zeit : '');
+  }
+  faelligGruppe(iso) { if (!iso) return 'ohne'; var h = this.heuteIso(); return iso < h ? 'ueber' : iso === h ? 'heute' : iso <= '2026-10-04' ? 'woche' : 'spaeter'; }
+  tageSeit(iso) { var a = iso.split('-'), b = this.heuteIso().split('-'); return Math.round((new Date(+b[0], +b[1] - 1, +b[2]) - new Date(+a[0], +a[1] - 1, +a[2])) / 864e5); }
+  aufgabenDaten() {
+    return [
+      { id: 'raum', richtung: 'von uns', titel: 'Raum für Sitzung 3 buchen', vorgang: 'Lehre · Entrepreneurship Basics', wer: 'Andreas', faellig: '2026-09-29', herkunft: 'Bitte von Prof. Hartmann', quelle: 'Mail 28.09.' },
+      { id: 'fin', richtung: 'von uns', titel: 'Feedback zum Finanzplan an Tom Kraus', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '2026-09-30', status: 'in Arbeit', herkunft: 'Tom bittet um Feedback „bis Mitte der Woche“', quelle: 'Mail 26.09.', notiz: 'Vor allem Personalkosten ansehen – Tom sagt selbst, die sind noch wackelig.' },
+      { id: 'std', richtung: 'von uns', titel: 'Save-the-Date Gründungsnacht verschicken', vorgang: 'Events · Gründungsnacht 2026', wer: 'Andreas', faellig: '2026-09-30', herkunft: 'nach Anweisung von Julia', quelle: 'Anweisung 24.09.' },
+      { id: 'weber', richtung: 'von uns', titel: 'Kontakt zu Frau Weber (IHK) vermitteln', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '2026-10-02', herkunft: 'in der Beratung zugesagt', quelle: 'Chat 30.09.' },
+      { id: 'nord', richtung: 'von uns', titel: 'Bei Nordlicht nachfassen: Folgetermin anbieten', vorgang: 'Gründungsteams · Nordlicht Analytics', wer: 'Andreas', faellig: '2026-10-01', herkunft: 'nach Anweisung von Mehmet', quelle: 'Anweisung 15.09.' },
+      { id: 'tom', richtung: 'von uns', titel: 'Bei Tom wegen Finanzierung nachfragen', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '2026-10-05', herkunft: 'eigene Notiz', quelle: 'Chat 24.09.', privat: true },
+      { id: 'merk', richtung: 'von uns', titel: 'EXIST-Merkblatt an Lisa schicken', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '2026-09-24', erledigt: true, erledigtAm: '2026-09-24', herkunft: 'in der Beratung zugesagt', quelle: 'Mail 24.09.' },
+      { id: 'slot', richtung: 'von uns', titel: 'Pitch-Slot für Solaro bestätigen', vorgang: 'Gründungsteams · Solaro', wer: 'Julia', faellig: '2026-11-13', herkunft: 'Julias Mail an Tom', quelle: 'Mail 23.09.' },
+      { id: 'jb', richtung: 'von uns', titel: 'Jury-Briefing vorbereiten', vorgang: 'Events · Pitch-Abend', wer: 'Andreas', faellig: '2026-11-04', herkunft: 'aus dem Termin abgeleitet', quelle: 'Kalender 04.11.' },
+      { id: 'cat', richtung: 'von uns', titel: 'Catering anfragen', vorgang: 'Events · Gründungsnacht 2026', wer: 'Julia', faellig: '2026-10-16', herkunft: 'Ablaufplan', quelle: 'Datei 29.09.' },
+      { id: 'sommer', richtung: 'von uns', titel: 'Rückblick Sommerfest fertigstellen', vorgang: 'Social Media · Rückblick Sommerfest', wer: 'Mehmet', faellig: '2026-09-25', herkunft: 'eigene Notiz', quelle: 'Notiz 12.09.' },
+      { id: 'insta', richtung: 'von uns', titel: 'Instagram-Beitrag Pitch-Abend freigeben', vorgang: 'Social Media · Pitch-Abend ankündigen', wer: 'Mehmet', faellig: '2026-09-30', zeit: '17:00', herkunft: 'eigene Notiz', quelle: 'Notiz 29.09.' },
+      { id: 'jury', richtung: 'von uns', titel: 'Jury vollständig machen', vorgang: 'Events · Pitch-Abend', wer: 'Julia', faellig: '2026-10-02', status: 'in Arbeit', herkunft: 'Teamrunde', quelle: 'Mail 21.09.' },
+      { id: 'hyg', richtung: 'von uns', titel: 'Hygieneschulung für Kitchen Loop klären', vorgang: 'Gründungsteams · Kitchen Loop', wer: 'Julia', faellig: '2026-10-01', herkunft: 'Julia: „Ich kläre das mit dem Studierendenwerk.“', quelle: 'Mail 24.09.' },
+      // an uns: Zusagen anderer – „wartet“ ergibt sich aus der Richtung (E27)
+      { id: 'pd', richtung: 'an uns', von: 'Lisa Meier (Solaro)', titel: 'Pitchdeck final inkl. Finanzteil', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '2026-10-02', herkunft: 'Entwurf kam gestern, Finanzteil fehlt noch', quelle: 'Mail 29.09.' },
+      { id: 'fp', richtung: 'an uns', von: 'Tom Kraus (Solaro)', titel: 'Finanzplan überarbeiten (Personalkosten)', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '2026-10-15', herkunft: 'in der Beratung vereinbart', quelle: 'Notiz 22.09.' },
+      { id: 'folien', richtung: 'an uns', von: 'Prof. Dr. Martin Hartmann', titel: 'Folien für Sitzung 3 schicken', vorgang: 'Lehre · Entrepreneurship Basics', wer: 'Andreas', faellig: '2026-10-06', herkunft: '„Die Folien schicke ich bis 06.10.“', quelle: 'Mail 28.09.' },
+      { id: 'aw', richtung: 'an uns', von: 'Anna Weber (IHK Schwaben)', titel: 'Rückmeldung: Jurorin beim Pitch-Abend?', vorgang: 'Events · Pitch-Abend', wer: 'Julia', faellig: '2026-09-25', herkunft: 'Anfrage von Julia; Antwort zugesagt „bis Ende der Woche“', quelle: 'Mail 21.09.' },
+      { id: 'sw', richtung: 'an uns', von: 'Studierendenwerk', titel: 'Termin für Pilotstart Mensa nennen', vorgang: 'Gründungsteams · Kitchen Loop', wer: 'Julia', faellig: '2026-10-02', herkunft: 'Telefonnotiz Julia', quelle: 'Notiz 23.09.' },
+      { id: 'por', richtung: 'an uns', von: 'Lisa Meier (Solaro)', titel: 'Freigabe des Porträts', vorgang: 'Social Media · Porträt: Lisa Meier (Solaro)', wer: 'Mehmet', faellig: '2026-10-08', herkunft: 'Porträtreihe Gründerinnen', quelle: 'Notiz 15.09.' },
+      // ungeprüft aus dem Import
+      { id: 'u1', ungeprueft: true, richtung: 'von uns', titel: 'Presseanfrage Porträt Gründerinnen beantworten', vorgang: '– (ohne Bereich)', wer: 'Mehmet', faellig: '2026-10-02', grund: 'Frage in einer Mail ans StartHub-Postfach', herkunft: 'Anfrage der Augsburger Allgemeinen', quelle: 'Mail heute 08:05' },
+      { id: 'u2', ungeprueft: true, richtung: 'von uns', titel: 'Max Brandt Sprechstunde anbieten', vorgang: 'Gründungsteams · Lern-App (Max Brandt)', wer: 'Andreas', faellig: '2026-10-01', grund: 'unbeantwortete Frage im StartHub-Postfach', herkunft: 'Anfrage Gründungsstipendium', quelle: 'Mail 29.09.' },
+      { id: 'u3', ungeprueft: true, richtung: 'an uns', von: 'Karin Vogt (Stadtwerke)', titel: 'Unterschriebene Rahmenvereinbarung', vorgang: '– (ohne Bereich)', wer: 'Andreas', faellig: '', grund: '„schicken wir Ihnen dann unterschrieben zu“', herkunft: 'Kooperationsgespräch', quelle: 'Mail 29.09.' },
+      { id: 'u4', ungeprueft: true, richtung: 'von uns', titel: 'Hackathon-Challenge zusagen oder absagen', vorgang: '– (ohne Bereich)', wer: 'Julia', faellig: '', grund: 'Frage in einer Mail ans StartHub-Postfach', herkunft: 'Anfrage Fachschaft Informatik', quelle: 'Mail 28.09.' },
+      { id: 'u5', ungeprueft: true, richtung: 'von uns', titel: 'Rechnung Raumtechnik weiterleiten', vorgang: '– (ohne Bereich)', wer: 'Julia', faellig: '', grund: 'Rechnung im Netzlaufwerk ohne Vermerk', herkunft: 'Rechnung_0326.pdf', quelle: 'Netzlaufwerk' }
+    ];
+  }
+  // Zusagen eines Eintrags (Beratungsakte, Bereichsdetail): gefiltert aus den Aufgaben, Status berechnet
+  zusagenFuer(vorgang) {
+    var self = this;
+    var z = this.aufgabenDaten().filter(function (a) { return a.vorgang === vorgang && !a.ungeprueft && !a.privat; }).map(function (a) {
+      var erl = self.wert(a.id, 'erledigt', !!a.erledigt), g = self.faelligGruppe(a.faellig);
+      return { richtung: a.richtung, text: a.titel + (a.richtung === 'an uns' ? ' – ' + a.von.replace(/ \(.*\)$/, '') : a.wer !== 'Andreas' ? ' (' + a.wer + ')' : ''), quelle: a.quelle,
+        faellig: erl ? '' : (g === 'ueber' ? 'seit ' + self.datumText(a.faellig) : g === 'ohne' ? 'ohne Datum' : g === 'heute' ? self.datumText(a.faellig, a.zeit) : 'bis ' + self.datumText(a.faellig, a.zeit)),
+        status: erl ? 'erledigt' : g === 'ueber' ? 'ueberfaellig' : 'offen' };
+    });
+    return { vonUns: z.filter(function (x) { return x.richtung === 'von uns'; }), anUns: z.filter(function (x) { return x.richtung === 'an uns'; }) };
+  }
+  // ——— Kontakte: Personen und Organisationen, verknüpft über orgId (E47) ———
+  kontaktDaten() {
+    var P = [
+      { id: 'lisa', name: 'Lisa Meier', rolle: 'Gründer:in', funktion: 'Produkt', orgId: 'solaro', tage: 1, letzter: 'gestern · Mail', ueber: 'Andreas', mails: 'Andreas 9 Mails · Julia 2 Mails', telefon: '0151 2345 6789',
+        adressen: [{ adresse: 'lisa@solaro.de', info: 'Hauptadresse · 9 Mails' }, { adresse: 'l.meier@gmx.de', info: '1 Mail · bestätigt 30.09.' }, { adresse: 'lisa.meier@uni-augsburg.de', info: 'Kalender · 2 Termine' }],
+        notiz: 'Ansprechpartnerin für alles rund um den EXIST-Antrag. Antwortet meist abends.' },
+      { id: 'tom', name: 'Tom Kraus', rolle: 'Gründer:in', funktion: 'Finanzen', orgId: 'solaro', tage: 4, letzter: 'vor 4 Tagen · Mail', ueber: 'Andreas', mails: 'Andreas 4 Mails · Julia 1 Mail', adressen: [{ adresse: 'tom@solaro.de', info: 'Hauptadresse · 5 Mails' }] },
+      { id: 'sara', name: 'Sara Yilmaz', rolle: 'Gründer:in', orgId: 'kl', tage: 2, letzter: 'vor 2 Tagen · Mail', ueber: 'Julia', mails: 'Julia 6 Mails · Andreas 1 Mail', adressen: [{ adresse: 'sara@kitchenloop.de', info: 'Hauptadresse · 7 Mails' }] },
+      { id: 'ben', name: 'Ben Hofer', rolle: 'Gründer:in', orgId: 'kl', tage: 6, letzter: 'vor 6 Tagen · Termin', ueber: 'Julia', mails: 'Julia 3 Mails · Mehmet 2 Mails', adressen: [{ adresse: 'ben@kitchenloop.de', info: 'Hauptadresse · 5 Mails' }] },
+      { id: 'jonas', name: 'Jonas Berg', rolle: 'Gründer:in', orgId: 'nord', tage: 23, letzter: 'vor 23 Tagen · Termin', ueber: 'Andreas', mails: 'Andreas 2 Mails', adressen: [{ adresse: 'jonas@nordlicht-analytics.de', info: 'Hauptadresse · 2 Mails' }] },
+      { id: 'weber', name: 'Anna Weber', rolle: 'Partner', orgId: 'ihk', tage: 12, letzter: 'vor 12 Tagen · Mail', ueber: 'Julia', mails: 'Julia 3 Mails', adressen: [{ adresse: 'anna.weber@schwaben.ihk.de', info: 'Hauptadresse · 3 Mails' }], notiz: 'Soll Jurorin beim Pitch-Abend werden; Rückmeldung steht aus.' },
+      { id: 'vogt', name: 'Karin Vogt', rolle: 'Partner', orgId: 'swa', tage: 1, letzter: 'gestern · Mail', ueber: 'Andreas', mails: 'Andreas 2 Mails', adressen: [{ adresse: 'k.vogt@stadtwerke-augsburg.de', info: 'Hauptadresse · 2 Mails' }] },
+      { id: 'lang', name: 'Petra Lang', rolle: 'Partner', orgId: 'stw', tage: 12, letzter: 'vor 12 Tagen · Telefon', ueber: 'Julia', mails: 'Julia 4 Mails', adressen: [{ adresse: 'p.lang@studentenwerk-augsburg.de', info: 'Hauptadresse · 4 Mails' }] },
+      { id: 'albrecht', name: 'Dr. Kerstin Albrecht', rolle: 'Mentor:in', orgId: 'ac', tage: 34, letzter: 'vor 34 Tagen · Mail', ueber: 'Andreas', mails: 'Andreas 3 Mails', adressen: [{ adresse: 'k.albrecht@albrecht-consulting.de', info: 'Hauptadresse · 3 Mails' }] },
+      { id: 'hartmann', name: 'Prof. Dr. Martin Hartmann', rolle: 'Uni-intern', orgId: 'uni', tage: 2, letzter: 'vor 2 Tagen · Mail', ueber: 'Andreas', mails: 'Andreas 6 Mails', adressen: [{ adresse: 'hartmann@uni-augsburg.de', info: 'Hauptadresse · 6 Mails' }] },
+      { id: 'lmeier2', dublette: true, ungeprueft: true, name: 'L. Meier', rolle: 'Gründer:in', orgId: 'solaro2', tage: 40, letzter: 'vor 40 Tagen · Termin', ueber: 'Andreas', mails: 'Andreas 1 Mail', adressen: [{ adresse: 'l.meier@solaro-energy.de', info: '2 Termine, 1 Mail' }], grund: 'Absender in 2 Terminen und 1 Mail', quelle: 'Import Kalender' },
+      { id: 'nora', ungeprueft: true, name: 'Nora Kim', rolle: 'Gründer:in', orgId: 'green', tage: 1, letzter: 'gestern · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'nora@greenbyte.io', info: '1 Mail' }], grund: 'Anfrage über das StartHub-Postfach', quelle: 'Mail 29.09.' },
+      { id: 'max', ungeprueft: true, name: 'Max Brandt', rolle: 'Gründer:in', orgId: '', tage: 1, letzter: 'gestern · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'max.brandt@student.uni-augsburg.de', info: '1 Mail' }], grund: 'Anfrage Gründungsstipendium', quelle: 'Mail 29.09.' },
+      { id: 'ott', ungeprueft: true, name: 'Sven Ott', rolle: 'Partner', orgId: 'klc', tage: 7, letzter: 'vor 7 Tagen · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'ott@kl-catering.de', info: '1 Mail' }], grund: 'CC in einer Mail an Kitchen Loop', quelle: 'Mail 23.09.' },
+      { id: 'redaktion', ungeprueft: true, name: 'Redaktion Augsburger Allgemeine', rolle: 'Sonstige', orgId: 'aa', tage: 0, letzter: 'heute · Mail', ueber: 'StartHub-Postfach', mails: 'StartHub 1 Mail', adressen: [{ adresse: 'redaktion@augsburger-allgemeine.de', info: '1 Mail' }], grund: 'Presseanfrage', quelle: 'Mail heute 08:05' },
+      { id: 'lmeyer', dublette: true, ungeprueft: true, name: 'Lisa Meyer', rolle: 'Sonstige', orgId: '', tage: 90, letzter: 'vor 90 Tagen · Mail', ueber: 'Andreas', mails: 'Andreas 1 Mail', adressen: [{ adresse: 'lisa.meyer@student.uni-augsburg.de', info: '1 Mail' }], grund: 'Absenderin einer Mail zu Sprechzeiten', quelle: 'Import Mail 02.07.' }
+    ];
+    var O = [
+      { id: 'solaro', name: 'Solaro', art: 'Gründungsteam', web: 'solaro.de', ort: 'Augsburg', telefon: '0821 123 45 60', mail: 'hallo@solaro.de', ueber: 'Andreas', notiz: 'Solarspeicher für Balkonkraftwerke. EXIST-Antrag in Arbeit.' },
+      { id: 'kl', name: 'Kitchen Loop', art: 'Gründungsteam', web: 'kitchenloop.de', ort: 'Augsburg', ueber: 'Julia' },
+      { id: 'nord', name: 'Nordlicht Analytics', art: 'Gründungsteam', web: 'nordlicht-analytics.de', ort: 'Augsburg', ueber: 'Andreas' },
+      { id: 'ihk', name: 'IHK Schwaben', art: 'Partner', web: 'ihk.de/schwaben', ort: 'Augsburg', ueber: 'Julia' },
+      { id: 'swa', name: 'Stadtwerke Augsburg', art: 'Partner', web: 'sw-augsburg.de', ort: 'Augsburg', ueber: 'Andreas' },
+      { id: 'stw', name: 'Studierendenwerk Augsburg', art: 'Partner', web: '', ort: 'Augsburg', ueber: 'Julia' },
+      { id: 'ac', name: 'Albrecht Consulting', art: 'Mentor:in', web: '', ort: 'München', ueber: 'Andreas' },
+      { id: 'uni', name: 'Universität Augsburg', art: 'Uni-intern', web: 'uni-augsburg.de', ort: 'Augsburg', ueber: 'Andreas' },
+      { id: 'solaro2', ungeprueft: true, dublette: true, name: 'Solaro Energy', art: 'Gründungsteam', web: 'solaro-energy.de', ort: '', ueber: 'Andreas', grund: 'Domain aus 2 Terminen von L. Meier' },
+      { id: 'green', ungeprueft: true, name: 'Greenbyte', art: 'Gründungsteam', web: 'greenbyte.io', ort: '', ueber: 'StartHub-Postfach', grund: 'aus der Mail von Nora Kim' },
+      { id: 'klc', ungeprueft: true, name: 'Kitchen Loop Catering', art: 'Partner', web: '', ort: '', ueber: 'StartHub-Postfach', grund: 'aus einer Mail-Signatur' },
+      { id: 'aa', ungeprueft: true, name: 'Augsburger Allgemeine', art: 'Sonstige', web: 'augsburger-allgemeine.de', ort: 'Augsburg', ueber: 'StartHub-Postfach', grund: 'Presseanfrage' }
+    ];
+    return { personen: P, orgs: O };
+  }
+  // Detailansicht schließen: Liste nimmt dann die ganze Breite ein; Klick auf eine Zeile öffnet wieder
+  detailVals() { var self = this; return { ldKlasse: 'ld' + (this.state.zu ? ' ld--zu' : ''), detailZu: function () { self.setState({ zu: true, kcOffen: false }); }, detailOffen: !this.state.zu, detailIstZu: !!this.state.zu }; }
   // ——— Bearbeiten, Rückgängig, Prüfen (gemeinsam für alle Werkzeuge) ———
   basisState() { return { edits: {}, letzte: null, sel: null, pAuswahl: {}, pAlle: false, pWarumOffen: false, pWarum: '' }; }
   wert(id, feld, fallback) { var e = this.state.edits[id]; return e && e[feld] !== undefined ? e[feld] : fallback; }
-  aendere(changes, label, ohneUndo) {
+  aendere(changes, label, ohneUndo, undoFn) {
     var ed = Object.assign({}, this.state.edits), alt = [], self = this;
     changes.forEach(function (c) { ed[c.id] = Object.assign({}, ed[c.id]); alt.push({ id: c.id, feld: c.feld, vorher: self.wert(c.id, c.feld, c.basis) }); ed[c.id][c.feld] = c.wert; });
-    this.setState({ edits: ed, letzte: { changes: alt, label: label, ohneUndo: !!ohneUndo } });
+    this.setState({ edits: ed, letzte: { changes: alt, label: label, ohneUndo: !!ohneUndo && !undoFn, undoFn: undoFn || null } });
     clearTimeout(this._tt); this._tt = setTimeout(function () { self.setState({ letzte: null }); }, 9000);
   }
   toastVals() {
@@ -300,6 +396,7 @@ class Component extends DCLogic {
         var ed = Object.assign({}, self.state.edits);
         l.changes.forEach(function (c) { ed[c.id] = Object.assign({}, ed[c.id]); ed[c.id][c.feld] = c.vorher; });
         self.setState({ edits: ed, letzte: null });
+        if (l.undoFn) l.undoFn();
       }
     };
   }
@@ -321,8 +418,8 @@ class Component extends DCLogic {
     };
   }
   // Filter „ungeprüft“: Mehrfachauswahl + Übernehmen / Verwerfen (+ optional Warum)
-  pruefVals(items, gesamt, art) {
-    var self = this, st = this.state;
+  pruefVals(items, gesamt, art, opt) {
+    var self = this, st = this.state; opt = opt || {};
     var offen = items.filter(function (i) { return i.ungeprueft && !self.wert(i.id, 'geprueft', ''); });
     var gewaehlt = st.pAlle ? offen : offen.filter(function (i) { return st.pAuswahl[i.id]; });
     var bulk = self.wert('_pruef', art, false);
@@ -330,14 +427,15 @@ class Component extends DCLogic {
     var anzahl = st.pAlle ? rest : gewaehlt.length;
     var anwenden = function (wert) {
       var warum = self.state.pWarum.trim();
-      var ch = gewaehlt.map(function (i) { return { id: i.id, feld: 'geprueft', wert: wert, basis: '' }; });
+      var ch = [];
+      gewaehlt.forEach(function (i) { if (wert === 'weg' && opt.verwerfen) ch = ch.concat(opt.verwerfen(i)); else ch.push({ id: i.id, feld: 'geprueft', wert: wert, basis: '' }); });
       if (self.state.pAlle) ch.push({ id: '_pruef', feld: art, wert: true, basis: false });
       self.aendere(ch,
-        anzahl + ' ' + art + (wert === 'ok' ? ' übernommen' : ' verworfen') + (wert === 'weg' && warum ? ' · gemerkt: „' + warum + '“' : ''));
+        anzahl + ' ' + art + (wert === 'ok' ? ' übernommen' : (opt.verworfenText || ' verworfen')) + (wert === 'weg' && warum ? ' · gemerkt: „' + warum + '“' : ''));
       self.setState({ pAuswahl: {}, pAlle: false, pWarumOffen: false, pWarum: '' });
     };
     return {
-      pruefGesamt: rest, pruefAlle: st.pAlle,
+      pruefGesamt: rest, pruefAlle: st.pAlle, pruefVerwerfenLabel: opt.verwerfenLabel || 'Verwerfen',
       pruefAlleToggle: function () { self.setState({ pAlle: !self.state.pAlle, pAuswahl: {} }); },
       pruefZeile: anzahl ? anzahl + ' ausgewählt' : rest + ' ungeprüft · einzeln anhaken oder alle wählen',
       pruefHatAuswahl: anzahl > 0,
@@ -391,7 +489,7 @@ class Component extends DCLogic {
     var roh = this.daten();
     var alle = roh.filter(function (d) { return self.wert(d.id, 'geprueft', '') !== 'weg'; });
     var pruef = st.filter === 'ungeprüft';
-    var P = this.pruefVals(roh, 3, 'Dateien');
+    var P = this.pruefVals(roh, 3, 'Dateien', { verwerfenLabel: 'Zuordnung verwerfen', verworfenText: ': Zuordnung verworfen – die Dateien bleiben im Ordner', verwerfen: function (i) { return [{ id: i.id, feld: 'geprueft', wert: 'ok', basis: '' }, { id: i.id, feld: 'bezuege', wert: [], basis: i.bezuege }]; } });
     var ung = function (d) { return !!d.ungeprueft && !self.wert(d.id, 'geprueft', ''); };
     var eltern = function (k) { var i = B.map(function (b) { return b[0]; }).indexOf(k); if (i < 0 || !B[i][2]) return k; for (var j = i; j >= 0; j--) if (!B[j][2]) return B[j][0]; return k; };
     var imOrdner = function (d, k) { var o = self.wert(d.id, 'ordner', d.ordner); return k === 'alle' || o === k || eltern(o) === k; };
@@ -409,7 +507,7 @@ class Component extends DCLogic {
       return { name: self.wert(d.id, 'name', d.name), datum: d.datum, pruef: pruef, normal: !pruef,
         unter: (st.ordner === 'alle' || pruef ? bName(self.wert(d.id, 'ordner', d.ordner)) + ' · ' : '') + (pruef ? d.grund : (bz.length ? bz.map(function (k) { return V[k] ? V[k].name : k; }).join(', ') : 'nicht zugeordnet')),
         aktiv: d.id === st.sel ? 'true' : 'false', gewaehlt: P.pruefIstGewaehlt(d.id), waehlen: P.pruefWaehle(d.id),
-        los: function () { self.setState({ sel: d.id, kcOffen: false }); } };
+        los: function () { self.setState({ zu: false, sel: d.id, kcOffen: false }); } };
     });
     var d = this.aktuell(), dv = {};
     if (d) {
@@ -434,7 +532,7 @@ class Component extends DCLogic {
       };
     }
     var fl = function (label, key) { return { label: label, an: st.filter === key ? 'true' : 'false', los: function () { self.setState({ filter: key, pAuswahl: {}, pAlle: false }); } }; };
-    return Object.assign(this.kcVals(), this.toastVals(), P, {
+    return Object.assign(this.kcVals(), this.toastVals(), this.detailVals(), P, {
       sidebarChats: this.kgChats(),
       ordner: B.map(function (b) { var n = alle.filter(function (d) { return !ung(d) && imOrdner(d, b[0]); }).length; return { name: b[1], zahl: n ? String(n) : '', an: st.ordner === b[0] && !pruef ? 'true' : 'false', einzug: b[2] ? 'padding-left: 24px' : '', los: function () { self.setState({ ordner: b[0], filter: self.state.filter === 'ungeprüft' ? 'alle' : self.state.filter }); } }; }),
       ordnerOptionen: B.filter(function (b) { return b[0] !== 'alle'; }).map(function (b) { return { key: b[0], name: (b[2] ? '— ' : '') + b[1] }; }),
@@ -448,7 +546,7 @@ class Component extends DCLogic {
         var ziel = st.ordner === 'alle' || st.ordner === 'bera' ? 'solaro' : st.ordner;
         var id = 'n' + Date.now();
         var neu = { id: id, ordner: ziel, name: 'Protokoll_30-09.docx', datum: 'gerade', zeit: 'gerade eben · Andreas (hochgeladen)', fakten: '1 Seite · 30 KB', kurz: 'Protokoll der heutigen Beratung.', lang: 'Kollege liest die Datei gerade – Zusammenfassung folgt in wenigen Sekunden.', bezuege: ziel === 'solaro' ? ['solaro'] : [], verlauf: [['30.09.', 'Datei', 'Von Andreas hochgeladen', 'Netzlaufwerk']] };
-        self.setState({ sel: id });
+        self.setState({ zu: false, sel: id });
         self.aendere([{ id: '_neu', feld: 'liste', wert: [neu].concat(self.wert('_neu', 'liste', [])), basis: [] }], 'Hochgeladen nach ' + bName(ziel) + ' · liegt auf dem Netzlaufwerk');
       },
       hatDetail: !!d, keinDetail: !d, d: dv

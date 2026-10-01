@@ -9,14 +9,16 @@
   function Vermutung(p) { return h('span', { className: 'kg-vermutung', title: 'Ungeprüft: Deutung des Systems, kein Beleg' }, p.children || 'KI-Vermutung'); }
 
   function Privat(p) {
-    return h('span', { className: 'kg-privat', title: 'Privat: nur für dich sichtbar' },
+    var wer = p.fuer ? 'nur für ' + p.fuer : 'nur für dich';
+    return h('span', { className: 'kg-privat', title: 'Privat: ' + wer + ' sichtbar' },
       h('svg', { width: 11, height: 12, viewBox: '0 0 11 12', 'aria-hidden': 'true', focusable: 'false' },
         h('rect', { x: 1.5, y: 5.5, width: 8, height: 6, rx: 1, fill: 'none', stroke: 'currentColor' }),
         h('path', { d: 'M3 5.5V3.8a2.5 2.5 0 0 1 5 0v1.7', fill: 'none', stroke: 'currentColor' })),
-      p.nurSymbol ? h('span', { className: 'kg-sr' }, 'privat') : h('span', null, p.children || 'privat'));
+      p.nurSymbol ? h('span', { className: 'kg-sr' }, 'privat, ' + wer) : h('span', null, p.children || (p.fuer ? 'nur ' + p.fuer : 'privat')));
   }
 
   function Quelle(p) {
+    if (!p.href && !p.onClick) return h('span', { className: cx('kg-quelle', p.className) }, p.children);
     return h(p.href ? 'a' : 'button', { className: cx('kg-quelle', p.className), href: p.href, type: p.href ? undefined : 'button', onClick: p.onClick, title: p.title || 'Quelle öffnen' }, p.children);
   }
 
@@ -124,16 +126,17 @@
   }
 
   function Entwurf(p) {
-    return h('div', { className: 'kg-entwurf', role: 'group', 'aria-label': 'Entwurf, noch nicht gesendet' },
+    var zu = !!p.gesperrt;
+    return h('div', { className: cx('kg-entwurf', zu && 'kg-entwurf--gesperrt'), role: 'group', 'aria-label': 'Entwurf, noch nicht gesendet' + (zu ? ', gesperrt' : ''), 'aria-disabled': zu ? 'true' : undefined },
       h('div', { className: 'kg-entwurf-kopf' },
         h('span', null, 'Entwurf \u00b7 ' + (p.kanal || 'Mail') + (p.von ? ' \u00b7 von ' + p.von : '')), h('span', { 'aria-hidden': 'true' }, '\u2192'), h('b', null, p.an)),
       p.betreff ? h('div', { className: 'kg-entwurf-betreff' }, p.betreff) : null,
       p.auszug ? h('div', { className: 'kg-entwurf-auszug' }, p.auszug) : null,
-      p.hinweis !== false ? h('div', { className: 'kg-entwurf-hinweis' }, p.hinweis || 'Geht über dein Postfach und liegt danach ganz normal in \u201EGesendet\u201C.') : null,
+      zu ? h('div', { className: 'kg-entwurf-hinweis' }, p.gesperrtText || 'Wartet auf deine Antwort oben – erst dann lässt er sich senden.') : (p.hinweis !== false ? h('div', { className: 'kg-entwurf-hinweis' }, p.hinweis || 'Geht über dein Postfach und liegt danach ganz normal in \u201EGesendet\u201C.') : null),
       h('div', { className: 'kg-entwurf-fuss' },
         h('div', { className: 'kg-entwurf-grund' }, p.grund || null),
-        h(Aktion, { variante: 'sekundaer', onClick: p.onAnsehen }, 'Ansehen'),
-        h(Aktion, { variante: 'primaer', onClick: p.onSenden }, p.sendenText || '\u00dcber mein Postfach senden')));
+        h(Aktion, { variante: 'sekundaer', onClick: p.onAnsehen, disabled: zu }, 'Ansehen'),
+        h(Aktion, { variante: 'primaer', onClick: p.onSenden, disabled: zu }, p.sendenText || '\u00dcber mein Postfach senden')));
   }
 
   function Quittung(p) {
@@ -166,7 +169,7 @@
         h('span', { className: 'kg-verlauf-datum' }, e.datum),
         h('span', { className: 'kg-verlauf-art' }, e.art),
         h('span', { className: 'kg-verlauf-text' },
-          h('span', null, e.privat ? h(F, null, h(Privat, { nurSymbol: true }), ' ') : null, e.text, e.quelle ? h(F, null, ' \u00a0', h(Quelle, null, e.quelle)) : null,
+          h('span', null, e.privat ? h(F, null, h(Privat, { nurSymbol: true, fuer: e.privatFuer }), ' ') : null, e.text, e.quelle ? h(F, null, ' \u00a0', h(Quelle, null, e.quelle)) : null,
             e.herkunft ? h('span', { className: 'kg-verlauf-herkunft' }, e.herkunft) : null),
           e.art === 'System' && e.rueckgaengig !== false ? h(Aktion, { variante: 'rueckgaengig', onClick: e.onRueckgaengig }) : null)));
     });
@@ -189,7 +192,7 @@
       return h('div', { className: 'kg-klaerung' },
         h('div', { className: 'kg-klaerung-erledigt' },
           h('span', null, '✓ ' + (p.bestaetigt ? p.bestaetigt(st[0]) : 'Gemerkt: ' + st[0])),
-          h(Aktion, { variante: 'rueckgaengig', onClick: function () { st[1](null); } })));
+          h(Aktion, { variante: 'rueckgaengig', onClick: function () { var alt = st[0]; st[1](null); p.onRueckgaengig && p.onRueckgaengig(alt); } })));
     }
     return h('div', { className: 'kg-klaerung' },
       h('div', { className: 'kg-klaerung-frage' }, p.frage),

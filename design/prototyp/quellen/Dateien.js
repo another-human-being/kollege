@@ -39,7 +39,7 @@ class Component extends DCLogic {
     var roh = this.daten();
     var alle = roh.filter(function (d) { return self.wert(d.id, 'geprueft', '') !== 'weg'; });
     var pruef = st.filter === 'ungeprüft';
-    var P = this.pruefVals(roh, 3, 'Dateien');
+    var P = this.pruefVals(roh, 3, 'Dateien', { verwerfenLabel: 'Zuordnung verwerfen', verworfenText: ': Zuordnung verworfen – die Dateien bleiben im Ordner', verwerfen: function (i) { return [{ id: i.id, feld: 'geprueft', wert: 'ok', basis: '' }, { id: i.id, feld: 'bezuege', wert: [], basis: i.bezuege }]; } });
     var ung = function (d) { return !!d.ungeprueft && !self.wert(d.id, 'geprueft', ''); };
     var eltern = function (k) { var i = B.map(function (b) { return b[0]; }).indexOf(k); if (i < 0 || !B[i][2]) return k; for (var j = i; j >= 0; j--) if (!B[j][2]) return B[j][0]; return k; };
     var imOrdner = function (d, k) { var o = self.wert(d.id, 'ordner', d.ordner); return k === 'alle' || o === k || eltern(o) === k; };
@@ -57,7 +57,7 @@ class Component extends DCLogic {
       return { name: self.wert(d.id, 'name', d.name), datum: d.datum, pruef: pruef, normal: !pruef,
         unter: (st.ordner === 'alle' || pruef ? bName(self.wert(d.id, 'ordner', d.ordner)) + ' · ' : '') + (pruef ? d.grund : (bz.length ? bz.map(function (k) { return V[k] ? V[k].name : k; }).join(', ') : 'nicht zugeordnet')),
         aktiv: d.id === st.sel ? 'true' : 'false', gewaehlt: P.pruefIstGewaehlt(d.id), waehlen: P.pruefWaehle(d.id),
-        los: function () { self.setState({ sel: d.id, kcOffen: false }); } };
+        los: function () { self.setState({ zu: false, sel: d.id, kcOffen: false }); } };
     });
     var d = this.aktuell(), dv = {};
     if (d) {
@@ -82,7 +82,7 @@ class Component extends DCLogic {
       };
     }
     var fl = function (label, key) { return { label: label, an: st.filter === key ? 'true' : 'false', los: function () { self.setState({ filter: key, pAuswahl: {}, pAlle: false }); } }; };
-    return Object.assign(this.kcVals(), this.toastVals(), P, {
+    return Object.assign(this.kcVals(), this.toastVals(), this.detailVals(), P, {
       sidebarChats: this.kgChats(),
       ordner: B.map(function (b) { var n = alle.filter(function (d) { return !ung(d) && imOrdner(d, b[0]); }).length; return { name: b[1], zahl: n ? String(n) : '', an: st.ordner === b[0] && !pruef ? 'true' : 'false', einzug: b[2] ? 'padding-left: 24px' : '', los: function () { self.setState({ ordner: b[0], filter: self.state.filter === 'ungeprüft' ? 'alle' : self.state.filter }); } }; }),
       ordnerOptionen: B.filter(function (b) { return b[0] !== 'alle'; }).map(function (b) { return { key: b[0], name: (b[2] ? '— ' : '') + b[1] }; }),
@@ -96,7 +96,7 @@ class Component extends DCLogic {
         var ziel = st.ordner === 'alle' || st.ordner === 'bera' ? 'solaro' : st.ordner;
         var id = 'n' + Date.now();
         var neu = { id: id, ordner: ziel, name: 'Protokoll_30-09.docx', datum: 'gerade', zeit: 'gerade eben · Andreas (hochgeladen)', fakten: '1 Seite · 30 KB', kurz: 'Protokoll der heutigen Beratung.', lang: 'Kollege liest die Datei gerade – Zusammenfassung folgt in wenigen Sekunden.', bezuege: ziel === 'solaro' ? ['solaro'] : [], verlauf: [['30.09.', 'Datei', 'Von Andreas hochgeladen', 'Netzlaufwerk']] };
-        self.setState({ sel: id });
+        self.setState({ zu: false, sel: id });
         self.aendere([{ id: '_neu', feld: 'liste', wert: [neu].concat(self.wert('_neu', 'liste', [])), basis: [] }], 'Hochgeladen nach ' + bName(ziel) + ' · liegt auf dem Netzlaufwerk');
       },
       hatDetail: !!d, keinDetail: !d, d: dv

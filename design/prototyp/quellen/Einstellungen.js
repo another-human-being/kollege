@@ -1,7 +1,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = Object.assign(this.basisState(), { vorschlagOffen: true, tab: 'Quellen', sel: 'einrichtung', anwText: '', einladText: '', zeitraum: 'weitere 12 Monate', iq: { Mail: true, Kalender: true, Netzlaufwerk: true }, teile: [], laeuft: false });
+    this.state = Object.assign(this.basisState(), { vorschlagOffen: false, tab: 'Quellen', sel: 'einrichtung', anwText: '', einladText: '', zeitraum: 'weitere 12 Monate', iq: { Mail: true, Kalender: true, Netzlaufwerk: true }, teile: [], laeuft: false });
   }
   componentWillUnmount() { clearInterval(this.timer); }
   quellen() {
@@ -27,7 +27,7 @@ class Component extends DCLogic {
       { id: 'a4', geltung: 'Gründungsteams', von: 'Andreas', datum: '10.09.', angewandt: '2× angewandt', text: 'EXIST-Anträge: Pitchdeck spätestens 4 Wochen vor Einreichung anfordern.' },
       { id: 'a5', geltung: 'persönlich', von: 'Andreas · im Chat', datum: '15.09.', angewandt: '6× angewandt', text: 'Mails an Gründungsteams duzen.' },
       { id: 'a0', geltung: 'persönlich', von: 'Andreas · im Chat', datum: '30.09.', angewandt: 'noch nie angewandt', text: 'Hinweise zu Social Media nur montags.' },
-      { id: 'a6', geltung: 'Alle', von: 'Andreas', datum: '30.09.', angewandt: '2× angewandt', text: 'Rechnungen sind keine Gründungsteams.', beziehung: 'Entstanden beim Prüfen („Warum verworfen?“).' }
+      { id: 'a6', geltung: 'Alle', von: 'Andreas', datum: '30.09.', angewandt: '2× angewandt', text: 'Rechnungen sind keine Gründungsteams.', herkunft: 'Entstanden beim Prüfen („Warum verworfen?“) – 31 Rechnungen gesammelt verworfen.' }
     ].concat(this.wert('_neu', 'anweisungen', []));
   }
   ausschluesse() {
@@ -71,7 +71,7 @@ class Component extends DCLogic {
     var BR = reihe.map(function (id) { return BR0.filter(function (b) { return b.id === id; })[0]; }).filter(Boolean);
     var istQ = st.tab === 'Quellen';
     var mehmetOk = this.wert('p-mehmet', 'erinnert', false);
-    var zeile = function (id, titel, meta, unter, metaStil) { return { titel: titel, meta: meta, unter: unter, metaStil: metaStil || '', aktiv: st.sel === id ? 'true' : 'false', los: function () { self.setState({ sel: id }); } }; };
+    var zeile = function (id, titel, meta, unter, metaStil) { return { titel: titel, meta: meta, unter: unter, metaStil: metaStil || '', aktiv: st.sel === id ? 'true' : 'false', los: function () { self.setState({ zu: false, sel: id }); } }; };
     var gruppen;
     if (istQ) {
       var offenListe = [];
@@ -86,14 +86,14 @@ class Component extends DCLogic {
       ];
     } else if (st.tab === 'Bereiche') {
       gruppen = [{ titel: 'Reihenfolge wie in der Seitenleiste', zeilen: BR.map(function (b, i) { return zeile('b-' + b.id, self.wert(b.id, 'name', b.name), (i + 1) + '.', self.wert(b.id, 'spalten', b.spalten).length + ' Spalten · ' + (b.umfang || 'neu')); }).concat([{ titel: '+ Bereich', meta: '', unter: 'z. B. Partner und Kooperationen', metaStil: '', aktiv: 'false', los: function () {
-        var id = 'bn' + Date.now(); self.setState({ sel: 'b-' + id });
+        var id = 'bn' + Date.now(); self.setState({ zu: false, sel: 'b-' + id });
         self.aendere([{ id: '_neu', feld: 'bereiche', wert: self.wert('_neu', 'bereiche', []).concat([{ id: id, name: 'Neuer Bereich', spalten: ['Titel', 'zuständig'], phasen: ['offen', 'erledigt'], umfang: '' }]), basis: [] }, { id: '_reihe', feld: 'liste', wert: reihe.concat([id]), basis: null }], 'Bereich angelegt – erscheint in der Seitenleiste unter „Bereiche“');
       } }]) }];
     } else {
       gruppen = [
         { titel: 'Anweisungen · ' + A.length, zeilen: A.map(function (a) { return zeile(a.id, self.wert(a.id, 'text', a.text), self.wert(a.id, 'geltung', a.geltung), a.von + ' · ' + a.angewandt); }) },
         { titel: 'Ausschlüsse · ' + X.length, zeilen: X.map(function (x) { return zeile(x.id, self.wert(x.id, 'wert', x.wert), self.wert(x.id, 'art', x.art), (self.wert(x.id, 'geltung', x.geltung) === 'Team' ? 'alle Postfächer' : 'dein Postfach') + ' · ' + x.wirkung); }).concat([{ titel: '+ Ausschluss hinzufügen', meta: '', unter: 'Absender, Domain oder Ordner', metaStil: '', aktiv: 'false', los: function () {
-          var id = 'xn' + Date.now(); self.setState({ sel: id });
+          var id = 'xn' + Date.now(); self.setState({ zu: false, sel: id });
           self.aendere([{ id: '_neu', feld: 'aus', wert: self.wert('_neu', 'aus', []).concat([{ id: id, art: 'Domain', wert: '@beispiel.de', geltung: 'persönlich', von: 'Andreas', wirkung: 'wird nach dem Speichern berechnet' }]), basis: [] }], 'Ausschluss angelegt – Wert rechts eintragen');
         } }]) }
       ];
@@ -121,12 +121,12 @@ class Component extends DCLogic {
     }
     if (a) {
       av = { f: this.feld(a.id, a, 'Anweisung'), text: this.wert(a.id, 'text', a.text), geltung: this.wert(a.id, 'geltung', a.geltung), von: a.von, datum: a.datum, angewandt: a.angewandt,
-        hatBeziehung: !!a.beziehung, beziehung: a.beziehung || '',
-        loeschen: function () { self.setState({ sel: null }); self.aendere([{ id: a.id, feld: 'geloescht', wert: true, basis: false }], 'Anweisung gelöscht'); } };
+        hatBeziehung: !!a.beziehung, beziehung: a.beziehung || '', hatHerkunft: !!a.herkunft, herkunft: a.herkunft || '',
+        loeschen: function () { self.setState({ zu: false, sel: null }); self.aendere([{ id: a.id, feld: 'geloescht', wert: true, basis: false }], 'Anweisung gelöscht'); } };
     }
     if (x) {
       xv = { f: this.feld(x.id, x, 'Ausschluss'), art: this.wert(x.id, 'art', x.art), wert: this.wert(x.id, 'wert', x.wert), geltung: this.wert(x.id, 'geltung', x.geltung), wirkung: x.wirkung,
-        entfernen: function () { self.setState({ sel: null }); self.aendere([{ id: x.id, feld: 'geloescht', wert: true, basis: false }], 'Ausschluss entfernt – Mails werden wieder gelesen'); } };
+        entfernen: function () { self.setState({ zu: false, sel: null }); self.aendere([{ id: x.id, feld: 'geloescht', wert: true, basis: false }], 'Ausschluss entfernt – Mails werden wieder gelesen'); } };
     }
     var schritte = [
       { nr: '1', titel: 'Eigene Quellen verbinden', ok: verb(Q[0]) && verb(Q[1]), text: 'Postfach und Kalender – nur du siehst die Inhalte.', knopf: 'ansehen', ziel: 'q-mail' },
@@ -154,13 +154,14 @@ class Component extends DCLogic {
         umfang: bsel.umfang || 'noch leer', seite: { gruendungsteams: 'Gruendungsteams.dc.html', events: 'Events.dc.html', lehre: 'Lehre.dc.html', socialmedia: 'SocialMedia.dc.html' }[bsel.id] || 'Einstellungen.dc.html' };
     }
     var faktor = { 'weitere 12 Monate': 1, 'weitere 24 Monate': 2, 'seit 2019': 6 }[st.zeitraum];
-    return Object.assign(this.toastVals(), {
+    return Object.assign(this.toastVals(), this.detailVals(), {
       sidebarChats: this.kgChats(),
       tabs: ['Quellen', 'Bereiche', 'Anweisungen'], tab: st.tab, tBereiche: st.tab === 'Bereiche',
       setTab: function (w) { self.setState({ tab: w, sel: w === 'Quellen' ? 'einrichtung' : w === 'Bereiche' ? 'b-gruendungsteams' : 'a1' }); },
       vorschlagOffen: !!st.vorschlagOffen,
       vorschlag: BR0.slice(0, 4).map(function (b) { return { name: b.name, grund: b.grund, spalten: b.spalten.join(' · ') }; }),
-      vorschlagOk: !!this.wert('_einr', 'bereicheOk', true),
+      vorschlagOk: !!this.wert('_einr', 'bereicheOk', true), vorschlagFrage: !this.wert('_einr', 'bereicheOk', true),
+      vorschlagTitel: this.wert('_einr', 'bereicheOk', true) ? 'Diese Bereiche habt ihr beim Einrichten bestätigt' : 'Ich schlage diese Bereiche vor – passt das?',
       vorschlagPasst: function () { self.aendere([{ id: '_einr', feld: 'bereicheOk', wert: true, basis: true }], 'Bereiche bestätigt – Import ordnet danach zu'); self.setState({ vorschlagOffen: false }); },
       vorschlagAnpassen: function () { self.setState({ tab: 'Bereiche', sel: 'b-gruendungsteams' }); },
       dBereich: !!bv.name, bv: bv,
@@ -188,7 +189,7 @@ class Component extends DCLogic {
       q: qv, t: tv, a: av, x: xv,
       einrichtungZeile: schritte.filter(function (s) { return s.ok; }).length + ' von 5 Schritten erledigt · jede Person verbindet ihr eigenes Postfach',
       schritte: schritte.map(function (s) { return { nr: s.nr, titel: s.titel, text: s.text, knopf: s.knopf, status: s.ok ? '✓ erledigt' : 'offen', statusKlasse: s.ok ? 'schritt-ok' : 'schritt-offen',
-        los: s.ziel === '_vorschlag' ? function () { self.setState({ vorschlagOffen: !self.state.vorschlagOffen }); } : s.knopf === 'Mehmet erinnern' ? function () { self.aendere([{ id: 'p-mehmet', feld: 'erinnert', wert: true, basis: false }], 'Mehmet bekommt eine Erinnerung per Mail'); } : function () { self.setState({ sel: s.ziel }); } }; }),
+        los: s.ziel === '_vorschlag' ? function () { self.setState({ vorschlagOffen: !self.state.vorschlagOffen }); } : s.knopf === 'Mehmet erinnern' ? function () { self.aendere([{ id: 'p-mehmet', feld: 'erinnert', wert: true, basis: false }], 'Mehmet bekommt eine Erinnerung per Mail'); } : function () { self.setState({ zu: false, sel: s.ziel }); } }; }),
       ausAnzahl: X.length,
       zuAusschluessen: function () { self.setState({ tab: 'Anweisungen', sel: X.length ? X[0].id : null }); },
       importErgebnis: [{ was: 'Zeitraum', wert: 'Okt. 2025 – Sep. 2026' }, { was: 'Gelesen', wert: '5.640 Mails · 760 Termine · 1.240 Dateien' }, { was: 'Zugeordnet', wert: '1.180 Einträge zu Bereichen und Personen' }, { was: 'Neu angelegt', wert: 'Gründungsteams 52 · Events 31 · Lehre 14 · Social Media 21 · Kontakte 88 · Aufgaben 5 · Dateien 3' }],

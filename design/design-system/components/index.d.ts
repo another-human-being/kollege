@@ -34,21 +34,21 @@ export interface Grund { art: Herkunft; text: React.ReactNode; quelle?: string; 
 export interface HinweisProps { zeit: string; titel: React.ReactNode; kontext?: React.ReactNode; gruende: Grund[]; frage?: React.ReactNode; aktionen?: React.ReactNode; dringend?: boolean; children?: React.ReactNode }
 export declare function Hinweis(props: HinweisProps): React.ReactElement;
 
-export interface EntwurfProps { kanal?: 'Mail' | 'Einladung' | 'Beitrag'; an: string; von?: string; hinweis?: string | false; betreff?: string; auszug?: string; grund?: React.ReactNode; sendenText?: string; onAnsehen?: () => void; onSenden?: () => void }
+export interface EntwurfProps { kanal?: 'Mail' | 'Einladung' | 'Beitrag'; an: string; von?: string; hinweis?: string | false; betreff?: string; auszug?: string; grund?: React.ReactNode; sendenText?: string; gesperrt?: boolean; gesperrtText?: string; onAnsehen?: () => void; onSenden?: () => void }
 export declare function Entwurf(props: EntwurfProps): React.ReactElement;
 
 export interface QuittungPunkt { text: React.ReactNode; rueckgaengig?: boolean; onRueckgaengig?: () => void }
 export interface QuittungProps { zeit?: string; verstanden?: QuittungPunkt[]; erledigt?: QuittungPunkt[]; vorschlag?: React.ReactNode; fuss?: React.ReactNode; onAllesRueckgaengig?: () => void; onFalsch?: () => void }
 export declare function Quittung(props: QuittungProps): React.ReactElement;
 
-export interface VerlaufEintrag { monat?: string; datum: string; art: 'Mail' | 'Termin' | 'Notiz' | 'Datei' | 'System'; text: React.ReactNode; quelle?: string; herkunft?: string; privat?: boolean; rueckgaengig?: boolean; onRueckgaengig?: () => void }
+export interface VerlaufEintrag { monat?: string; datum: string; art: 'Mail' | 'Termin' | 'Notiz' | 'Datei' | 'System'; text: React.ReactNode; quelle?: string; herkunft?: string; privat?: boolean; privatFuer?: string; rueckgaengig?: boolean; onRueckgaengig?: () => void }
 export interface VerlaufProps { eintraege: VerlaufEintrag[]; label?: string }
 export declare function Verlauf(props: VerlaufProps): React.ReactElement;
 
 export interface ZusageProps { status?: 'offen' | 'ueberfaellig' | 'erledigt'; faellig?: string; quelle?: string; children: React.ReactNode }
 export declare function Zusage(props: ZusageProps): React.ReactElement;
 
-export interface KlaerungProps { frage: React.ReactNode; grund?: React.ReactNode; quelle?: string; antworten?: string[]; antwort?: string; bestaetigt?: (antwort: string) => string; onAntwort?: (antwort: string) => void }
+export interface KlaerungProps { frage: React.ReactNode; grund?: React.ReactNode; quelle?: string; antworten?: string[]; antwort?: string; bestaetigt?: (antwort: string) => string; onAntwort?: (antwort: string) => void; onRueckgaengig?: (alteAntwort: string) => void }
 export declare function Klaerung(props: KlaerungProps): React.ReactElement;
 
 export interface AnweisungProps { geltung: 'team' | 'persoenlich'; von?: string; datum?: string; onLoeschen?: () => void; angewandt?: string; onBearbeiten?: () => void; children: React.ReactNode }
@@ -73,7 +73,7 @@ export interface ChatEintrag { id: string; titel: string; datum: string; etikett
 export interface ChatListeProps { chats: ChatEintrag[]; onNeu?: () => void; neuHref?: string; onOeffnen?: (id: string) => void; onPin?: (id: string) => void; onLoeschen?: (id: string) => void }
 export declare function ChatListe(props: ChatListeProps): React.ReactElement;
 
-export interface PrivatProps { nurSymbol?: boolean; children?: React.ReactNode }
+export interface PrivatProps { nurSymbol?: boolean; fuer?: string; children?: React.ReactNode }
 export declare function Privat(props: PrivatProps): React.ReactElement;
 
 export interface VermutungProps { children?: React.ReactNode }

@@ -2,7 +2,7 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = {
-      view: 'chat', chatId: 'c1', scope: 'Meins', bereichFilter: 'Alle',
+      view: 'chat', chatId: null, scope: 'Meins', bereichFilter: 'Alle',
       offen: {}, gesendet: {}, spaeter: {}, erledigt: {}, sheet: null,
       chats: this.startChats(), conv: this.startConv(), zaehler: 0,
       stream: null, laedt: null, geloescht: null, msgGesendet: {}, klaert: {}, teamNeu: {}, teamWer: null
@@ -27,7 +27,7 @@ class Component extends DCLogic {
         { typ: 'karte', punkte: ['Beratung in der Akte von Solaro abgelegt', 'Zusage bei Solaro aktualisiert: Pitchdeck final bis Fr 02.10.', 'Aufgabe für dich angelegt: Kontakt zu Frau Weber vermitteln'], anweisung: 'EXIST-Anträge: Pitchdeck spätestens 4 Wochen vor Einreichung anfordern', folgen: 'entfernt auch 1 Erinnerung (Fr 17:00)', linkText: 'Zur Beratungsakte: Solaro', linkHref: 'Gruendungsteams.dc.html' },
         { typ: 'klaerung', kid: 'weber', frage: 'Ist „Frau Weber“ Anna Weber (IHK Schwaben)?', grund: 'Einzige Frau Weber in euren Kontakten, letzter Kontakt am 21.09.', quelle: 'Mail 21.09.', antworten: ['Ja', 'Andere Person', 'Neu anlegen'] },
         { typ: 'kollege', text: 'Sobald du das bestätigst, bereite ich die Vorstellung vor:' },
-        { typ: 'entwurf', wartetAuf: 'weber', kanal: 'Mail', an: 'Anna Weber, IHK Schwaben', betreff: 'Vorstellung: Solaro (Solar-Startup, EXIST)', auszug: 'Liebe Frau Weber, darf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? Die beiden bereiten gerade einen EXIST-Antrag vor und würden sich über ein kurzes Gespräch zur Finanzierung freuen.', text: 'Liebe Frau Weber,\n\ndarf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? Die beiden entwickeln Solarmodule für Balkone und bereiten gerade einen EXIST-Antrag vor. Sie würden sich über ein kurzes Gespräch zur Finanzierung freuen.\n\nIch setze die beiden in Kopie.\nHerzliche Grüße\nAndreas', quelle: 'Chat 14:32', grund: '„wir vermitteln Kontakt zu Frau Weber“' }
+        { typ: 'entwurf', wartetAuf: 'weber', zusage: 'Kontakt zu Frau Weber vermitteln', kanal: 'Mail', an: 'Anna Weber, IHK Schwaben', betreff: 'Vorstellung: Solaro (Solar-Startup, EXIST)', auszug: 'Liebe Frau Weber, darf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? Die beiden bereiten gerade einen EXIST-Antrag vor und würden sich über ein kurzes Gespräch zur Finanzierung freuen.', text: 'Liebe Frau Weber,\n\ndarf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? Die beiden entwickeln Solarmodule für Balkone und bereiten gerade einen EXIST-Antrag vor. Sie würden sich über ein kurzes Gespräch zur Finanzierung freuen.\n\nIch setze die beiden in Kopie.\nHerzliche Grüße\nAndreas', quelle: 'Chat 14:32', grund: '„wir vermitteln Kontakt zu Frau Weber“' }
       ]
     };
   }
@@ -53,7 +53,7 @@ class Component extends DCLogic {
         { typ: 'du', zeit: '10:12', text: 'Bereite die Einladung zur Gründungsnacht vor.' },
         { typ: 'kollege', zeit: '10:12', text: 'Die Einladung ist als Entwurf fertig. Verschicken würde ich sie am 09.10. – sechs Wochen vorher.' },
         { typ: 'karte', punkte: ['Einladung als Entwurf bei Events · Gründungsnacht 2026 abgelegt', 'Versand für Fr 09.10., 9:00 eingeplant'], anweisung: 'Gründungsnacht: Einladung 6 Wochen vorher – gilt vor „Events: 4 Wochen vorher“ (spezieller)', folgen: 'entfernt auch 1 geplanten Versand und 1 Erinnerung', linkText: 'Zu Events: Gründungsnacht 2026', linkHref: 'Events.dc.html' },
-        { typ: 'entwurf', kanal: 'Einladung', an: 'Verteiler Gründungsinteressierte (214)', betreff: 'Einladung: Gründungsnacht am 20. November', auszug: 'Hallo zusammen, am Freitag, 20. November, ist wieder Gründungsnacht im Gründungszentrum – mit Pitches, Workshops und viel Zeit zum Kennenlernen.', text: 'Hallo zusammen,\n\nam Freitag, 20. November, ist wieder Gründungsnacht im Gründungszentrum – mit Pitches, Workshops und viel Zeit zum Kennenlernen. Anmeldung bis 13.11.\n\nBis bald!\nEuer Gründungszentrum', quelle: 'Anweisung Julia', grund: 'Gründungsnacht: Einladung 6 Wochen vorher' }
+        { typ: 'entwurf', geplant: 'Fr 09.10., 9:00', kanal: 'Einladung', an: 'Verteiler Gründungsinteressierte (214)', betreff: 'Einladung: Gründungsnacht am 20. November', auszug: 'Hallo zusammen, am Freitag, 20. November, ist wieder Gründungsnacht im Gründungszentrum – mit Pitches, Workshops und viel Zeit zum Kennenlernen.', text: 'Hallo zusammen,\n\nam Freitag, 20. November, ist wieder Gründungsnacht im Gründungszentrum – mit Pitches, Workshops und viel Zeit zum Kennenlernen. Anmeldung bis 13.11.\n\nBis bald!\nEuer Gründungszentrum', quelle: 'Anweisung Julia', grund: 'Gründungsnacht: Einladung 6 Wochen vorher' }
       ],
       c5: [
         { typ: 'du', zeit: '09:40', text: 'Wie lange dauert es bei EXIST bis zur Bewilligung?' },
@@ -128,23 +128,20 @@ class Component extends DCLogic {
         knoepfe: [{ label: 'Erledigt', aktion: 'erledigt' }, { label: 'Später', aktion: 'spaeter' }] }
     ];
     var wartetAufUns = [
-      { id: 'fin', zeit: 'seit 4 T.', vor: 'Tom Kraus wartet auf ', kern: 'Feedback zum Finanzplan', nach: '.', art: 'beratung', vorgang: 'Gründungsteams · Solaro', href: 'AUTO', wer: 'Andreas',
+      { id: 'fin', zeit: 'seit 4 Tagen', vor: 'Tom Kraus wartet auf ', kern: 'Feedback zum Finanzplan', nach: '.', art: 'beratung', vorgang: 'Gründungsteams · Solaro', href: 'AUTO', wer: 'Andreas',
         gruende: [{ art: 'belegt', text: '„Könnt ihr bis Mitte der Woche drüberschauen?“', quelle: 'Mail 26.09.' }, { art: 'berechnet', text: 'Mitte der Woche = heute' }],
         knoepfe: [{ label: 'Finanzplan öffnen', href: 'Dateien.dc.html' }, { label: 'Antworten', href: 'Mail.dc.html', text: true }, { label: 'Später', aktion: 'spaeter' }] },
-      { id: 'raum', zeit: 'seit 2 T.', vor: 'Prof. Hartmann wartet auf die ', kern: 'Raumbuchung', nach: ' für Sitzung 3.', art: 'lehre', vorgang: 'Lehre · Entrepreneurship Basics', href: 'AUTO', wer: 'Andreas',
+      { id: 'raum', zeit: 'seit 2 Tagen', vor: 'Prof. Hartmann wartet auf die ', kern: 'Raumbuchung', nach: ' für Sitzung 3.', art: 'lehre', vorgang: 'Lehre · Entrepreneurship Basics', href: 'AUTO', wer: 'Andreas',
         gruende: [{ art: 'belegt', text: 'Bitte um Raum mit Beamer für 40 Personen', quelle: 'Mail 28.09.' }, { art: 'berechnet', text: 'Aufgabe seit gestern überfällig', dringend: true }],
         knoepfe: [{ label: 'Erledigt', aktion: 'erledigt' }, { label: 'Antworten', href: 'Mail.dc.html', text: true }, { label: 'Später', aktion: 'spaeter' }] }
     ];
     var wirWarten = [
       { id: 'pitch', zeit: 'bis Fr', vor: 'Solaro schickt das ', kern: 'finale Pitchdeck', nach: ' bis Freitag.', art: 'beratung', vorgang: 'Gründungsteams · Solaro', href: 'AUTO', wer: 'Andreas',
         gruende: [{ art: 'belegt', text: 'Entwurf kam gestern, noch ohne Finanzteil', quelle: 'Mail 29.09.' }, { art: 'belegt', text: 'Final zugesagt bis Fr 02.10.', quelle: 'Chat 30.09.' }, { art: 'berechnet', text: 'noch 2 Tage' }],
-        knoepfe: [{ label: 'Entwurf ansehen', href: 'Mail.dc.html' }, { label: 'Später', aktion: 'spaeter' }] },
-      { id: 'jury', zeit: 'seit 9 T.', vor: 'Frau Weber hat nicht auf die ', kern: 'Juryanfrage', nach: ' geantwortet.', art: 'event', vorgang: 'Events · Pitch-Abend', href: 'AUTO', wer: 'Julia',
-        gruende: [{ art: 'belegt', text: 'Anfrage gesendet', quelle: 'Mail 21.09.' }, { art: 'berechnet', text: 'seit 9 Tagen keine Antwort' }, { art: 'einschaetzung', text: 'Jury wird knapp, falls sie absagt' }],
-        knoepfe: [{ label: 'In Aufgaben', href: 'Aufgaben.dc.html' }, { label: 'Später', aktion: 'spaeter' }] }
+        knoepfe: [{ label: 'Entwurf ansehen', href: 'Mail.dc.html' }, { label: 'Später', aktion: 'spaeter' }] }
     ];
     var haengt = [
-      { id: 'nord', zeit: 'seit 23 T.', vor: 'Nordlicht Analytics: ', kern: 'kein Folgetermin', nach: ' nach der Erstberatung.', art: 'beratung', vorgang: 'Gründungsteams · Nordlicht Analytics', href: 'AUTO', wer: 'Andreas',
+      { id: 'nord', zeit: 'seit 23 Tagen', vor: 'Nordlicht Analytics: ', kern: 'kein Folgetermin', nach: ' nach der Erstberatung.', art: 'beratung', vorgang: 'Gründungsteams · Nordlicht Analytics', href: 'AUTO', wer: 'Andreas',
         gruende: [{ art: 'belegt', text: 'Erstberatung', quelle: 'Termin 07.09.' }, { art: 'berechnet', text: 'seit 23 Tagen kein Kontakt' }, { art: 'einschaetzung', text: 'möglicherweise eingeschlafen – die letzte Mail klang unentschlossen' }],
         knoepfe: [{ label: 'Nachfassen', aktion: 'entwurf' }, { label: 'Erledigt', aktion: 'erledigt' }, { label: 'Später', aktion: 'spaeter' }],
         entwurf: { an: 'Jonas Berg (Nordlicht Analytics)', betreff: 'Wie geht es bei euch weiter?', quelle: 'Termin 07.09.', grund: 'Erstberatung am 07.09., seitdem kein Kontakt',
@@ -154,18 +151,18 @@ class Component extends DCLogic {
       heute = heute.filter(function (h) { return !h.privat; });
       heute.push({ id: 'insta', zeit: 'bis 17:00', vor: '', kern: 'Instagram-Beitrag', nach: ' zum Pitch-Abend freigeben.', art: 'beitrag', vorgang: 'Social Media · Pitch-Abend ankündigen', href: 'AUTO', wer: 'Mehmet',
         gruende: [{ art: 'belegt', text: 'Freigabe angefragt', quelle: 'Notiz 29.09.' }], knoepfe: [{ label: 'Öffnen', href: 'AUTO' }, { label: 'Später', aktion: 'spaeter' }] });
-      wartetAufUns.push({ id: 'mensa', zeit: 'seit 6 T.', vor: 'Kitchen Loop wartet auf ', kern: 'Rückmeldung zur Mensa', nach: '.', art: 'beratung', vorgang: 'Gründungsteams · Kitchen Loop', href: 'AUTO', wer: 'Julia',
+      wartetAufUns.push({ id: 'mensa', zeit: 'seit 6 Tagen', vor: 'Kitchen Loop wartet auf ', kern: 'Rückmeldung zur Mensa', nach: '.', art: 'beratung', vorgang: 'Gründungsteams · Kitchen Loop', href: 'AUTO', wer: 'Julia',
         gruende: [{ art: 'belegt', text: 'Julia: „Ich kläre das mit dem Studierendenwerk.“', quelle: 'Mail 24.09.' }], knoepfe: [{ label: 'Zur Aufgabe', href: 'Aufgaben.dc.html' }, { label: 'Später', aktion: 'spaeter' }] });
-      haengt.push({ id: 'sommer', zeit: 'seit 25 T.', vor: 'Rückblick Sommerfest: ', kern: 'Entwurf liegt', nach: ' seit 25 Tagen.', art: 'beitrag', vorgang: 'Social Media · Rückblick Sommerfest', href: 'AUTO', wer: 'Mehmet',
+      haengt.push({ id: 'sommer', zeit: 'seit 25 Tagen', vor: 'Rückblick Sommerfest: ', kern: 'Entwurf liegt', nach: ' seit 25 Tagen.', art: 'beitrag', vorgang: 'Social Media · Rückblick Sommerfest', href: 'AUTO', wer: 'Mehmet',
         gruende: [{ art: 'belegt', text: 'Letzte Änderung am Entwurf', quelle: 'Datei 05.09.' }, { art: 'einschaetzung', text: 'vermutlich zurückgestellt wegen Pitch-Abend' }], knoepfe: [{ label: 'Öffnen', href: 'AUTO' }, { label: 'Später', aktion: 'spaeter' }] });
     }
     return [
       { titel: 'Heute', items: heute, leerTitel: 'Heute steht nichts an.', leerText: 'Termine und Fristen für heute erscheinen hier.' },
       { titel: 'Wartet auf uns', items: wartetAufUns, leerTitel: 'Nichts wartet auf euch.', leerText: 'Wenn jemand eine Antwort von euch erwartet, steht es hier.' },
       { titel: 'Wir warten auf', items: wirWarten, leerTitel: 'Ihr wartet auf nichts.', leerText: 'Zusagen anderer mit Frist erscheinen hier.' },
-      { titel: 'Hängt', items: haengt, leerTitel: 'Nichts hängt.', leerText: 'Vorgänge ohne Bewegung seit drei Wochen erscheinen hier.' },
+      { titel: 'Hängt', items: haengt, leerTitel: 'Nichts hängt.', leerText: 'Einträge ohne Bewegung seit drei Wochen erscheinen hier.' },
       { titel: 'Prüfen', items: [{ id: 'pruef', zeit: 'Import', vor: '', kern: '214 ungeprüft', nach: ' – Vorschläge aus dem Import der letzten 12 Monate.', art: 'sonstiges', vorgang: 'Alle Bereiche · Filter „ungeprüft“', href: 'AUTO', wer: 'Team',
-        gruende: [{ art: 'berechnet', text: 'Gründungsteams 52 · Events 31 · Lehre 14 · Social Media 21 · Kontakte 88 · Aufgaben 5 · Dateien 3' }, { art: 'einschaetzung', text: 'Rechnungen tauchen gehäuft als Gründungsteams auf – gesammelt verwerfen spart Zeit' }],
+        gruende: [{ art: 'berechnet', text: 'Gründungsteams 52 · Events 31 · Lehre 14 · Social Media 21 · Kontakte 88 (57 Personen, 31 Organisationen) · Aufgaben 5 · Dateien 3' }, { art: 'einschaetzung', text: 'Rechnungen tauchen gehäuft als Gründungsteams auf – gesammelt verwerfen spart Zeit' }],
         knoepfe: [{ label: 'Gründungsteams prüfen', href: 'Gruendungsteams.dc.html' }, { label: 'Kontakte', href: 'Kontakte.dc.html', text: true }, { label: 'Später', aktion: 'spaeter' }] }], leerTitel: 'Alles geprüft.', leerText: '' }
     ];
   }
@@ -180,7 +177,7 @@ class Component extends DCLogic {
       var w = st.teamNeu[t.id];
       return Object.assign({}, t, {
         offen: !w, vergeben: !!w,
-        status: w === 'Andreas' ? '✓ Von dir übernommen · steht jetzt unter „Meins“' : (w ? '✓ Zugewiesen an ' + w + ' · ' + w + ' sieht es unter „Meins“' : ''),
+        status: w === 'Andreas' ? '✓ Von dir übernommen · steht jetzt in deiner Liste auf Heute' : (w ? '✓ Zugewiesen an ' + w + ' · steht jetzt auf ' + w + 's Heute' : ''),
         zeigeWer: st.teamWer === t.id,
         uebernehmen: function () { var m = Object.assign({}, self.state.teamNeu); m[t.id] = 'Andreas'; self.setState({ teamNeu: m, teamWer: null }); },
         zuweisenAuf: function () { self.setState({ teamWer: self.state.teamWer === t.id ? null : t.id }); },
@@ -197,8 +194,11 @@ class Component extends DCLogic {
     var self = this, st = this.state;
     var gesamt = 0, prueft = 0;
     var BF = st.bereichFilter || 'Alle';
-    var abschnitte = this.daten(st.scope).map(function (s) {
-      var items = s.items.filter(function (h) { return BF === 'Alle' || h.vorgang.split(' · ')[0] === BF; }).map(function (h) {
+    var PZ = { 'Gründungsteams': 52, 'Events': 31, 'Lehre': 14, 'Social Media': 21 };
+    var abschnitte = this.daten('Meins').map(function (s) {
+      var quelle = s.items;
+      if (s.titel === 'Prüfen' && BF !== 'Alle') quelle = PZ[BF] ? [{ id: 'pruef-' + BF, zeit: 'Import', vor: '', kern: PZ[BF] + ' ungeprüft', nach: ' in ' + BF + ' – Vorschläge aus dem Import.', art: 'sonstiges', vorgang: BF + ' · Filter „ungeprüft“', href: 'AUTO', wer: 'Team', gruende: [{ art: 'berechnet', text: 'Nur ' + BF + ' – über alle Bereiche sind es 214' }], knoepfe: [{ label: BF + ' prüfen', href: 'AUTO' }, { label: 'Später', aktion: 'spaeter' }] }] : [];
+      var items = quelle.filter(function (h) { return BF === 'Alle' || h.vorgang.split(' · ')[0] === BF; }).map(function (h) {
         var gesendet = !!st.gesendet[h.id], verschoben = !!st.spaeter[h.id], offen = !!st.offen[h.id];
         var erledigt = !!st.erledigt[h.id];
         var teile = h.vorgang.split(' · '), hr = self.bereichHref(h.vorgang);
@@ -239,19 +239,24 @@ class Component extends DCLogic {
     var nachrichten = msgs.map(function (m, i) {
       var key = st.chatId + ':' + i, gesendet = !!st.msgGesendet[key];
       var antwort = m.wartetAuf ? st.klaert[st.chatId + ':' + m.wartetAuf] : null;
-      var wartet = !!m.wartetAuf && !antwort, entfallen = !!m.wartetAuf && !!antwort && antwort !== 'Ja';
+      var neuAnlegen = !!m.wartetAuf && antwort === 'Neu anlegen';
+      var wartet = !!m.wartetAuf && (!antwort || neuAnlegen), entfallen = !!m.wartetAuf && antwort === 'Andere Person';
       return Object.assign({ art: 'quittung', titel: '', geltung: '', privat: false, punkte: [], anweisung: '', folgen: '', linkText: '', linkHref: '', quelle: '', dringend: false, streamt: false, zeit: '' }, m, {
         istDu: m.typ === 'du', istKollege: m.typ === 'kollege', istAussage: m.typ === 'aussage', istKarte: m.typ === 'karte',
         istKlaerung: m.typ === 'klaerung', istEntwurf: m.typ === 'entwurf' && !gesendet && !entfallen, istGesendet: m.typ === 'entwurf' && gesendet, istLuecke: m.typ === 'luecke',
         istEntfallen: entfallen,
-        wartet: wartet, wartetStil: wartet ? 'opacity: 0.45; pointer-events: none' : '', wartetAria: wartet ? 'true' : 'false',
+        wartet: wartet, gesperrtText: neuAnlegen ? 'Wartet, bis „Frau Weber“ als Kontakt angelegt ist – dann trage ich die Adresse ein.' : 'Wartet auf deine Antwort oben – erst dann lässt er sich senden.',
+        istNeuAnlegen: m.typ === 'klaerung' && st.klaert[st.chatId + ':' + m.kid] === 'Neu anlegen',
         beantworten: function (a) { var k = Object.assign({}, self.state.klaert); k[st.chatId + ':' + m.kid] = a; self.setState({ klaert: k }); },
+        zuruecknehmen: function () { var k = Object.assign({}, self.state.klaert); delete k[st.chatId + ':' + m.kid]; self.setState({ klaert: k }); },
+        hinweis: m.geplant ? 'Geht am ' + m.geplant + ' über dein Postfach raus – bis dahin änderbar.' : '',
+        sendenText: m.geplant ? 'Jetzt senden statt ' + m.geplant.split(',')[0].slice(3) : 'Über mein Postfach senden',
         hatQuelle: !!m.quelle && m.typ === 'kollege',
         art: m.typ === 'karte' ? (m.art || 'quittung') : (m.art || 'belegt'),
-        gesendetPunkte: m.typ === 'entwurf' ? ['Mail an ' + m.an + ' über dein Postfach gesendet – liegt in „Gesendet“', 'Zusage „Kontakt vermitteln“ als erledigt markiert'] : [],
+        gesendetPunkte: m.typ === 'entwurf' ? ['Mail an ' + m.an + ' über dein Postfach gesendet – liegt in „Gesendet“'].concat(m.zusage ? ['Zusage „' + m.zusage + '“ als erledigt markiert'] : []).concat(m.geplant ? ['Geplanter Versand am ' + m.geplant + ' entfällt'] : []) : [],
         senden: function () { self.toggleMap('msgGesendet', key); },
         unsend: function () { self.toggleMap('msgGesendet', key); },
-        ansehen: function () { self.setState({ sheet: { id: null, msgKey: key, an: m.an, betreff: m.betreff, text: m.text || m.auszug, quelle: m.quelle, grund: m.grund } }); },
+        ansehen: function () { self.setState({ sheet: { id: null, msgKey: key, kanal: m.kanal, geplant: m.geplant, an: m.an, betreff: m.betreff, text: m.text || m.auszug, quelle: m.quelle, grund: m.grund } }); },
         fragJulia: function () {
           var c = Object.assign({}, self.state.conv);
           c[self.state.chatId] = c[self.state.chatId].concat([
@@ -264,6 +269,24 @@ class Component extends DCLogic {
     var vorschlaege = ['Was steht heute an?', 'Was haben wir Solaro versprochen?', 'Ab jetzt: Hinweise zu Social Media nur montags.'].map(function (t) {
       return { text: t, los: function () { self.senden(t, null); } };
     });
+    var HA = [{ id: 'sommer', zeit: 'seit 25 Tagen', vor: 'Rückblick Sommerfest: ', kern: 'Entwurf liegt', nach: ' seit 25 Tagen.', vorgang: 'Social Media · Rückblick Sommerfest', wer: 'Mehmet', gruende: [{ art: 'belegt', text: 'Letzte Änderung am Entwurf', quelle: 'Datei 05.09.' }, { art: 'einschaetzung', text: 'vermutlich zurückgestellt wegen Pitch-Abend' }] },
+      { id: 'jury2', zeit: 'seit 9 Tagen', vor: 'Pitch-Abend: ', kern: 'Jury unvollständig', nach: ' – Frau Weber hat nicht geantwortet.', vorgang: 'Events · Pitch-Abend', wer: 'Julia', gruende: [{ art: 'belegt', text: 'Juryanfrage an Anna Weber', quelle: 'Mail 21.09.' }, { art: 'berechnet', text: 'zugesagte Antwort seit 5 Tagen überfällig' }] }]
+      .filter(function (h) { return BF === 'Alle' || h.vorgang.split(' · ')[0] === BF; })
+      .map(function (h) { var t = h.vorgang.split(' · '); var gefragt = !!(st.nachgefragt || {})[h.id]; return Object.assign({}, h, { bereich: t[0], eintrag: t[1], href: self.bereichHref(h.vorgang), nachfragenLabel: gefragt ? '✓ ' + h.wer + ' gefragt · Rückgängig' : h.wer + ' fragen', nachfragen: function () { var m = Object.assign({}, self.state.nachgefragt); m[h.id] = !m[h.id]; self.setState({ nachgefragt: m }); } }); });
+    var CG = (function () {
+        var q = (st.chatSuche || '').trim().toLowerCase(), F = st.chatFilterW || 'Alle';
+        var cs = st.chats.filter(function (c) {
+          if (F === 'Angepinnt' && !c.angepinnt) return false;
+          if (F === 'Mit Bereich' && !c.etikett) return false;
+          if (F === 'Ohne Bereich' && c.etikett) return false;
+          var inhalt = (st.conv[c.id] || []).map(function (m) { return m.text || ''; }).join(' ');
+          return !q || (c.titel + ' ' + (c.etikett || '') + ' ' + inhalt).toLowerCase().indexOf(q) >= 0;
+        });
+        var gruppe = function (c) { return c.angepinnt ? 'Angepinnt' : c.datum === 'heute' || c.datum === 'gerade' ? 'Heute' : c.datum === 'gestern' ? 'Gestern' : (c.datum >= '28.09.' ? 'Diese Woche' : 'Älter'); };
+        return ['Angepinnt', 'Heute', 'Gestern', 'Diese Woche', 'Älter'].map(function (g) {
+          return { titel: g, chats: cs.filter(function (c) { return gruppe(c) === g; }).map(function (c) { var n = (st.conv[c.id] || []).length; return { titel: c.titel, datum: c.datum, unter: (c.etikett ? c.etikett + ' · ' : '') + n + ' Nachrichten', los: function () { self.setState({ view: 'chat', chatId: c.id }); }, pinLabel: c.angepinnt ? 'Lösen' : 'Anpinnen', pin: function () { self.setState({ chats: self.state.chats.map(function (x) { return x.id === c.id ? Object.assign({}, x, { angepinnt: !x.angepinnt }) : x; }) }); } }; }) };
+        }).filter(function (g) { return g.chats.length; });
+      })();
     return {
       navUebersicht: st.view === 'uebersicht' ? 'page' : 'false',
       navChat: st.view === 'chat' ? 'page' : 'false',
@@ -289,8 +312,11 @@ class Component extends DCLogic {
         var cs = self.state.chats.slice(); cs.splice(g.idx, 0, g.chat);
         self.setState({ chats: cs, geloescht: null });
       },
-      istTeam: st.scope === 'Team',
-      teamNeu: self.teamNeuListe(),
+      teamOffen: !!st.teamOffen, teamOffenAria: st.teamOffen ? 'true' : 'false', teamPfeil: st.teamOffen ? '▾' : '▸',
+      teamToggle: function () { self.setState({ teamOffen: !self.state.teamOffen }); },
+      haengtAndere: HA, haengtAndereAnzahl: HA.length,
+      imTeamAnzahl: self.teamNeuListe().filter(function (t) { return t.offen && (BF === 'Alle' || t.bereich === BF); }).length + HA.length,
+      teamNeu: self.teamNeuListe().filter(function (t) { return BF === 'Alle' || t.bereich === BF; }),
       teamNeuAnzahl: self.teamNeuListe().filter(function (t) { return t.offen; }).length,
       scope: st.scope,
       setScope: function (w) { self.setState({ scope: w }); },
@@ -304,15 +330,23 @@ class Component extends DCLogic {
       ],
       abschnitte: abschnitte,
       chatTitel: aktiv ? aktiv.titel : 'Neuer Chat',
+      chatPinLabel: aktiv && aktiv.angepinnt ? 'Lösen' : 'Anpinnen',
+      chatPin: function () { if (aktiv) self.setState({ chats: self.state.chats.map(function (x) { return x.id === aktiv.id ? Object.assign({}, x, { angepinnt: !x.angepinnt }) : x; }) }); },
+      chatLoeschen: function () { if (!aktiv) return; var cs = self.state.chats, idx = cs.indexOf(aktiv); self.setState({ chats: cs.filter(function (x) { return x !== aktiv; }), geloescht: { chat: aktiv, idx: idx }, chatId: null }); },
       chatHatEtikett: !!(aktiv && aktiv.etikett),
       chatEtikett: aktiv ? (aktiv.etikett || '') : '',
       chatEtikettHref: aktiv ? (aktiv.etikettHref || '#') : '#',
-      chatLeer: !st.chatId,
+      chatLeer: !st.chatId, chatNichtLeer: !!st.chatId,
+      chatSuche: st.chatSuche || '', chatSucheTippen: function (e) { self.setState({ chatSuche: e.target.value }); },
+      chatFilter: ['Alle', 'Angepinnt', 'Mit Bereich', 'Ohne Bereich'].map(function (f) { return { label: f, an: (st.chatFilterW || 'Alle') === f ? 'true' : 'false', los: function () { self.setState({ chatFilterW: f }); } }; }),
+      keineChats: CG.length === 0,
+      chatGruppen: CG,
+      chatAnzahl: st.chats.length + ' Chats',
       nachrichten: nachrichten,
       chatLaedt: !!st.laedt && st.laedt === st.chatId,
       vorschlaege: vorschlaege,
       zeigeSheet: !!st.sheet,
-      sheet: st.sheet || {},
+      sheet: st.sheet || {}, sheetKopf: 'Entwurf · ' + ((st.sheet || {}).kanal || 'Mail') + ' · von deinem Uni-Postfach →', sheetEinzeln: !!st.sheet && !/Verteiler|\(\d+\)/.test(st.sheet.an || ''), sheetSendenText: st.sheet && st.sheet.geplant ? 'Jetzt senden statt ' + st.sheet.geplant.split(',')[0].slice(3) : 'Über mein Postfach senden', sheetHinweis: st.sheet && st.sheet.geplant ? 'Geht am ' + st.sheet.geplant + ' über dein Postfach raus und liegt danach in „Gesendet“.' : 'Geht über dein Postfach und liegt danach ganz normal in „Gesendet“.',
       sheetZu: function () { self.setState({ sheet: null }); },
       sheetSenden: function () {
         var s = self.state.sheet;

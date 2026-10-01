@@ -1,6 +1,6 @@
 Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid var(--rule);padding:20px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}.baum{display:flex;flex-direction:column;gap:1px}.baum button{all:unset;cursor:pointer;font-size:13px;line-height:20px;padding:3px 8px;border-radius:2px;color:var(--ink-muted);display:flex;justify-content:space-between;gap:8px}.baum button[aria-pressed="true"]{background:var(--paper-sunk);color:var(--ink)}.baum button:focus-visible{outline:2px solid var(--accent)}.ld-liste--schmal{width:340px}.tagz{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.tag{display:inline-flex;gap:4px;align-items:baseline;font-size:13px;padding:1px 4px 1px 8px;border:1px solid var(--rule);border-radius:2px}.tag button{all:unset;cursor:pointer;color:var(--ink-muted);padding:0 4px}.tag button:focus-visible{outline:2px solid var(--accent)}.pfad{font-family:var(--font-mono);font-size:12px;line-height:18px;color:var(--ink-muted);word-break:break-all}
 @@SIDE:dateien@@
-<div class="ld">
+<div class="{{ldKlasse}}">
 <nav class="baum-spalte" aria-label="Ordner auf dem Netzlaufwerk">
 <div class="label" style="color: var(--ink-muted)">Netzlaufwerk</div>
 <div class="pfad">\\fs.uni-augsburg.de\gruendung</div>
@@ -34,16 +34,17 @@ Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid 
 </div>
 
 <div class="ld-detail">
+<div class="ld-zu"><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
 <sc-if value="{{hatDetail}}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{d.istUngeprueft}}" hint-placeholder-val="{{ false }}">
-<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Zuordnung von Kollege – {{d.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Verwerfen</button></div>
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Zuordnung von Kollege – {{d.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Zuordnung verwerfen</button></div>
 </sc-if>
 <div style="display: flex; flex-direction: column; gap: 12px">
 <label for="d-name" class="kg-sr">Dateiname</label>
 <input id="d-name" class="fe fe-titel" data-feld="name" value="{{d.name}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" style="font-family: var(--font-mono); font-size: 20px">
 <div class="pfad">{{d.pfad}}</div>
 <div class="kg-aktionen">
-<button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{d.oeffnen}}">{{d.oeffnenLabel}}</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.oeffnen}}">{{d.oeffnenLabel}}</button>
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.pfadKopieren}}">Pfad kopieren</button>
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
 </div>
