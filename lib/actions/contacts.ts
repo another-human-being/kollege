@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isFreemailDomain, teamConfig } from '@/lib/config';
+import { isFreemailDomain, teamDomain } from '@/lib/config';
 import { orgs, people, personEmails } from '@/lib/db/schema';
 import { ALL_ACTORS, reviewStateFor } from './helpers';
 import { defineAction } from './registry';
@@ -22,7 +22,7 @@ export const orgCreate = defineAction({
     // domains are used for fixed assignment: never freemail, never the team itself (§7.2.2)
     for (const d of p.domains) {
       if (isFreemailDomain(d)) throw new ActionError(`freemail domain ${d} cannot belong to an organisation`);
-      if (d === teamConfig().team_domain) throw new ActionError('the team domain cannot belong to an organisation');
+      if (d === teamDomain()) throw new ActionError('the team domain cannot belong to an organisation');
     }
     const [row] = await tx
       .insert(orgs)

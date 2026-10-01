@@ -4,7 +4,8 @@ Ein kleiner, realistischer Ausschnitt aus dem StartHub-Alltag im September 2026.
 
 | Datei | Inhalt |
 |---|---|
-| `config.json` | Team, Postfächer (wer hat welches), Start-Bereiche, Freemail-Domains, Team-Domain |
+| `config.json` | Team, Postfächer (wer hat welches), Start-Bereiche |
+| `freemail.json` | Freemail-Domains der Testdaten (`FREEMAIL_FILE`); Team-Domain der Testdaten: `TEAM_DOMAIN=gruendung.uni-augsburg.example` |
 | `mail.json` | 15 Mails; `mailboxes` gibt an, in welchen Postfächern die Mail liegt |
 | `calendar.json` | 7 Termine (inkl. Vorjahres-Event) |
 | `drive.json` | 6 Dateien auf dem Netzlaufwerk (Pfad + extrahierter Text) |

@@ -31,8 +31,10 @@
 2. **Klärungsknöpfe** leitet die Pipeline ab, das Schema bleibt. Beispiel: Absender unbekannt + genau ein Kandidat mit gleichem Vornamen → „Ja, das ist X“ (`person.add_email`), dazu immer „Nein/Verwerfen“.
 3. **`actions` sieht die App-Rolle nur für eigene Aktionen.** `reason` kann aus eingeschränkten Mails zitieren.
 4. **app-Container** in Stufe 1 nur als Gerüst.
-6. **Termine sehen Kalenderbesitzer, Organisator und eingeladene Teammitglieder** (`visible_to`).
 5. **Filter „rein intern“ gilt nur für Mails.** Interne Termine bewertet das Modell (e3 → `relevant:false`, Grund `irrelevant`). `expected.json` ist entsprechend angepasst. Grund: Bei Terminen sind die Eingeladenen nicht das Publikum (Gründungsnacht).
+6. **Termine sehen Kalenderbesitzer, Organisator und eingeladene Teammitglieder** (`visible_to`).
+7. **Systemschritte werden korrigiert, nicht rückgängig gemacht** (für Stufe 2): Nutzer verwenden `entry.unlink`/`relink`, `review.discard` (mit Grund), `task.update`. Diese Aktionen sind selbst umkehrbar und werden zu Korrekturbeispielen (§7.4). `undoAction` bleibt auf eigene Aktionen beschränkt.
+8. **Konfiguration:** Die Team-Domain steht in `TEAM_DOMAIN` (`.env`). Die Freemail-Liste ist die Datei `config/freemail.json` (überschreibbar per `FREEMAIL_FILE`, für die Testdaten `fixtures/freemail.json`). Die Seed-Daten (Team, Postfächer, Bereiche) bleiben in `fixtures/config.json`.
 
 ## Befunde aus dem Bau
 
@@ -50,7 +52,7 @@
 - **Fristen:** Das Modell liefert ein Datum, gespeichert wird `due_at` = 23:59:59 Berlin an diesem Tag.
 - **Konnektor-Interface:** `sync` liefert zusätzlich `errors` (nicht lesbare Elemente → Eintrag `kind=system`, Cursor läuft weiter, §12).
 - **Mails ohne Message-ID** werden als Fehler-Eintrag abgelehnt. Die Formulierung „Message-ID ohne Quelle“ in §12 ist so ausgelegt.
-- **Rückgängig** wirkt nur auf eigene Aktionen (Entscheidung 3). Folgeschritte anderer Akteure unter einer Nutzeraktion sähe `undoAction` nicht. In Stufe 1 kommt das nicht vor, für Stufe 2 ist es zu klären (siehe Fragen).
+- **Rückgängig** wirkt nur auf eigene Aktionen (Entscheidung 3). Folgeschritte anderer Akteure unter einer Nutzeraktion sähe `undoAction` nicht. In Stufe 1 kommt das nicht vor. Mit Entscheidung 7 ist es auch nicht nötig.
 - **`created_by_type`** kennt nur `user|system`. Was der Akteur `model` anlegt, zählt als `system` und ist ungeprüft.
 - **Rollen:** Es gibt eine Login-Rolle (eine `DATABASE_URL`, §14), die App wechselt per `SET LOCAL ROLE`. Strenger wäre ein eigener Login für die App ohne Mitgliedschaft in der Eigentümerrolle.
 - **Noch nicht gebaut**, weil in Stufe 1 nicht gebraucht:
@@ -65,14 +67,12 @@
 - Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
 - EU-Modell für den Betrieb (parallel zum Test)
-- Team-Domain und Freemail-Liste (Backend, für den Filter und die feste Zuordnung): Wo liegen sie im Betrieb? Vorschlag: `TEAM_DOMAIN` in `.env`, die Freemail-Liste als Datei im Repo. Stufe 1 liest `fixtures/config.json`.
 - Klärungshinweis zu einer eingeschränkten Mail mit mehreren Berechtigten: Wer bekommt ihn? Jetzt geht er an die erste Person in `visible_to`.
-- Zuständige: Andreas hat entschieden „zuständig bin ich, später können weitere dazukommen“. Zu klären: (a) gilt das für alle vom System angelegten Vorgänge oder nur für Gründungsteams? (b) „weitere zusätzlich“ braucht mehrere Zuständige pro Vorgang, das Schema §4.6 hat nur `owner_user_id`. (c) Fest „Andreas“ oder „Admin“ bzw. ein konfigurierter Standard-Zuständiger? m10 erwartet derzeit „niemand zuständig“.
+- Zuständige für Vorgänge, die das System anlegt: Vorschlag liegt bei Andreas. Wer die Quelle persönlich hat, wird zuständig (eigenes Postfach, Adressat, eigener Kalender, Bearbeiter der Datei). Team-Quellen (StartHub-Postfach, Laufwerk ohne Bearbeiter) bleiben ohne Zuständigen. Es gibt einen Zuständigen pro Vorgang, wechselbar über `matter.assign`/`handover`.
 - Rolle neuer Personen (founder/partner/…) aus der Rolle der Org ableiten?
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
 - e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
-- Rückgängig von Systemschritten (Stufe 2): Vorschlag ist, statt Undo Korrekturaktionen zu verwenden (`entry.unlink`/`relink`, `review.discard`, `task.update`). Diese sind selbst umkehrbar und werden zu Korrekturbeispielen (§7.4). Wartet auf Bestätigung.
 - Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (ab Stufe 3)
 
 ## Verbrauch

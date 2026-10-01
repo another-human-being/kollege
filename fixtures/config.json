@@ -1,6 +1,4 @@
 {
-  "team_domain": "gruendung.uni-augsburg.example",
-  "freemail_domains": ["gmx.example", "web.example", "gmail.example", "outlook.example", "t-online.example"],
   "users": [
     { "key": "andreas", "name": "Andreas", "email": "andreas@gruendung.uni-augsburg.example", "is_admin": true },
     { "key": "julia", "name": "Julia", "email": "julia@gruendung.uni-augsburg.example", "is_admin": false },

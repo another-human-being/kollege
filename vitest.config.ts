@@ -14,6 +14,8 @@ export default defineConfig({
       DATABASE_URL: process.env.TEST_DATABASE_URL ?? 'postgres://kollege:kollege@localhost:5432/kollege_test',
       BLOB_DIR: join(tmpdir(), 'kollege-test-blobs'),
       MODEL_FAST: 'oracle',
+      TEAM_DOMAIN: 'gruendung.uni-augsburg.example',
+      FREEMAIL_FILE: fileURLToPath(new URL('./fixtures/freemail.json', import.meta.url)),
       TZ: 'Europe/Berlin',
     },
     testTimeout: 30000,

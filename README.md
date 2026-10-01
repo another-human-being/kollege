@@ -5,7 +5,7 @@ Interne Arbeits-App für das StartHub-Team (Arbeitsname). Spezifikation: [`docs/
 ## Entwicklung (Stufe 1)
 
 ```
-cp .env.example .env            # für die Testdaten: MODEL_FAST=oracle
+cp .env.example .env            # Testdaten: MODEL_FAST=oracle, TEAM_DOMAIN=gruendung.uni-augsburg.example, FREEMAIL_FILE=fixtures/freemail.json
 docker compose up -d --build
 docker compose run --rm worker npm run db:seed
 docker compose restart worker   # importiert die Fixture-Quellen

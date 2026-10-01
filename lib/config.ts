@@ -1,6 +1,7 @@
-// Team configuration (team domain, freemail list, team, mailboxes, start areas).
-// Stage 1: read from fixtures/config.json – where it lives in production is an
-// open question (docs/STAND.md).
+// Configuration.
+//  - team domain: env TEAM_DOMAIN; freemail list: JSON file (env FREEMAIL_FILE,
+//    default config/freemail.json) – decision 2026-10-01
+//  - seed data (team, mailboxes, start areas): fixtures/config.json
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
@@ -24,8 +25,6 @@ export const AreaConfig = z.object({
 });
 
 const TeamConfig = z.object({
-  team_domain: z.string().min(1),
-  freemail_domains: z.array(z.string()),
   users: z.array(z.object({ key: z.string(), name: z.string(), email: z.email(), is_admin: z.boolean() })),
   mailboxes: z.array(
     z.object({ key: z.string(), owner: z.string().nullable(), address: z.email(), team: z.boolean().optional() }),
@@ -35,6 +34,7 @@ const TeamConfig = z.object({
 export type TeamConfig = z.infer<typeof TeamConfig>;
 
 export const fixturesDir = fileURLToPath(new URL('../fixtures', import.meta.url));
+const defaultFreemailFile = fileURLToPath(new URL('../config/freemail.json', import.meta.url));
 
 let cached: TeamConfig | undefined;
 
@@ -47,10 +47,28 @@ export function emailDomain(email: string): string {
   return email.slice(email.lastIndexOf('@') + 1).toLowerCase();
 }
 
+export function teamDomain(): string {
+  const d = process.env.TEAM_DOMAIN?.trim().toLowerCase();
+  if (!d) throw new Error('TEAM_DOMAIN is not set');
+  return d;
+}
+
+let freemail: Set<string> | undefined;
+
+function freemailDomains(): Set<string> {
+  freemail ??= new Set(
+    z
+      .array(z.string().min(3))
+      .parse(JSON.parse(readFileSync(process.env.FREEMAIL_FILE || defaultFreemailFile, 'utf8')))
+      .map((d) => d.toLowerCase()),
+  );
+  return freemail;
+}
+
 export function isTeamAddress(email: string): boolean {
-  return emailDomain(email) === teamConfig().team_domain;
+  return emailDomain(email) === teamDomain();
 }
 
 export function isFreemailDomain(domain: string): boolean {
-  return teamConfig().freemail_domains.includes(domain.toLowerCase());
+  return freemailDomains().has(domain.toLowerCase());
 }
