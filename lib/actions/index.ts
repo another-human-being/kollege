@@ -2,6 +2,7 @@
 // Stage 1 registers the actions the seed and the intake pipeline need;
 // the remaining V1 actions follow with the stage that uses them.
 import './area';
+import './chat';
 import './contacts';
 import './handover';
 import './hint';
@@ -13,6 +14,6 @@ import './review';
 import './task';
 
 export { runAction, undoAction, type RunOptions } from './run';
-export { defineAction, getAction } from './registry';
+export { defineAction, getAction, listActions } from './registry';
 export { ActionError, type Actor } from './types';
 export { answerHint } from './answer';

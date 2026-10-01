@@ -12,3 +12,7 @@ export function defineAction<S extends z.ZodType, R>(def: ActionDef<S, R>): Acti
 export function getAction(type: string): ActionDef | undefined {
   return registry.get(type);
 }
+
+export function listActions(): ActionDef[] {
+  return [...registry.values()];
+}

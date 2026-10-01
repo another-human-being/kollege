@@ -48,7 +48,7 @@ export const noteCreate = defineAction({
       .returning({ id: entries.id });
     const [l] = await tx
       .insert(links)
-      .values({ entry_id: e!.id, target_type: p.target_type, target_id: p.target_id, origin: 'human', confidence: 'high', action_id: ctx.actionId })
+      .values({ entry_id: e!.id, target_type: p.target_type, target_id: p.target_id, origin: ctx.actor.type === 'user' ? 'human' : 'model', confidence: 'high', action_id: ctx.actionId })
       .returning({ id: links.id });
     return {
       result: { id: e!.id },

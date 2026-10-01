@@ -15,6 +15,8 @@ export const taskCreate = defineAction({
       owner_user_id: z.uuid().optional(),
       owner_person_id: z.uuid().optional(),
       due_at: z.iso.datetime({ offset: true }).optional(),
+      /** a day: due at its end in Berlin ("bis Freitag") */
+      due_date: z.iso.date().optional(),
       matter_id: z.uuid().optional(),
       org_id: z.uuid().optional(),
       source_entry_id: z.uuid().optional(),
@@ -22,10 +24,12 @@ export const taskCreate = defineAction({
     })
     .refine((t) => (t.direction === 'ours' ? !t.owner_person_id : !t.owner_user_id), {
       message: 'ours is owed by a user, theirs by a person',
-    }),
+    })
+    .refine((t) => !(t.due_at && t.due_date), { message: 'either due_at or due_date' }),
   external: false,
   allowedActors: ALL_ACTORS,
-  async apply(tx, { due_at, ...p }, ctx) {
+  async apply(tx, { due_at, due_date, ...p }, ctx) {
+    const due = due_date ? berlinEndOfDay(due_date) : due_at;
     if (p.visibility === 'private' && ctx.actor.type === 'system') {
       throw new ActionError('the system cannot create private tasks');
     }
@@ -33,7 +37,7 @@ export const taskCreate = defineAction({
       .insert(tasks)
       .values({
         ...p,
-        due_at: due_at ? new Date(due_at) : undefined,
+        due_at: due ? new Date(due) : undefined,
         owner_of_private: p.visibility === 'private' && ctx.actor.type !== 'system' ? ctx.actor.userId : undefined,
         action_id: ctx.actionId,
       })

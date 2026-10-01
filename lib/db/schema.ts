@@ -269,3 +269,17 @@ export const hints = pgTable('hints', {
   show_from: ts('show_from'),
   dedupe_key: text('dedupe_key').notNull().unique(),
 });
+
+// §9: every model call, for costs and debugging only (no content)
+export const modelCalls = pgTable('model_calls', {
+  id: id(),
+  created_at: ts('created_at').notNull().defaultNow(),
+  user_id: uuid('user_id').references(() => users.id),
+  role: text('role').notNull(),
+  model: text('model').notNull(),
+  purpose: text('purpose').notNull(),
+  input_tokens: integer('input_tokens'),
+  output_tokens: integer('output_tokens'),
+  duration_ms: integer('duration_ms').notNull(),
+  error: text('error'),
+});

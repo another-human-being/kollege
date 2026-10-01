@@ -44,7 +44,7 @@ export const NOW = new Date('2026-10-01T08:00:00+02:00');
 export async function resetDb(): Promise<void> {
   await withSystem((tx) =>
     tx.execute(sql`TRUNCATE users, connections, areas, orgs, people, person_emails, matters, entries,
-                   links, tasks, actions, hints, chats, chat_messages CASCADE`),
+                   links, tasks, actions, hints, chats, chat_messages, model_calls CASCADE`),
   );
 }
 
