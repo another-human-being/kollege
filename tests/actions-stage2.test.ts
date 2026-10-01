@@ -242,6 +242,12 @@ describe('clarify: answering a hint', () => {
 });
 
 describe('settings', () => {
+  it('creates an area from just its name', async () => {
+    const { result } = await runAction<{ id: string }>(as('andreas'), 'area.create', { name_plural: 'Partner & Kooperationen', matter_kind: 'item' });
+    const [a] = await withSystem((tx) => tx.select().from(areas).where(eq(areas.id, result.id)));
+    expect(a).toMatchObject({ key: 'partner_kooperationen', name_singular: 'Partner & Kooperationen', fields: [], phases: [] });
+  });
+
   it('changes an area and undoes it', async () => {
     const [social] = await withSystem((tx) => tx.select().from(areas).where(eq(areas.key, 'social')));
     const { actionId } = await runAction(as('mehmet'), 'area.update', { id: social!.id, name_plural: 'Beiträge', phases: ['Idee', 'Entwurf'] });

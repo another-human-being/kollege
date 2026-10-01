@@ -5,9 +5,21 @@ import { ALL_ACTORS, defined, updateWithInverse } from './helpers';
 import { ActionError } from './types';
 import { defineAction } from './registry';
 
+function slug(name: string): string {
+  return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/[^a-z]+/g, '_').replace(/^_|_$/g, '');
+}
+
 export const areaCreate = defineAction({
   type: 'area.create',
-  schema: AreaConfig.extend({ sort: z.number().int().default(0) }),
+  // from the settings only a name comes in: the key is derived, the singular starts as the name
+  schema: z.preprocess(
+    (raw) => {
+      const r = raw as Record<string, unknown>;
+      const name = typeof r?.name_plural === 'string' ? r.name_plural : '';
+      return { name_singular: name, key: slug(name), ...r };
+    },
+    AreaConfig.extend({ sort: z.number().int().default(0) }),
+  ),
   external: false,
   allowedActors: ALL_ACTORS,
   async apply(tx, p) {

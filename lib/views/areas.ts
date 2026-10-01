@@ -13,6 +13,7 @@ export interface AreaField {
   label: string;
   type: 'text' | 'date' | 'person' | 'number' | 'select';
   options?: string[];
+  carry_over?: boolean;
 }
 
 export interface AreaInfo {
