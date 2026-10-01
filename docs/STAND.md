@@ -5,7 +5,7 @@
 ## Stufen
 
 - [x] 1 Kern: Schema, RLS, Aktionsschicht + Rückgängig, Seed, Fixture-Import
-- [ ] 2 Oberfläche: Heute, Bereiche, Aufgaben, Kontakte, Einstellungen
+- [x] 2 Oberfläche: Heute, Bereiche, Aufgaben, Kontakte, Einstellungen
 - [ ] 3 Eingabe & Chat
 - [ ] 4 Mail-Eingang
 - [ ] 5 Mail-Client
@@ -13,7 +13,7 @@
 - [ ] 7 Laufwerk
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 2 läuft. Alles ohne Oberfläche ist gebaut und getestet. Die Oberfläche wartet auf den neuen Design-Export (Entscheidung 10).
+**Aktuell:** Stufe 2 abgeschlossen (02.10.2026). Als Nächstes Stufe 3.
 
 ## Stufe 1 – erledigt
 
@@ -25,18 +25,21 @@
 - Eingangsweg `lib/pipeline/`: Rohspeicherung (Blob + `entries`, Upsert über `dedupe_key`), Filter, feste Zuordnung, Kandidaten, Modell `fast` (Stufe 1: Orakel, `MODEL_FAST=oracle`), Schranke, Anhänge, Import mit `review_batch`. Der Worker führt die pg-boss-Jobs `import`, `sync` und `process` aus.
 - Tests (63, `npm test`, brauchen ein lokales Postgres 16, siehe README): alle Abnahmen aus §13, alle `rls_checks` und alle `assert`-Einträge aus `expected.json`, die zu Stufe 1 gehören. Ein Test schlägt fehl, wenn `expected.json` einen Prüfschlüssel bekommt, der weder geprüft noch ausdrücklich zurückgestellt ist. `tsc --noEmit` ist sauber.
 
-## Stufe 2 – Stand
+## Stufe 2 – erledigt
 
-Erledigt (95 Tests grün, `tsc` sauber):
-- **Aktionen:** `matter.update|set_status|assign|create_from_previous`, `review.accept|discard` (einzeln oder gesammelt, ein Rückgängig für alles), `task.update|complete|reopen|assign`, `person.update`, `org.update`, `entry.unlink|relink` (Korrekturen, Entscheidung 7), `area.update`, `instruction.update|delete`, `hint.resolve`, dazu `answerHint` (Knopf ausführen + Hinweis erledigen, ein Rückgängig).
-- **Undo kann jetzt auch Gelöschtes wiederherstellen** (Umkehrung `insert`).
-- **Abfragen `lib/views/`:** Heute (Meins/Team), Bereichsliste mit Filtern und „ungeprüft · N“, Detail (Felder, nächster Schritt, Zusagen wir/sie mit Herkunft „aus Julias Mail“, Verlauf mit Platzhaltern und Zahl der Systemschritte, Notizen, Dateien inkl. lesbarer Anhänge, Bezüge), Beratungsakte (Org), Person, Kontakte, Aufgaben, Einstellungen.
-- **Login:** Auth.js mit Sitzung und Dev-Login (nur `NODE_ENV=development`).
-
-Offen in Stufe 2:
-- Layout, Navigation und alle Seiten nach dem neuen Design-Export.
-- Schriften selbst ausliefern.
-- Abnahme von Hand. Auf Aktionsebene ist sie schon durch Tests abgedeckt.
+- Oberfläche nach dem Design-Export vom 01.10. (`design/`):
+  - Rahmen und Navigation (E40).
+  - Heute nach E39: Kurz klären, Heute, Wartet auf uns, Wir warten auf, Hängt, Prüfen, „Im Team“, Bereichsfilter, „Übergabe an dich“.
+  - Bereiche als Liste und Detail mit Filtern und Prüfmodus (gesammelt, mit Grund); Beratungsakte für Gründungsteams mit Personen, Gesprächen, Zusagen und Themen.
+  - Aufgaben als Liste und Board (E44), Kontakte, Einstellungen (Quellen, Bereiche, Anweisungen).
+- Bearbeiten ohne Speichern-Knopf, „Gespeichert · Rückgängig“ (E24). Jede Änderung ist eine Aktion des angemeldeten Nutzers (`app/actions.ts` → `runAction`).
+- Bausteine aus `bundle.js` als typisierte React-Komponenten (`components/kg.tsx`). CSS kommt direkt aus `design/`, Schriften liefert die App selbst aus.
+- Neu in der Aktionsschicht:
+  - Übergabe mit Annahme für Vorgänge und Organisationen (`matters.handover_to`, `orgs.handover_to`),
+  - Aufgabenstatus „In Arbeit“,
+  - Notizen und Gespräche (`note.create|update`),
+  - Bereich anlegen aus dem Namen.
+- Tests: 107 Vitest und 5 Playwright-Abnahmen (`npm run e2e`, eigene DB `kollege_e2e`). Die Abnahme aus §13 läuft damit automatisch statt von Hand. `npm run dev:reset -- --ja` baut die Dev-Datenbank aus den Testdaten neu auf.
 
 ## Entscheidungen (mit Andreas, 01.10.2026)
 
@@ -91,6 +94,27 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 - **`npm audit`** meldet 4 Fälle „moderate“ in `drizzle-kit` (esbuild-Dev-Server). Das betrifft nur die Entwicklung.
 
 ### Befunde Stufe 2
+
+- **Fehler im Design, beim Bau gelöst:**
+  - „Nächster Schritt“ als freies Feld neben den Aufgaben: zwei Wahrheiten. Er wird jetzt aus der frühesten offenen eigenen Aufgabe berechnet; bei Gründungsteams ist er das Bereichsfeld.
+  - „betreut von“ und „Phase“ stehen bei Gründungsteams als Feld und als Spalte der Organisation: Sie werden auf die Spalten abgebildet.
+  - Die Phasenliste steht zweimal (Phasen und Auswahl des Feldes „Phase“): Das Feld verwendet jetzt immer die Phasen.
+  - `Navigation` mit Zählern: entfernt (M2).
+  - `Verlauf` mit Rückgängig an Systemschritten: entfernt (Entscheidung 7).
+  - `Quelle` ohne Ziel als funktionsloser Knopf: rendert als Text (Ü11).
+  - Hintergrund im Prototyp fest `#fbfbfa`: jetzt `var(--paper)`.
+  - Klärungen nannten als Beleg den Zeitpunkt des Hinweises: jetzt das Datum der Mail.
+  - „Prüfen“ auf Heute zählt live je Bereich (H2) statt des eingefrorenen Import-Texts.
+  - Liste neben offenem Detail: Feste Spaltenbreiten drückten den Titel auf null. Jetzt gilt E34: schmal mit 3 Spalten, ohne Detail alle.
+- **Bewusst anders als der Prototyp:**
+  - **„Stimmt“ je KI-Feld:** Die Marke bleibt, bestätigt wird über „Übernehmen“, denn Herkunft pro Feld gibt es nicht.
+  - **Bezüge über Bereiche** nur über vorhandene Beziehungen (Org, „gehört zu“, Vorgänger). Eine eigene Tabelle für freie Querbezüge (E31) gibt es nicht.
+  - **Notizen** sind ein schlichtes Textfeld statt eines Rich-Text-Editors.
+  - **„Kollege fragen“** fehlt bis Stufe 3.
+  - **„+ Aufgabe“ und „+ Anweisung“** gibt es nicht, nach §11 laufen sie über das Eingabefeld.
+  - **Board ohne Ziehen:** Status per „Verschieben nach …“ (Tastaturweg aus E44).
+- **Übergabe braucht keine Hinweis-Zeile:** Die Wahrheit ist `handover_to`. Die Empfängerin sieht sie auf Heute, und RLS bleibt unberührt (ein Hinweis für eine andere Person wäre unter RLS nicht anlegbar).
+- **Turbopack** deutet `new URL('../x', import.meta.url)` als Asset. Pfade sind jetzt relativ zu `process.cwd()`.
 
 - **RLS lässt UPDATE/DELETE auf lesbare, aber nicht änderbare Zeilen still durchlaufen.** Ein Beispiel ist der Link zu einer Mail, die man nicht sehen darf: Das Ergebnis sind 0 Zeilen, aber kein Fehler. Ein Test hat das gefunden. Die Aktionen prüfen jetzt die betroffenen Zeilen und lehnen sonst ab.
 - **Berechnete Zustände** müssen alles zählen, was das Team hat, nicht nur das, was der Fragende lesen darf. Sonst gälte eine Mail für Julia als unbeantwortet, obwohl Andreas aus seinem Postfach geantwortet hat. Dafür gibt es `SECURITY DEFINER`-Funktionen (`waiting_on_us`, `matter_last_activity`, `org_last_activity`, `entry_owner_names`, Migration `0002_views.sql`). Sie liefern nur IDs, Zeitpunkte und Namen, keine Inhalte.
