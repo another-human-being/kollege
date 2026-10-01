@@ -41,12 +41,14 @@ export function Feld({
   );
 }
 
-export function Auswahl({ id, wert, optionen, change, label, leer }: { id: string; wert: string; optionen: string[]; change: Change; label: string; leer?: string }) {
+/** options: plain values, or [value, label] when the stored value is a code or an id */
+export function Auswahl({ id, wert, optionen, change, label, leer }: { id: string; wert: string; optionen: (string | [string, string])[]; change: Change; label: string; leer?: string }) {
   const { run } = useAktion();
+  const paare = optionen.map((o) => (typeof o === 'string' ? ([o, o] as [string, string]) : o));
   return (
     <select id={id} className="fe" value={wert} aria-label={label} onChange={(e) => run(change.type, payloadFor(change, e.target.value))}>
-      {leer !== undefined || !optionen.includes(wert) ? <option value="">{leer ?? '–'}</option> : null}
-      {optionen.map((o) => <option key={o} value={o}>{o}</option>)}
+      {leer !== undefined || !paare.some(([v]) => v === wert) ? <option value="">{leer ?? '–'}</option> : null}
+      {paare.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
     </select>
   );
 }
@@ -203,6 +205,8 @@ export function AusVorjahr({ vorlagen, oeffnen }: { vorlagen: { id: string; titl
 
 export interface Zeile {
   id: string;
+  /** mixed lists (contacts): what this row is */
+  typ?: 'matter' | 'org' | 'person';
   href: string;
   aktiv: boolean;
   zellen: { text: string; klasse?: string }[];
@@ -215,7 +219,8 @@ export function Pruefen({ typ, raster, zeilen }: { typ: 'matter' | 'org' | 'pers
   const [warum, setWarum] = useState<string | null>(null);
   const toggle = (id: string) => setAuswahl((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const alle = auswahl.size === zeilen.length && zeilen.length > 0;
-  const payload = () => ({ items: [...auswahl].map((id) => ({ type: typ, id })) });
+  const typVon = new Map(zeilen.map((z) => [z.id, z.typ ?? typ]));
+  const payload = () => ({ items: [...auswahl].map((id) => ({ type: typVon.get(id)!, id })) });
   return (
     <>
       <div className="pruefleiste">
