@@ -4,10 +4,13 @@
 import './area';
 import './contacts';
 import './hint';
+import './instruction';
 import './link';
 import './matter';
+import './review';
 import './task';
 
 export { runAction, undoAction, type RunOptions } from './run';
 export { defineAction, getAction } from './registry';
 export { ActionError, type Actor } from './types';
+export { answerHint } from './answer';

@@ -14,7 +14,9 @@ export type UndoableTable = (typeof UNDOABLE_TABLES)[number];
 
 export type InverseOp =
   | { op: 'delete'; table: UndoableTable; id: string }
-  | { op: 'update'; table: UndoableTable; id: string; set: Record<string, unknown> };
+  | { op: 'update'; table: UndoableTable; id: string; set: Record<string, unknown> }
+  /** restore a deleted row (only the given columns; generated columns are left out) */
+  | { op: 'insert'; table: UndoableTable; row: Record<string, unknown> & { id: string } };
 
 export interface ActionContext {
   actor: Actor;

@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { areas, matters } from '@/lib/db/schema';
-import { ALL_ACTORS, reviewStateFor } from './helpers';
+import type { Tx } from '@/lib/db/client';
+import { ALL_ACTORS, defined, reviewStateFor, updateWithInverse } from './helpers';
 import { defineAction } from './registry';
 import { ActionError } from './types';
 
@@ -35,6 +36,106 @@ export const matterCreate = defineAction({
         area_id: area.id,
         date_start: date_start ? new Date(date_start) : undefined,
         date_end: date_end ? new Date(date_end) : undefined,
+        review_state: reviewStateFor(ctx.actor),
+        created_by_type: ctx.actor.type === 'user' ? 'user' : 'system',
+      })
+      .returning({ id: matters.id });
+    return { result: { id: row!.id }, inverse: [{ op: 'delete', table: 'matters', id: row!.id }] };
+  },
+});
+
+const isoOrNull = z.iso.datetime({ offset: true }).nullable().optional();
+const toDate = (v: string | null | undefined) => (v === undefined ? undefined : v === null ? null : new Date(v));
+
+async function areaOf(tx: Tx, matterId: string) {
+  const [row] = await tx
+    .select({ area: areas })
+    .from(matters)
+    .innerJoin(areas, eq(areas.id, matters.area_id))
+    .where(eq(matters.id, matterId));
+  if (!row) throw new ActionError(`matter ${matterId} not found`);
+  return row.area;
+}
+
+export const matterUpdate = defineAction({
+  type: 'matter.update',
+  schema: z.object({
+    id: z.uuid(),
+    title: z.string().min(1).optional(),
+    /** partial: given keys are set, null removes a value */
+    fields: z.record(z.string(), z.unknown()).optional(),
+    phase: z.string().nullable().optional(),
+    date_start: isoOrNull,
+    date_end: isoOrNull,
+    org_id: z.uuid().nullable().optional(),
+    parent_id: z.uuid().nullable().optional(),
+    predecessor_id: z.uuid().nullable().optional(),
+    outcome_note: z.string().nullable().optional(),
+  }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { id, fields, date_start, date_end, ...p }) {
+    const area = await areaOf(tx, id);
+    const set: Record<string, unknown> = defined({ ...p, date_start: toDate(date_start), date_end: toDate(date_end) });
+    if (p.phase && !area.phases.includes(p.phase)) throw new ActionError(`area ${area.key} has no phase ${p.phase}`);
+    if (fields) {
+      const known = new Set((area.fields as { key: string }[]).map((f) => f.key));
+      const unknown = Object.keys(fields).filter((k) => !known.has(k));
+      if (unknown.length) throw new ActionError(`area ${area.key} has no field(s) ${unknown.join(', ')}`);
+      const [m] = await tx.select({ fields: matters.fields }).from(matters).where(eq(matters.id, id));
+      const merged: Record<string, unknown> = { ...(m!.fields as Record<string, unknown>) };
+      for (const [k, v] of Object.entries(fields)) {
+        if (v === null) delete merged[k];
+        else merged[k] = v;
+      }
+      set.fields = merged;
+    }
+    if (!Object.keys(set).length) throw new ActionError('nothing to change');
+    const inverse = await updateWithInverse(tx, matters, 'matters', id, set);
+    return { result: { id }, inverse: [inverse] };
+  },
+});
+
+export const matterSetStatus = defineAction({
+  type: 'matter.set_status',
+  schema: z.object({ id: z.uuid(), status: z.enum(['open', 'done']) }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { id, status }) {
+    return { result: { id }, inverse: [await updateWithInverse(tx, matters, 'matters', id, { status })] };
+  },
+});
+
+export const matterAssign = defineAction({
+  type: 'matter.assign',
+  schema: z.object({ id: z.uuid(), owner_user_id: z.uuid().nullable() }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { id, owner_user_id }) {
+    return { result: { id }, inverse: [await updateWithInverse(tx, matters, 'matters', id, { owner_user_id })] };
+  },
+});
+
+/** "Aus Vorjahr": new matter in the same area and org, pointing to its predecessor. */
+export const matterCreateFromPrevious = defineAction({
+  type: 'matter.create_from_previous',
+  schema: z.object({ previous_id: z.uuid(), title: z.string().min(1) }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { previous_id, title }, ctx) {
+    const area = await areaOf(tx, previous_id);
+    if (!(area.actions as string[]).includes('from_previous')) {
+      throw new ActionError(`area ${area.key} does not offer "from previous"`);
+    }
+    const [prev] = await tx.select().from(matters).where(eq(matters.id, previous_id));
+    const [row] = await tx
+      .insert(matters)
+      .values({
+        area_id: area.id,
+        title,
+        org_id: prev!.org_id,
+        predecessor_id: previous_id,
+        owner_user_id: ctx.actor.type === 'system' ? prev!.owner_user_id : ctx.actor.userId,
         review_state: reviewStateFor(ctx.actor),
         created_by_type: ctx.actor.type === 'user' ? 'user' : 'system',
       })

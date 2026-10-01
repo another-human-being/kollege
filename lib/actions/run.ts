@@ -100,6 +100,13 @@ async function applyInverse(tx: Tx, op: InverseOp): Promise<void> {
   let res;
   if (op.op === 'delete') {
     res = await tx.execute(sql`DELETE FROM ${table} WHERE id = ${op.id}`);
+  } else if (op.op === 'insert') {
+    const cols = Object.keys(op.row);
+    if (!cols.every((c) => /^[a-z_]+$/.test(c))) throw new ActionError('invalid inverse columns');
+    const list = sql.join(cols.map((c) => sql.identifier(c)), sql`, `);
+    res = await tx.execute(sql`
+      INSERT INTO ${table} (${list})
+      SELECT ${list} FROM jsonb_populate_record(NULL::${table}, ${JSON.stringify(op.row)}::jsonb)`);
   } else {
     const cols = Object.keys(op.set);
     if (cols.length === 0 || !cols.every((c) => /^[a-z_]+$/.test(c))) throw new ActionError('invalid inverse columns');
@@ -109,5 +116,8 @@ async function applyInverse(tx: Tx, op: InverseOp): Promise<void> {
         SELECT ${list} FROM jsonb_populate_record(NULL::${table}, ${JSON.stringify(op.set)}::jsonb)
       ) WHERE id = ${op.id}`);
   }
-  if (res.rowCount !== 1) throw new ActionError(`inverse ${op.op} on ${op.table} ${op.id} affected ${res.rowCount} rows`);
+  if (res.rowCount !== 1) {
+    const id = op.op === 'insert' ? op.row.id : op.id;
+    throw new ActionError(`inverse ${op.op} on ${op.table} ${id} affected ${res.rowCount} rows`);
+  }
 }

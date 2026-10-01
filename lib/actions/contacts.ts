@@ -1,9 +1,15 @@
 import { z } from 'zod';
 import { isFreemailDomain, teamDomain } from '@/lib/config';
 import { orgs, people, personEmails } from '@/lib/db/schema';
-import { ALL_ACTORS, reviewStateFor } from './helpers';
+import { ALL_ACTORS, defined, reviewStateFor, updateWithInverse } from './helpers';
 import { defineAction } from './registry';
 import { ActionError } from './types';
+
+/** domains are used for fixed assignment: never freemail, never the team itself (§7.2.2) */
+function checkOrgDomain(d: string) {
+  if (isFreemailDomain(d)) throw new ActionError(`freemail domain ${d} cannot belong to an organisation`);
+  if (d === teamDomain()) throw new ActionError('the team domain cannot belong to an organisation');
+}
 
 const email = z.email().transform((e) => e.toLowerCase());
 const emailSource = z.enum(['mail', 'calendar', 'manual']);
@@ -19,11 +25,7 @@ export const orgCreate = defineAction({
   external: false,
   allowedActors: ALL_ACTORS,
   async apply(tx, p, ctx) {
-    // domains are used for fixed assignment: never freemail, never the team itself (§7.2.2)
-    for (const d of p.domains) {
-      if (isFreemailDomain(d)) throw new ActionError(`freemail domain ${d} cannot belong to an organisation`);
-      if (d === teamDomain()) throw new ActionError('the team domain cannot belong to an organisation');
-    }
+    for (const d of p.domains) checkOrgDomain(d);
     const [row] = await tx
       .insert(orgs)
       .values({ ...p, review_state: reviewStateFor(ctx.actor) })
@@ -66,3 +68,42 @@ export const personAddEmail = defineAction({
   },
 });
 
+
+export const personUpdate = defineAction({
+  type: 'person.update',
+  schema: z.object({
+    id: z.uuid(),
+    name: z.string().min(1).optional(),
+    org_id: z.uuid().nullable().optional(),
+    role: z.enum(['founder', 'mentor', 'partner', 'speaker', 'university', 'other']).optional(),
+    notes: z.string().nullable().optional(),
+  }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { id, ...p }) {
+    const set = defined(p);
+    if (!Object.keys(set).length) throw new ActionError('nothing to change');
+    return { result: { id }, inverse: [await updateWithInverse(tx, people, 'people', id, set)] };
+  },
+});
+
+export const orgUpdate = defineAction({
+  type: 'org.update',
+  schema: z.object({
+    id: z.uuid(),
+    name: z.string().min(1).optional(),
+    role: z.enum(['founding_team', 'partner', 'university', 'other']).optional(),
+    domains: z.array(z.string().min(3).transform((d) => d.toLowerCase())).optional(),
+    phase: z.string().nullable().optional(),
+    fields: z.record(z.string(), z.unknown()).optional(),
+    owner_user_id: z.uuid().nullable().optional(),
+  }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { id, ...p }) {
+    for (const d of p.domains ?? []) checkOrgDomain(d);
+    const set = defined(p);
+    if (!Object.keys(set).length) throw new ActionError('nothing to change');
+    return { result: { id }, inverse: [await updateWithInverse(tx, orgs, 'orgs', id, set)] };
+  },
+});

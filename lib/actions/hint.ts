@@ -1,7 +1,6 @@
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { hints } from '@/lib/db/schema';
-import { ALL_ACTORS } from './helpers';
+import { ALL_ACTORS, updateWithInverse } from './helpers';
 import { defineAction, getAction } from './registry';
 import { ActionError } from './types';
 
@@ -44,13 +43,17 @@ export const hintDismiss = defineAction({
   schema: z.object({ hint_id: z.uuid() }),
   external: false,
   allowedActors: ALL_ACTORS,
-  async apply(tx, p) {
-    const [hint] = await tx.select({ status: hints.status }).from(hints).where(eq(hints.id, p.hint_id));
-    if (!hint) throw new ActionError(`hint ${p.hint_id} not found`);
-    await tx.update(hints).set({ status: 'dismissed' }).where(eq(hints.id, p.hint_id));
-    return {
-      result: { id: p.hint_id },
-      inverse: [{ op: 'update', table: 'hints', id: p.hint_id, set: { status: hint.status } }],
-    };
+  async apply(tx, { hint_id }) {
+    return { result: { id: hint_id }, inverse: [await updateWithInverse(tx, hints, 'hints', hint_id, { status: 'dismissed' })] };
+  },
+});
+
+export const hintResolve = defineAction({
+  type: 'hint.resolve',
+  schema: z.object({ hint_id: z.uuid() }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { hint_id }) {
+    return { result: { id: hint_id }, inverse: [await updateWithInverse(tx, hints, 'hints', hint_id, { status: 'done' })] };
   },
 });
