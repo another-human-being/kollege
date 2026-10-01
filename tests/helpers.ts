@@ -33,3 +33,25 @@ export async function createEntry(values: Partial<typeof entries.$inferInsert> =
   );
   return e!.id;
 }
+
+import { sql } from 'drizzle-orm';
+import { seed, type SeedResult } from '@/lib/db/seed';
+import { runImport, type ImportResult } from '@/lib/pipeline/import';
+
+/** "today" of the fixtures */
+export const NOW = new Date('2026-10-01T08:00:00+02:00');
+
+export async function resetDb(): Promise<void> {
+  await withSystem((tx) =>
+    tx.execute(sql`TRUNCATE users, connections, areas, orgs, people, person_emails, matters, entries,
+                   links, tasks, actions, hints, chats, chat_messages CASCADE`),
+  );
+}
+
+/** Fresh database, seed from fixtures/config.json, import all fixture sources through the intake. */
+export async function importFixtures(): Promise<SeedResult & { import: ImportResult }> {
+  await resetDb();
+  const s = await seed({ now: NOW });
+  const result = await runImport(s.connections, { now: NOW, importId: 'fixtures' });
+  return { ...s, import: result };
+}
