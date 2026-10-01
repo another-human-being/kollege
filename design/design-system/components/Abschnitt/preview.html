@@ -1,0 +1,18 @@
+<!-- @dsCard group="Gerüst" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Abschnitt</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',null,
+ h(K.Abschnitt,{titel:'Heute',anzahl:2,aside:h(K.Umschalter,null)},
+   h(K.Hinweis,{zeit:'10:00',titel:h(F,null,h('strong',null,'Beratung Kitchen Loop'),' mit Mehmet'),gruende:[{art:'belegt',text:'Termin im Teamkalender',quelle:'Kalender'}]}),
+   h(K.Hinweis,{zeit:'bis 18:00',titel:h(F,null,h('strong',null,'Instagram-Beitrag'),' zur Gründungsnacht freigeben')})),
+ h(K.Abschnitt,{titel:'Hängt',anzahl:0,leer:h(K.Leer,{titel:'Nichts hängt.',text:'Wenn ein Vorgang länger als zwei Wochen ruht, steht er hier.'})})));
+</script>
+</body>
+</html>

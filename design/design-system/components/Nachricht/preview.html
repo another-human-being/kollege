@@ -1,0 +1,17 @@
+<!-- @dsCard group="Chat" height=260 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Nachricht</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',null,
+ h(K.Nachricht,{von:'du',zeit:'14:32'},'Gerade Beratung mit Solaro gehabt, sie schicken bis Freitag das Pitchdeck, wir vermitteln Kontakt zu Frau Weber.'),
+ h(K.Nachricht,{von:'kollege',zeit:'14:32'},'Verstanden: Beratung mit Solaro (Lisa Meier, Tom Kraus) zum EXIST-Antrag. Das Pitchdeck war eigentlich schon am 29.09. fällig ',h(K.Quelle,null,'Notiz 22.09.'),' – ich habe die Frist auf Freitag verschoben.'),
+ h(K.Nachricht,{von:'kollege',streamt:true},'Frau Weber ist vermutlich Anna Weber von der IHK Schwaben')));
+</script>
+</body>
+</html>

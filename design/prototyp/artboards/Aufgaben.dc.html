@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Aufgaben</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kollege/tokens.css">
+<link rel="stylesheet" href="ds/kollege/components/bundle.css">
+<script src="ds/kollege/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Serif:ital,wght@1,400&amp;display=swap">
+<style>
+body{margin:0;background:#fbfbfa}
+a:not([class]){color:inherit}
+a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
+.kg-seitennav{display:flex;flex-direction:column;gap:2px}
+.kg-seitennav a{padding:4px 8px;border-radius:2px;color:var(--ink-muted);text-decoration:none;font-size:14px;line-height:20px}
+.kg-seitennav a:hover{color:var(--ink)}
+.kg-seitennav a[aria-current="page"]{color:var(--ink);background:var(--paper-sunk)}
+.nav-luecke{display:block;height:12px}
+.nav-gruppe{display:block;padding:14px 8px 4px;font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+.kg-seitennav a.nav-plus{color:var(--ink-faint);font-size:13px}
+.h1{margin:0;font-size:28px;line-height:34px;font-weight:500;letter-spacing:-0.01em}
+.label{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.mono{font-family:var(--font-mono);font-size:12px;line-height:16px;color:var(--ink-muted)}
+.ld{display:flex;height:100%}.ld-liste{width:380px;flex-shrink:0;border-right:1px solid var(--rule);display:flex;flex-direction:column;min-height:0}.ld-kopf{padding:20px 20px 12px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px}.ld-kopf h1{margin:0;font-size:20px;line-height:28px;font-weight:500}.ld-scroll{flex:1;overflow-y:auto;min-height:0}.ld-zeile{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;padding:10px 20px;border-bottom:1px solid var(--rule);cursor:pointer}.ld-zeile:hover{background:var(--paper-sunk)}.ld-zeile[aria-current="true"]{background:var(--paper-sunk);box-shadow:inset 2px 0 0 var(--ink)}.ld-zeile:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.ld-t{font-size:14px;line-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ld-m{font-family:var(--font-mono);font-size:11px;line-height:16px;color:var(--ink-muted);white-space:nowrap}.ld-u{grid-column:1/-1;font-size:12px;line-height:16px;color:var(--ink-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ld-gruppe{padding:14px 20px 6px;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}.ld-detail{flex:1;min-width:0;overflow-y:auto;padding:28px 40px 96px;display:flex;flex-direction:column;gap:28px}.ld-leer{padding:40px}
+.fe{font:inherit;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:2px;padding:3px 6px;margin-left:-7px;min-width:0;box-sizing:border-box}.fe:hover{border-color:var(--rule)}.fe:focus{outline:none;border-color:var(--accent);background:var(--paper)}textarea.fe{resize:vertical;line-height:22px}select.fe{cursor:pointer}.fe-titel{font-size:24px;line-height:32px;font-weight:500;width:100%}
+.felder{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 16px;align-items:baseline}.felder>label,.felder>.fl{font-size:12px;line-height:28px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.such{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);border-radius:2px;background:var(--paper);color:var(--ink);width:100%;box-sizing:border-box}.such:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.filterzeile{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.klein{font-size:12px}.chip{all:unset;cursor:pointer;font-size:12px;line-height:18px;padding:1px 8px;border:1px solid var(--line-control);border-radius:2px;color:var(--ink-muted)}.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}.chip:focus-visible{outline:2px solid var(--accent)}
+.ungeprueft-banner{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--line-control);border-radius:4px;font-size:14px}
+
+.pz{display:grid;grid-template-columns:36px minmax(0,1fr);align-items:start;border-bottom:1px solid var(--rule)}.pz .ld-zeile{border-bottom:0;padding-left:4px}.pz input{margin:14px 0 0 16px;accent-color:var(--ink)}
+.pz--erl .ld-t{text-decoration:line-through;color:var(--ink-muted)}.neu-form{display:flex;gap:6px}.neu-form input{flex:1}
+</style>
+</helmet>
+<div class="kg" style="width: 1280px; height: 1000px; box-sizing: border-box; position: relative; display: flex; background: var(--paper); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<aside style="width: 264px; flex-shrink: 0; box-sizing: border-box; height: 100%; border-right: 1px solid var(--rule); padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto">
+<div style="font-weight: 600; padding: 0 8px">Kollege</div>
+<nav class="kg-seitennav" aria-label="Hauptnavigation">
+<a href="Main.dc.html"><span class="kg-nav-slash">/</span>heute</a>
+<a href="Chat.dc.html"><span class="kg-nav-slash">/</span>chat</a>
+<span class="nav-gruppe">Werkzeuge</span>
+<a href="Mail.dc.html"><span class="kg-nav-slash">/</span>mail<span class="kg-nav-zahl" style="color: var(--ink-muted)">4</span></a>
+<a href="Kalender.dc.html"><span class="kg-nav-slash">/</span>kalender</a>
+<a href="Aufgaben.dc.html" aria-current="page"><span class="kg-nav-slash">/</span>aufgaben</a>
+<a href="Dateien.dc.html"><span class="kg-nav-slash">/</span>dateien</a>
+<a href="Kontakte.dc.html"><span class="kg-nav-slash">/</span>kontakte</a>
+<span class="nav-gruppe">Bereiche</span>
+<a href="Gruendungsteams.dc.html"><span class="kg-nav-slash">/</span>gründungsteams</a>
+<a href="Events.dc.html"><span class="kg-nav-slash">/</span>events</a>
+<a href="Lehre.dc.html"><span class="kg-nav-slash">/</span>lehre</a>
+<a href="SocialMedia.dc.html"><span class="kg-nav-slash">/</span>social media</a>
+<a href="Einstellungen.dc.html" class="nav-plus">+ Bereich</a>
+<span class="nav-luecke" aria-hidden="true"></span>
+<a href="Einstellungen.dc.html"><span class="kg-nav-slash">/</span>einstellungen</a>
+</nav>
+<x-import component-from-global-scope="Kollege.ChatListe" chats="{{sidebarChats}}" neu-href="Main.dc.html"></x-import>
+<div style="margin-top: auto; font-size: 13px; color: var(--ink-muted); padding: 0 8px">Andreas · Gründungszentrum</div>
+</aside>
+<div style="flex-grow: 1; min-width: 0; height: 100%; position: relative; overflow: hidden">
+<div class="ld">
+<div class="ld-liste">
+<div class="ld-kopf">
+<div style="display: flex; align-items: baseline; gap: 10px"><h1>Aufgaben</h1><span class="mono">{{zaehler}}</span><span style="flex-grow: 1"></span><x-import component-from-global-scope="Kollege.Umschalter" optionen="{{scopes}}" wert="{{scope}}" label="Wessen Aufgaben" on-wechsel="{{setScope}}"></x-import></div>
+<form class="neu-form" onSubmit="{{anlegen}}">
+<label for="a-neu" class="kg-sr">Neue Aufgabe</label>
+<input id="a-neu" class="such" value="{{neuText}}" onChange="{{neuTippen}}" placeholder="{{neuPlatzhalter}}">
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">+ Aufgabe</button>
+</form>
+<div class="filterzeile">
+<sc-for list="{{filter}}" as="f" hint-placeholder-count="4"><button type="button" class="chip" aria-pressed="{{f.an}}" onClick="{{f.los}}">{{f.label}}</button></sc-for>
+</div>
+</div>
+<sc-if value="{{pruefModus}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 10px 20px; border-bottom: 1px solid var(--rule); background: var(--paper-sunk)">
+<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
+<label style="display: inline-flex; gap: 6px; align-items: center; font-size: 12px"><input type="checkbox" checked="{{pruefAlle}}" onChange="{{pruefAlleToggle}}" style="accent-color: var(--ink)"> alle {{pruefGesamt}}</label>
+<span class="mono" style="flex-grow: 1">{{pruefZeile}}</span>
+</div>
+<sc-if value="{{pruefHatAuswahl}}" hint-placeholder-val="{{ false }}">
+<div class="kg-aktionen">
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefUebernehmen}}">Übernehmen</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefWarumAuf}}">Verwerfen</button>
+</div>
+</sc-if>
+<sc-if value="{{pruefWarumOffen}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{pruefVerwerfen}}" style="display: flex; gap: 6px; align-items: center">
+<label for="pruef-warum" class="kg-sr">Warum verwerfen?</label>
+<input id="pruef-warum" value="{{pruefWarum}}" onChange="{{pruefWarumTippen}}" placeholder="Warum? (optional) z. B. „Rechnungen sind keine Gründungsteams“" class="such" style="flex: 1">
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">Verwerfen</button>
+</form>
+</sc-if>
+</div>
+</sc-if>
+
+<div class="ld-scroll">
+<sc-for list="{{gruppen}}" as="g" hint-placeholder-count="4">
+<div class="ld-gruppe" style="{{g.stil}}">{{g.titel}} · {{g.anzahl}}</div>
+<sc-for list="{{g.items}}" as="a" hint-placeholder-count="3">
+<div class="{{a.klasse}}">
+<input type="checkbox" aria-label="{{a.hakenLabel}}" checked="{{a.haken}}" onChange="{{a.hakenLos}}">
+<button type="button" class="ld-zeile" aria-current="{{a.aktiv}}" onClick="{{a.los}}"><span class="ld-t">{{a.titel}}</span><span class="ld-m" style="{{a.faelligStil}}">{{a.faellig}}</span><span class="ld-u">{{a.unter}}</span></button>
+</div>
+</sc-for>
+</sc-for>
+<sc-if value="{{keine}}" hint-placeholder-val="{{ false }}"><div style="padding: 20px"><x-import component-from-global-scope="Kollege.Leer" titel="Nichts in dieser Ansicht." text="Anderen Filter wählen oder oben eine Aufgabe anlegen."></x-import></div></sc-if>
+<sc-if value="{{hatErledigte}}" hint-placeholder-val="{{ true }}"><div style="padding: 12px 20px"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{erledigteToggle}}" style="font-size: 13px">{{erledigteZeile}}</button></div></sc-if>
+</div>
+</div>
+
+<div class="ld-detail">
+<sc-if value="{{hatDetail}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{d.istUngeprueft}}" hint-placeholder-val="{{ false }}">
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Von Kollege erkannt – {{d.grund}}</span><x-import component-from-global-scope="Kollege.Quelle">{{d.quelle}}</x-import><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Verwerfen</button></div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; gap: 10px; align-items: center">
+<input type="checkbox" id="a-erl" checked="{{d.erledigt}}" onChange="{{d.toggle}}" style="accent-color: var(--ink); width: 18px; height: 18px">
+<label for="a-erl" class="mono">{{d.erledigtText}}</label>
+</div>
+<label for="a-titel" class="kg-sr">Titel</label>
+<input id="a-titel" class="fe fe-titel" data-feld="titel" value="{{d.titel}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}">
+<div class="felder">
+<label for="a-richtung">Richtung</label>
+<select id="a-richtung" class="fe" data-feld="richtung" value="{{d.richtung}}" onChange="{{d.f.wahl}}" style="justify-self: start"><option value="von uns">von uns – wir haben zugesagt</option><option value="an uns">an uns – andere haben uns zugesagt</option></select>
+<sc-if value="{{d.anUns}}" hint-placeholder-val="{{ false }}">
+<label for="a-von">Von wem</label>
+<input id="a-von" class="fe" data-feld="von" value="{{d.von}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" style="width: 320px">
+</sc-if>
+<label for="a-wer">{{d.werLabel}}</label>
+<select id="a-wer" class="fe" data-feld="wer" value="{{d.wer}}" onChange="{{d.f.wahl}}" style="justify-self: start"><sc-for list="{{personen}}" as="o" hint-placeholder-count="3"><option value="{{o}}">{{o}}</option></sc-for></select>
+<label for="a-faellig">Fällig</label>
+<div style="display: flex; gap: 10px; align-items: baseline"><select id="a-faellig" class="fe" data-feld="faellig" value="{{d.faellig}}" onChange="{{d.f.wahl}}"><sc-for list="{{termine}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><sc-if value="{{d.hatBerechnet}}" hint-placeholder-val="{{ false }}"><span class="mono" style="{{d.berechnetStil}}">= {{d.berechnet}}</span></sc-if></div>
+<label for="a-vorgang">Gehört zu</label>
+<div style="display: flex; gap: 10px; align-items: baseline"><select id="a-vorgang" class="fe" data-feld="vorgang" value="{{d.vorgang}}" onChange="{{d.f.wahl}}"><sc-for list="{{vorgaenge}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><a class="kg-bezug" href="{{d.gehoertHref}}" style="font-size: 13px">öffnen</a></div>
+<span class="fl">Herkunft</span>
+<div style="font-size: 14px; display: flex; gap: 8px; align-items: baseline">{{d.herkunft}}<x-import component-from-global-scope="Kollege.Quelle">{{d.quelle}}</x-import></div>
+<span class="fl">Sichtbar</span>
+<div style="font-size: 14px; display: flex; gap: 8px; align-items: center"><sc-if value="{{d.privat}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Privat"></x-import></sc-if>{{d.sichtbarText}}<button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.privatToggle}}" style="font-size: 13px">{{d.privatKnopf}}</button></div>
+</div>
+</div>
+
+<section class="kg-abschnitt" aria-label="Notiz">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Notiz</h2><span class="kg-abschnitt-aside">wird beim Verlassen des Feldes gespeichert</span></div>
+<label for="a-notiz" class="kg-sr">Notiz</label>
+<textarea id="a-notiz" class="fe" data-feld="notiz" rows="4" value="{{d.notiz}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" placeholder="Was muss man dazu wissen?" style="width: 100%; font-size: 15px"></textarea>
+</section>
+
+<div class="kg-aktionen">
+<sc-if value="{{d.anUns}}" hint-placeholder-val="{{ false }}"><a class="kg-aktion kg-aktion--sekundaer" href="Mail.dc.html">Nachfassen per Mail</a></sc-if>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.loeschen}}">Löschen</button>
+</div>
+</sc-if>
+<sc-if value="{{keinDetail}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Leer" titel="Keine Aufgabe geöffnet." text="Links eine Aufgabe wählen oder oben eine anlegen."></x-import></sc-if>
+</div>
+</div>
+<sc-if value="{{kcOffen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Chat zum Kontext" style="position: absolute; top: 0; right: 0; bottom: 0; width: 520px; box-sizing: border-box; background: var(--paper); box-shadow: var(--shadow-sheet); border-left: 1px solid var(--rule); display: flex; flex-direction: column; z-index: 5">
+<div style="display: flex; align-items: baseline; gap: 8px; padding: 16px 24px; border-bottom: 1px solid var(--rule); flex-wrap: wrap">
+<span class="label">Chat</span>
+<x-import component-from-global-scope="Kollege.Etikett">{{kcName}}</x-import>
+<x-import component-from-global-scope="Kollege.Privat">persönlich</x-import>
+<span style="flex-grow: 1"></span>
+<a class="kg-aktion kg-aktion--text" href="Chat.dc.html">Im Chatverlauf</a>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcZu}}">Schließen</button>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 8px">
+<div class="mono">Kontext geladen: {{kcKontext}}</div>
+<sc-for list="{{kcMsgs}}" as="m" hint-placeholder-count="2">
+<sc-if value="{{m.istDu}}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="jetzt">{{m.text}}</x-import>
+</sc-if>
+<sc-if value="{{m.istKollege}}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="Kollege.Nachricht" von="kollege" streamt="{{m.streamt}}">{{m.text}}</x-import>
+</sc-if>
+<sc-if value="{{m.istAussage}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Aussage" art="{{m.art}}" quelle="{{m.quelle}}">{{m.text}}</x-import></div>
+</sc-if>
+<sc-if value="{{m.istKarte}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Karte" punkte="{{m.punkte}}" privat="{{m.privat}}" folgen="{{m.folgen}}" link-text="{{m.linkText}}" link-href="{{m.linkHref}}"></x-import></div>
+</sc-if>
+<sc-if value="{{m.istLuecke}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="{{m.bekannt}}"></x-import></div>
+</sc-if>
+</sc-for>
+<sc-if value="{{kcLaden}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Lese den Kontext"></x-import></div>
+</sc-if>
+</div>
+<div style="padding: 16px 24px; border-top: 1px solid var(--rule)">
+<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe-2" platzhalter="Weiter fragen oder notieren" on-senden="{{kcSenden}}"></x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{zeigeToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: absolute; left: 24px; bottom: 20px; display: flex; gap: 14px; align-items: baseline; padding: 8px 14px; background: var(--ink); color: var(--paper); border-radius: 4px; font-size: 13px; z-index: 8; max-width: 560px">
+<span>✓ {{toastText}}</span>
+<sc-if value="{{toastKannZurueck}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{toastUndo}}" style="all: unset; cursor: pointer; text-decoration: underline; text-underline-offset: 3px">↶ Rückgängig</button></sc-if>
+<button type="button" onClick="{{toastZu}}" aria-label="Hinweis schließen" style="all: unset; cursor: pointer; opacity: .7">×</button>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+  kgChats() {
+    return [
+      { id: 'c1', titel: 'Beratung Solaro, Pitchdeck', datum: 'heute', etikett: 'Solaro', angepinnt: true, href: 'Chat.dc.html' },
+      { id: 'c2', titel: 'Social Media nur montags', datum: 'heute', href: 'Chat.dc.html' },
+      { id: 'c3', titel: 'Was haben wir Solaro versprochen?', datum: 'gestern', etikett: 'Solaro', href: 'Chat.dc.html' },
+      { id: 'c4', titel: 'Einladung Gründungsnacht', datum: '28.09.', etikett: 'Gründungsnacht 2026', href: 'Chat.dc.html' },
+      { id: 'c5', titel: 'Wie lange dauert EXIST?', datum: '25.09.', href: 'Chat.dc.html' },
+      { id: 'c6', titel: 'Notiz zu Tom', datum: '24.09.', etikett: 'Tom Kraus', href: 'Chat.dc.html' }
+    ];
+  }
+  kcState() { return { kcOffen: false, kcMsgs: [], kcStream: null, kcLaden: false, kcPrivat: false, kcNotizen: [] }; }
+  kcCfg() { return { name: 'Eintrag', anzahl: '0 Einträge', platzhalter: 'Frag oder notiere etwas', antwort: '', belege: [], luecke: '' }; }
+  kcSenden(text) {
+    var self = this, cfg = this.kcCfg(), frage = text.indexOf('?') >= 0, privat = this.state.kcPrivat;
+    this.setState({ kcOffen: true, kcLaden: true, kcMsgs: this.state.kcMsgs.concat([{ typ: 'du', text: text }]) });
+    setTimeout(function () {
+      var antwort = '', rest = [];
+      if (frage && cfg.antwort && !/wie lange|dauer|chance/i.test(text)) {
+        antwort = cfg.antwort;
+        rest = cfg.belege.map(function (b) { return { typ: 'aussage', art: b.art, text: b.text, quelle: b.quelle }; });
+      } else if (frage) {
+        rest = [{ typ: 'luecke', bekannt: cfg.luecke }];
+      } else {
+        antwort = 'Notiert bei ' + cfg.name + (privat ? ' – privat, nur für dich sichtbar.' : '.');
+        var punkte = ['Notiz im Verlauf von „' + cfg.name + '“ abgelegt' + (privat ? ' (privat)' : '')];
+        var folgen = '';
+        if (/ bis |frist|morgen|freitag|montag|nächste woche/i.test(text)) { punkte.push('Aufgabe für dich angelegt: ' + (text.length > 52 ? text.slice(0, 52) + '…' : text)); folgen = 'entfernt auch 1 Aufgabe'; }
+        rest = [{ typ: 'karte', punkte: punkte, privat: privat, folgen: folgen, linkText: 'Im Verlauf ansehen', linkHref: '#verlauf' }];
+        self.setState({ kcNotizen: [{ text: text, privat: privat }].concat(self.state.kcNotizen) });
+      }
+      self.kcStreamen(antwort, rest);
+    }, 800);
+  }
+  kcStreamen(voll, rest) {
+    var self = this;
+    if (!voll) { this.setState({ kcLaden: false, kcMsgs: this.state.kcMsgs.concat(rest) }); return; }
+    this.setState({ kcLaden: false, kcStream: { voll: voll, n: 0, rest: rest } });
+    var t = setInterval(function () {
+      var s = self.state.kcStream;
+      if (!s) { clearInterval(t); return; }
+      var n = Math.min(s.voll.length, s.n + 4);
+      if (n >= s.voll.length) { clearInterval(t); self.setState({ kcStream: null, kcMsgs: self.state.kcMsgs.concat([{ typ: 'kollege', text: s.voll }], s.rest) }); }
+      else self.setState({ kcStream: { voll: s.voll, n: n, rest: s.rest } });
+    }, 30);
+  }
+  kcVals() {
+    var self = this, st = this.state, cfg = this.kcCfg();
+    var msgs = (st.kcMsgs || []).slice();
+    if (st.kcStream) msgs.push({ typ: 'kollege', text: st.kcStream.voll.slice(0, st.kcStream.n), streamt: true });
+    return {
+      sidebarChats: this.kgChats(),
+      kcName: cfg.name, kcKontext: cfg.name + ' · ' + cfg.anzahl, kcPlatzhalter: cfg.platzhalter,
+      kcOffen: !!st.kcOffen, kcLaden: !!st.kcLaden,
+      kcMsgs: msgs.map(function (m) { return Object.assign({ istDu: m.typ === 'du', istKollege: m.typ === 'kollege', istAussage: m.typ === 'aussage', istKarte: m.typ === 'karte', istLuecke: m.typ === 'luecke', streamt: false }, m); }),
+      kcSenden: function (t) { self.kcSenden(t); },
+      kcZu: function () { self.setState({ kcOffen: false }); },
+      kcAuf: function () { self.setState({ kcOffen: true }); },
+      kcHatMsgs: (st.kcMsgs || []).length > 0,
+      kcPrivat: !!st.kcPrivat,
+      kcPrivatToggle: function () { self.setState({ kcPrivat: !self.state.kcPrivat }); },
+      kcNotizen: st.kcNotizen || []
+    };
+  }
+  // „Gründungsteams · Solaro“ → Seite des Bereichs
+  bereichHref(v) { var b = String(v || '').split(' · ')[0]; return ({ 'Gründungsteams': 'Gruendungsteams.dc.html', 'Events': 'Events.dc.html', 'Lehre': 'Lehre.dc.html', 'Social Media': 'SocialMedia.dc.html' })[b] || 'Main.dc.html'; }
+  zuordnungen() { return ['Gründungsteams · Solaro', 'Gründungsteams · Kitchen Loop', 'Gründungsteams · Nordlicht Analytics', 'Gründungsteams · Greenbyte', 'Gründungsteams · Lern-App (Max Brandt)', 'Events · Gründungsnacht 2026', 'Events · Pitch-Abend', 'Lehre · Entrepreneurship Basics', 'Lehre · Design Thinking Workshop', 'Social Media · Pitch-Abend ankündigen', 'Social Media · Rückblick Sommerfest', 'Social Media · Porträt: Lisa Meier (Solaro)', '– (ohne Bereich)']; }
+  // ——— Bearbeiten, Rückgängig, Prüfen (gemeinsam für alle Werkzeuge) ———
+  basisState() { return { edits: {}, letzte: null, sel: null, pAuswahl: {}, pAlle: false, pWarumOffen: false, pWarum: '' }; }
+  wert(id, feld, fallback) { var e = this.state.edits[id]; return e && e[feld] !== undefined ? e[feld] : fallback; }
+  aendere(changes, label, ohneUndo) {
+    var ed = Object.assign({}, this.state.edits), alt = [], self = this;
+    changes.forEach(function (c) { ed[c.id] = Object.assign({}, ed[c.id]); alt.push({ id: c.id, feld: c.feld, vorher: self.wert(c.id, c.feld, c.basis) }); ed[c.id][c.feld] = c.wert; });
+    this.setState({ edits: ed, letzte: { changes: alt, label: label, ohneUndo: !!ohneUndo } });
+    clearTimeout(this._tt); this._tt = setTimeout(function () { self.setState({ letzte: null }); }, 9000);
+  }
+  toastVals() {
+    var self = this, l = this.state.letzte;
+    return {
+      zeigeToast: !!l, toastText: l ? l.label : '', toastKannZurueck: !!l && !l.ohneUndo,
+      toastZu: function () { self.setState({ letzte: null }); },
+      toastUndo: function () {
+        var l = self.state.letzte; if (!l) return;
+        var ed = Object.assign({}, self.state.edits);
+        l.changes.forEach(function (c) { ed[c.id] = Object.assign({}, ed[c.id]); ed[c.id][c.feld] = c.vorher; });
+        self.setState({ edits: ed, letzte: null });
+      }
+    };
+  }
+  // Direkt bearbeitbare Felder: tippen speichert still, Verlassen des Feldes zeigt „Gespeichert · Rückgängig“
+  feld(id, basis, name) {
+    var self = this;
+    return {
+      fokus: function (e) { self._fokusAlt = e.target.value; },
+      tippen: function (e) { var f = e.target.getAttribute('data-feld'); var ed = Object.assign({}, self.state.edits); ed[id] = Object.assign({}, ed[id]); ed[id][f] = e.target.value; self.setState({ edits: ed }); },
+      fertig: function (e) {
+        var f = e.target.getAttribute('data-feld'), neu = e.target.value, alt = self._fokusAlt;
+        self._fokusAlt = undefined;
+        if (alt === undefined || alt === neu) return;
+        var ed = Object.assign({}, self.state.edits); ed[id] = Object.assign({}, ed[id]); ed[id][f] = alt;
+        self.state.edits = ed;
+        self.aendere([{ id: id, feld: f, wert: neu, basis: basis[f] }], 'Gespeichert' + (name ? ': ' + name : ''));
+      },
+      wahl: function (e) { var f = e.target.getAttribute('data-feld'); self.aendere([{ id: id, feld: f, wert: e.target.value, basis: basis[f] }], 'Gespeichert'); }
+    };
+  }
+  // Filter „ungeprüft“: Mehrfachauswahl + Übernehmen / Verwerfen (+ optional Warum)
+  pruefVals(items, gesamt, art) {
+    var self = this, st = this.state;
+    var offen = items.filter(function (i) { return i.ungeprueft && !self.wert(i.id, 'geprueft', ''); });
+    var gewaehlt = st.pAlle ? offen : offen.filter(function (i) { return st.pAuswahl[i.id]; });
+    var bulk = self.wert('_pruef', art, false);
+    var rest = bulk ? 0 : Math.max(0, gesamt - (items.filter(function (i) { return i.ungeprueft; }).length - offen.length));
+    var anzahl = st.pAlle ? rest : gewaehlt.length;
+    var anwenden = function (wert) {
+      var warum = self.state.pWarum.trim();
+      var ch = gewaehlt.map(function (i) { return { id: i.id, feld: 'geprueft', wert: wert, basis: '' }; });
+      if (self.state.pAlle) ch.push({ id: '_pruef', feld: art, wert: true, basis: false });
+      self.aendere(ch,
+        anzahl + ' ' + art + (wert === 'ok' ? ' übernommen' : ' verworfen') + (wert === 'weg' && warum ? ' · gemerkt: „' + warum + '“' : ''));
+      self.setState({ pAuswahl: {}, pAlle: false, pWarumOffen: false, pWarum: '' });
+    };
+    return {
+      pruefGesamt: rest, pruefAlle: st.pAlle,
+      pruefAlleToggle: function () { self.setState({ pAlle: !self.state.pAlle, pAuswahl: {} }); },
+      pruefZeile: anzahl ? anzahl + ' ausgewählt' : rest + ' ungeprüft · einzeln anhaken oder alle wählen',
+      pruefHatAuswahl: anzahl > 0,
+      pruefUebernehmen: function () { anwenden('ok'); },
+      pruefWarumAuf: function () { self.setState({ pWarumOffen: !self.state.pWarumOffen }); },
+      pruefWarumOffen: st.pWarumOffen && anzahl > 0,
+      pruefWarum: st.pWarum, pruefWarumTippen: function (e) { self.setState({ pWarum: e.target.value }); },
+      pruefVerwerfen: function (e) { if (e && e.preventDefault) e.preventDefault(); anwenden('weg'); },
+      pruefWaehle: function (id) { return function () { var m = Object.assign({}, self.state.pAuswahl); m[id] = !m[id]; self.setState({ pAuswahl: m, pAlle: false }); }; },
+      pruefIstGewaehlt: function (id) { return st.pAlle || !!st.pAuswahl[id]; }
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = Object.assign(this.basisState(), this.kcState(), { scope: 'Meins', filter: 'alle', sel: 'fin', neuText: '', zeigeErledigte: false });
+  }
+  kcCfg() { var a = this.aktuell(); return { name: a ? this.wert(a.id, 'titel', a.titel) : 'Aufgaben', anzahl: 'Aufgabe, Bereich, Verlauf', platzhalter: 'Frag etwas zu dieser Aufgabe', antwort: 'Tom hat am 26.09. um Feedback „bis Mitte der Woche“ gebeten, vor allem zu den Personalkosten. Das ist heute.', belege: [{ art: 'belegt', text: 'Bitte um Feedback zum Finanzplan v2', quelle: 'Mail 26.09.' }], luecke: 'Dazu habe ich nichts Belastbares.' }; }
+  // bucket: ueber | heute | woche | spaeter
+  termine() { return { '25.09.': 'ueber', 'Di 29.09.': 'ueber', 'heute': 'heute', 'heute 17:00': 'heute', 'Do 01.10.': 'woche', 'Fr 02.10.': 'woche', 'Mo 05.10.': 'spaeter', '06.10.': 'spaeter', '15.10.': 'spaeter', '04.11.': 'spaeter', 'ohne Datum': 'spaeter' }; }
+  daten() {
+    var A = [
+      { id: 'raum', richtung: 'von uns', titel: 'Raum für Sitzung 3 buchen', vorgang: 'Lehre · Entrepreneurship Basics', wer: 'Andreas', faellig: 'Di 29.09.', herkunft: 'Bitte von Prof. Hartmann', quelle: 'Mail 28.09.' },
+      { id: 'fin', richtung: 'von uns', titel: 'Feedback zum Finanzplan an Tom Kraus', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: 'heute', herkunft: 'Tom bittet um Feedback „bis Mitte der Woche“', quelle: 'Mail 26.09.', notiz: 'Vor allem Personalkosten ansehen – Tom sagt selbst, die sind noch wackelig.' },
+      { id: 'std', richtung: 'von uns', titel: 'Save-the-Date Gründungsnacht verschicken', vorgang: 'Events · Gründungsnacht 2026', wer: 'Andreas', faellig: 'heute', herkunft: 'nach Anweisung von Julia', quelle: 'Anweisung 24.09.' },
+      { id: 'weber', richtung: 'von uns', titel: 'Kontakt zu Frau Weber (IHK) vermitteln', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: 'Fr 02.10.', herkunft: 'in der Beratung zugesagt', quelle: 'Chat 30.09.' },
+      { id: 'nord', richtung: 'von uns', titel: 'Bei Nordlicht nachfassen', vorgang: 'Gründungsteams · Nordlicht Analytics', wer: 'Andreas', faellig: 'Do 01.10.', herkunft: 'nach Anweisung von Mehmet', quelle: 'Anweisung 15.09.' },
+      { id: 'tom', richtung: 'von uns', titel: 'Bei Tom wegen Finanzierung nachfragen', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: 'Mo 05.10.', herkunft: 'eigene Notiz', quelle: 'Chat 24.09.', privat: true },
+      { id: 'jb', richtung: 'von uns', titel: 'Jury-Briefing vorbereiten', vorgang: 'Events · Pitch-Abend', wer: 'Andreas', faellig: '04.11.', herkunft: 'aus dem Termin abgeleitet', quelle: 'Kalender 04.11.' },
+      { id: 'sommer', richtung: 'von uns', titel: 'Rückblick Sommerfest fertigstellen', vorgang: 'Social Media · Rückblick Sommerfest', wer: 'Mehmet', faellig: '25.09.', herkunft: 'eigene Notiz', quelle: 'Notiz 12.09.' },
+      { id: 'insta', richtung: 'von uns', titel: 'Instagram-Beitrag Pitch-Abend freigeben', vorgang: 'Social Media · Pitch-Abend ankündigen', wer: 'Mehmet', faellig: 'heute 17:00', herkunft: 'eigene Notiz', quelle: 'Notiz 29.09.' },
+      { id: 'jury', richtung: 'von uns', titel: 'Jury vollständig machen', vorgang: 'Events · Pitch-Abend', wer: 'Julia', faellig: 'Fr 02.10.', herkunft: 'Teamrunde', quelle: 'Mail 21.09.' },
+      { id: 'hyg', richtung: 'von uns', titel: 'Hygieneschulung für Kitchen Loop klären', vorgang: 'Gründungsteams · Kitchen Loop', wer: 'Julia', faellig: 'Do 01.10.', herkunft: 'Julia: „Ich kläre das mit dem Studierendenwerk.“', quelle: 'Mail 24.09.' },
+      // an uns: Zusagen anderer
+      { id: 'pd', richtung: 'an uns', von: 'Lisa Meier (Solaro)', titel: 'Pitchdeck final inkl. Finanzteil', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: 'Fr 02.10.', herkunft: 'Entwurf kam gestern, Finanzteil fehlt noch', quelle: 'Mail 29.09.' },
+      { id: 'fp', richtung: 'an uns', von: 'Tom Kraus (Solaro)', titel: 'Finanzplan überarbeiten (Personalkosten)', vorgang: 'Gründungsteams · Solaro', wer: 'Andreas', faellig: '15.10.', herkunft: 'in der Beratung vereinbart', quelle: 'Notiz 22.09.' },
+      { id: 'folien', richtung: 'an uns', von: 'Prof. Dr. Martin Hartmann', titel: 'Folien für Sitzung 3 schicken', vorgang: 'Lehre · Entrepreneurship Basics', wer: 'Andreas', faellig: '06.10.', herkunft: '„Die Folien schicke ich bis 06.10.“', quelle: 'Mail 28.09.' },
+      { id: 'aw', richtung: 'an uns', von: 'Anna Weber (IHK Schwaben)', titel: 'Rückmeldung: Jurorin beim Pitch-Abend?', vorgang: 'Events · Pitch-Abend', wer: 'Julia', faellig: '25.09.', herkunft: 'Anfrage von Julia; Antwort zugesagt „bis Ende der Woche“', quelle: 'Mail 21.09.' },
+      { id: 'sw', richtung: 'an uns', von: 'Studierendenwerk', titel: 'Termin für Pilotstart Mensa nennen', vorgang: 'Gründungsteams · Kitchen Loop', wer: 'Julia', faellig: 'Fr 02.10.', herkunft: 'Telefonnotiz Julia', quelle: 'Notiz 23.09.' },
+      // ungeprüft aus dem Import
+      { id: 'u1', ungeprueft: true, richtung: 'von uns', titel: 'Presseanfrage Porträt Gründerinnen beantworten', vorgang: '– (ohne Bereich)', wer: 'Mehmet', faellig: 'Fr 02.10.', grund: 'Frage in einer Mail ans StartHub-Postfach', herkunft: 'Anfrage der Augsburger Allgemeinen', quelle: 'Mail heute 08:05' },
+      { id: 'u2', ungeprueft: true, richtung: 'von uns', titel: 'Max Brandt Sprechstunde anbieten', vorgang: 'Gründungsteams · Lern-App (Max Brandt)', wer: 'Andreas', faellig: 'Do 01.10.', grund: 'unbeantwortete Frage im StartHub-Postfach', herkunft: 'Anfrage Gründungsstipendium', quelle: 'Mail 29.09.' },
+      { id: 'u3', ungeprueft: true, richtung: 'an uns', von: 'Karin Vogt (Stadtwerke)', titel: 'Unterschriebene Rahmenvereinbarung', vorgang: '– (ohne Bereich)', wer: 'Andreas', faellig: 'ohne Datum', grund: '„schicken wir Ihnen dann unterschrieben zu“', herkunft: 'Kooperationsgespräch', quelle: 'Mail 29.09.' },
+      { id: 'u4', ungeprueft: true, richtung: 'von uns', titel: 'Hackathon-Challenge zusagen oder absagen', vorgang: '– (ohne Bereich)', wer: 'Julia', faellig: 'ohne Datum', grund: 'Frage in einer Mail ans StartHub-Postfach', herkunft: 'Anfrage Fachschaft Informatik', quelle: 'Mail 28.09.' },
+      { id: 'u5', ungeprueft: true, richtung: 'von uns', titel: 'Rechnung Raumtechnik weiterleiten', vorgang: '– (ohne Bereich)', wer: 'Julia', faellig: 'ohne Datum', grund: 'Rechnung im Netzlaufwerk ohne Vermerk', herkunft: 'Rechnung_0326.pdf', quelle: 'Netzlaufwerk' }
+    ];
+    return this.wert('_neu', 'liste', []).concat(A);
+  }
+  aktuell() { var self = this; return this.daten().filter(function (a) { return a.id === self.state.sel && !self.wert(a.id, 'geloescht', false) && self.wert(a.id, 'geprueft', '') !== 'weg'; })[0]; }
+  renderVals() {
+    var self = this, st = this.state, T = this.termine();
+    var roh = this.daten();
+    var sichtbar = roh.filter(function (a) { return !self.wert(a.id, 'geloescht', false) && self.wert(a.id, 'geprueft', '') !== 'weg'; });
+    var pruef = st.filter === 'ungeprüft';
+    var P = this.pruefVals(roh, 5, 'Aufgaben');
+    var ung = function (a) { return !!a.ungeprueft && !self.wert(a.id, 'geprueft', ''); };
+    var liste = sichtbar.filter(function (a) {
+      if (pruef) return ung(a);
+      if (ung(a)) return false;
+      var r = self.wert(a.id, 'richtung', a.richtung), wer = self.wert(a.id, 'wer', a.wer), privat = self.wert(a.id, 'privat', !!a.privat);
+      if (st.scope === 'Meins' && wer !== 'Andreas') return false;
+      if (st.scope === 'Team' && privat) return false;
+      if (st.filter === 'von uns' && r !== 'von uns') return false;
+      if (st.filter === 'an uns' && r !== 'an uns') return false;
+      return true;
+    });
+    var offen = liste.filter(function (a) { return !self.wert(a.id, 'erledigt', false); });
+    var erledigte = liste.filter(function (a) { return self.wert(a.id, 'erledigt', false); });
+    var zeile = function (a) {
+      var r = self.wert(a.id, 'richtung', a.richtung), f = self.wert(a.id, 'faellig', a.faellig), erl = self.wert(a.id, 'erledigt', false);
+      var ueber = T[f] === 'ueber' && !erl;
+      return { titel: self.wert(a.id, 'titel', a.titel), faellig: f,
+        faelligStil: ueber ? 'color: var(--attention)' : '',
+        unter: (r === 'an uns' ? 'an uns · ' + self.wert(a.id, 'von', a.von) : 'von uns') + ' · ' + self.wert(a.id, 'vorgang', a.vorgang).replace(' · ', ': ') + (st.scope === 'Team' ? ' · ' + self.wert(a.id, 'wer', a.wer) : '') + (pruef ? ' · ' + a.grund : ''),
+        klasse: 'pz' + (erl ? ' pz--erl' : ''),
+        aktiv: a.id === st.sel ? 'true' : 'false',
+        haken: pruef ? P.pruefIstGewaehlt(a.id) : erl,
+        hakenLabel: (pruef ? 'Auswählen: ' : 'Erledigt: ') + self.wert(a.id, 'titel', a.titel),
+        hakenLos: pruef ? P.pruefWaehle(a.id) : function () { self.aendere([{ id: a.id, feld: 'erledigt', wert: !erl, basis: false }], (erl ? 'Wieder offen: ' : 'Erledigt: ') + self.wert(a.id, 'titel', a.titel)); },
+        los: function () { self.setState({ sel: a.id, kcOffen: false }); } };
+    };
+    var defs = pruef ? [['alle', 'Ungeprüft']] : [['ueber', 'Überfällig'], ['heute', 'Heute'], ['woche', 'Diese Woche'], ['spaeter', 'Später']];
+    var gruppen = defs.map(function (d) {
+      var items = offen.filter(function (a) { return pruef || T[self.wert(a.id, 'faellig', a.faellig)] === d[0]; });
+      return { titel: d[1], anzahl: items.length, items: items.map(zeile), stil: d[0] === 'ueber' ? 'color: var(--attention)' : '' };
+    }).filter(function (g) { return g.anzahl > 0; });
+    if (st.zeigeErledigte && erledigte.length && !pruef) gruppen.push({ titel: 'Erledigt', anzahl: erledigte.length, items: erledigte.map(zeile), stil: '' });
+
+    var a = this.aktuell(), d = {};
+    if (a) {
+      var r = this.wert(a.id, 'richtung', a.richtung), erl = this.wert(a.id, 'erledigt', false), f = this.wert(a.id, 'faellig', a.faellig), priv = this.wert(a.id, 'privat', !!a.privat);
+      var ber = { ueber: 'überfällig', heute: 'heute fällig' }[T[f]] || '';
+      d = {
+        f: this.feld(a.id, a, 'Aufgabe'),
+        titel: this.wert(a.id, 'titel', a.titel), richtung: r, anUns: r === 'an uns',
+        von: this.wert(a.id, 'von', a.von || ''), wer: this.wert(a.id, 'wer', a.wer),
+        werLabel: r === 'an uns' ? 'Im Blick' : 'Zuständig',
+        faellig: f, vorgang: this.wert(a.id, 'vorgang', a.vorgang), gehoertHref: this.bereichHref(this.wert(a.id, 'vorgang', a.vorgang)), notiz: this.wert(a.id, 'notiz', a.notiz || ''),
+        hatBerechnet: !!ber && !erl, berechnet: ber + (r === 'an uns' && T[f] === 'ueber' ? ' · nachfassen?' : ''), berechnetStil: T[f] === 'ueber' ? 'color: var(--attention)' : '',
+        herkunft: a.herkunft, quelle: a.quelle,
+        erledigt: erl, erledigtText: erl ? 'erledigt · Haken entfernen öffnet wieder' : (r === 'an uns' ? 'offen · abhaken, wenn es da ist' : 'offen · abhaken, wenn erledigt'),
+        toggle: function () { self.aendere([{ id: a.id, feld: 'erledigt', wert: !erl, basis: false }], erl ? 'Wieder offen' : 'Erledigt: ' + self.wert(a.id, 'titel', a.titel)); },
+        privat: priv, sichtbarText: priv ? 'nur für dich' : 'für das Team', privatKnopf: priv ? 'fürs Team freigeben' : 'privat machen',
+        privatToggle: function () { self.aendere([{ id: a.id, feld: 'privat', wert: !priv, basis: !!a.privat }], priv ? 'Fürs Team sichtbar' : 'Privat – nur für dich'); },
+        loeschen: function () { self.aendere([{ id: a.id, feld: 'geloescht', wert: true, basis: false }], 'Gelöscht: ' + self.wert(a.id, 'titel', a.titel)); },
+        istUngeprueft: ung(a), grund: a.grund || '',
+        uebernehmen: function () { self.aendere([{ id: a.id, feld: 'geprueft', wert: 'ok', basis: '' }], 'Übernommen: ' + a.titel); },
+        verwerfen: function () { self.aendere([{ id: a.id, feld: 'geprueft', wert: 'weg', basis: '' }], 'Verworfen: ' + a.titel); }
+      };
+    }
+    var fl = function (label, key) { return { label: label, an: st.filter === key ? 'true' : 'false', los: function () { self.setState({ filter: key, pAuswahl: {}, pAlle: false }); } }; };
+    var vg = this.zuordnungen();
+    return Object.assign(this.kcVals(), this.toastVals(), P, {
+      sidebarChats: this.kgChats(),
+      zaehler: pruef ? P.pruefGesamt + ' ungeprüft' : offen.length + ' offen',
+      scopes: ['Meins', 'Team'], scope: st.scope, setScope: function (w) { self.setState({ scope: w }); },
+      filter: [fl('alle', 'alle'), fl('von uns', 'von uns'), fl('an uns', 'an uns'), fl('ungeprüft · ' + P.pruefGesamt, 'ungeprüft')],
+      pruefModus: pruef,
+      neuText: st.neuText, neuTippen: function (e) { self.setState({ neuText: e.target.value }); },
+      neuPlatzhalter: st.filter === 'an uns' ? 'Was hat uns jemand zugesagt?' : 'Neue Aufgabe, Enter legt an',
+      anlegen: function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        var t = self.state.neuText.trim(); if (!t) return;
+        var id = 'n' + Date.now(), anUns = self.state.filter === 'an uns';
+        var neu = { id: id, richtung: anUns ? 'an uns' : 'von uns', von: anUns ? '' : undefined, titel: t, vorgang: '– (ohne Bereich)', wer: 'Andreas', faellig: 'ohne Datum', herkunft: 'von Hand angelegt', quelle: 'gerade eben' };
+        self.setState({ neuText: '', sel: id, filter: self.state.filter === 'ungeprüft' ? 'alle' : self.state.filter });
+        self.aendere([{ id: '_neu', feld: 'liste', wert: [neu].concat(self.wert('_neu', 'liste', [])), basis: [] }], 'Aufgabe angelegt – Fälligkeit und „Gehört zu“ rechts setzen');
+      },
+      gruppen: gruppen, keine: gruppen.length === 0,
+      hatErledigte: erledigte.length > 0 && !pruef,
+      erledigteZeile: (st.zeigeErledigte ? 'Erledigte ausblenden' : erledigte.length + ' erledigt · anzeigen'),
+      erledigteToggle: function () { self.setState({ zeigeErledigte: !self.state.zeigeErledigte }); },
+      hatDetail: !!a, keinDetail: !a, d: d,
+      personen: ['Andreas', 'Julia', 'Mehmet'], termine: Object.keys(T), vorgaenge: vg
+    });
+  }
+}
+</script>
+</body>
+</html>

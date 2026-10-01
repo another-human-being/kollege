@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Person: Lisa Meier</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kollege/tokens.css">
+<link rel="stylesheet" href="ds/kollege/components/bundle.css">
+<script src="ds/kollege/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Serif:ital,wght@1,400&amp;display=swap">
+<style>
+body{margin:0;background:#fbfbfa}
+a:not([class]){color:inherit}
+a.kg-aktion--primaer,a.kg-aktion--sekundaer{text-decoration:none}
+.kg-seitennav{display:flex;flex-direction:column;gap:2px}
+.kg-seitennav a{padding:4px 8px;border-radius:2px;color:var(--ink-muted);text-decoration:none;font-size:14px;line-height:20px}
+.kg-seitennav a:hover{color:var(--ink)}
+.kg-seitennav a[aria-current="page"]{color:var(--ink);background:var(--paper-sunk)}
+.nav-luecke{display:block;height:12px}
+.h1{margin:0;font-size:28px;line-height:34px;font-weight:500;letter-spacing:-0.01em}
+.label{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.mono{font-family:var(--font-mono);font-size:12px;line-height:16px;color:var(--ink-muted)}
+.adresse{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 120px;column-gap:16px;align-items:baseline;padding-block:8px;border-top:1px solid var(--rule)}
+</style>
+</helmet>
+<div class="kg" style="width: 1280px; height: 1900px; box-sizing: border-box; position: relative; display: flex; background: var(--paper); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<aside style="width: 264px; flex-shrink: 0; box-sizing: border-box; height: 100%; border-right: 1px solid var(--rule); padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto">
+<div style="font-weight: 600; padding: 0 8px">Kollege</div>
+<nav class="kg-seitennav" aria-label="Hauptnavigation">
+<a href="Main.dc.html"><span class="kg-nav-slash">/</span>übersicht</a>
+<a href="Chat.dc.html"><span class="kg-nav-slash">/</span>chat</a>
+<span class="nav-luecke" aria-hidden="true"></span>
+<a href="Liste.dc.html"><span class="kg-nav-slash">/</span>vorgänge</a>
+<a href="Aufgaben.dc.html"><span class="kg-nav-slash">/</span>aufgaben</a>
+<a href="Kalender.dc.html"><span class="kg-nav-slash">/</span>kalender</a>
+<a href="Kontakte.dc.html" aria-current="page"><span class="kg-nav-slash">/</span>kontakte</a>
+<a href="Dateien.dc.html"><span class="kg-nav-slash">/</span>dateien</a>
+<span class="nav-luecke" aria-hidden="true"></span>
+<a href="NeuAngelegt.dc.html"><span class="kg-nav-slash">/</span>neu angelegt<span class="kg-nav-zahl">219</span></a>
+<a href="Einstellungen.dc.html"><span class="kg-nav-slash">/</span>einstellungen</a>
+</nav>
+<x-import component-from-global-scope="Kollege.ChatListe" chats="{{sidebarChats}}" neu-href="Main.dc.html"></x-import>
+<div style="margin-top: auto; font-size: 13px; color: var(--ink-muted); padding: 0 8px">Andreas · Gründungszentrum</div>
+</aside>
+<div style="flex-grow: 1; min-width: 0; height: 100%; position: relative; overflow: hidden">
+<main style="height: 100%; box-sizing: border-box; overflow-y: auto; padding: 40px 72px 96px; display: flex; flex-direction: column; gap: 44px">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 816px">
+<div class="mono"><a href="Kontakte.dc.html" style="color: var(--ink-muted)">/ kontakte</a> / <a href="Team.dc.html" style="color: var(--ink-muted)">Solaro</a></div>
+<h1 class="h1">Lisa Meier</h1>
+<div style="color: var(--ink-muted)">Mitgründerin, Technik · Team <a class="kg-bezug" href="Team.dc.html" style="color: var(--ink)">Solaro</a></div>
+<x-import component-from-global-scope="Kollege.Aussage" art="berechnet">seit 21.08. · 2 Vorgänge · 11 Mails · 2 Beratungen · letzter Kontakt heute</x-import>
+<div class="kg-aktionen" style="margin-top: 4px">
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{mergeAuf}}">Mit anderer Person zusammenführen</button>
+</div>
+
+<sc-if value="{{mSuche}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--line-control); border-radius: 4px; background: var(--paper-sunk)">
+<label for="merge-suche" class="label">Mit wem zusammenführen?</label>
+<input id="merge-suche" defaultValue="Meier" style="font: inherit; font-size: 15px; padding: 6px 10px; border: 1px solid var(--line-control); border-radius: 2px; background: var(--paper); color: var(--ink)">
+<sc-for list="{{kandidaten}}" as="k" hint-placeholder-count="2">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: baseline; padding-block: 8px; border-top: 1px solid var(--rule)">
+<div><b style="font-weight: 500">{{k.name}}</b> <span class="mono">{{k.adresse}}</span></div>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{k.waehlen}}">Auswählen</button>
+<div style="grid-column: 1 / -1"><x-import component-from-global-scope="Kollege.Aussage" art="berechnet">{{k.umfang}}</x-import><x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung">{{k.grund}}</x-import></div>
+</div>
+</sc-for>
+<div><button type="button" class="kg-aktion kg-aktion--text" onClick="{{mergeZu}}">Abbrechen</button></div>
+</div>
+</sc-if>
+
+<sc-if value="{{mVorschau}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line-control); border-radius: 4px; background: var(--paper-sunk)">
+<div class="label">Vorschau</div>
+<div>„{{wahl.name}}“ wird in Lisa Meier übernommen. Danach gibt es nur noch eine Person.</div>
+<x-import component-from-global-scope="Kollege.Aussage" art="berechnet">übernimmt 1 Adresse, {{wahl.umfang}}</x-import>
+<div class="kg-aktionen" style="margin-top: 4px">
+<button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{mergeLos}}">Zusammenführen</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{mergeZu}}">Abbrechen</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{mFertig}}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="Kollege.Karte" titel="Zusammengeführt" punkte="{{mPunkte}}" folgen="trennt auch die übernommenen Termine und Mails wieder" on-rueckgaengig="{{mergeRueck}}"></x-import>
+</sc-if>
+</div>
+
+<section class="kg-abschnitt" aria-label="E-Mail-Adressen" style="max-width: 816px">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">E-Mail-Adressen</h2><span class="kg-abschnitt-zahl">{{adressAnzahl}}</span><span class="kg-abschnitt-aside">alle gehören zu dieser Person</span></div>
+<sc-for list="{{adressen}}" as="a" hint-placeholder-count="3">
+<div class="adresse">
+<span style="font-family: var(--font-mono); font-size: 13px">{{a.adresse}}</span>
+<span style="font-size: 13px; color: var(--ink-muted)">{{a.herkunft}}</span>
+<span class="mono" style="text-align: right">{{a.rolle}}</span>
+</div>
+</sc-for>
+</section>
+
+<div style="display: flex; flex-direction: column; gap: 8px; max-width: 816px">
+<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe" kontext="{{kcKontext}}" platzhalter="{{kcPlatzhalter}}" on-senden="{{kcSenden}}"></x-import>
+<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap">
+<label style="display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-muted)"><input type="checkbox" checked="{{kcPrivat}}" onChange="{{kcPrivatToggle}}"> Notiz nur für mich (privat)</label>
+<sc-if value="{{kcHatMsgs}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Gespräch zu {{kcName}} anzeigen</button></sc-if>
+</div>
+</div>
+
+
+<section class="kg-abschnitt" aria-label="Offene Zusagen" style="max-width: 816px">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Offene Zusagen</h2><span class="kg-abschnitt-zahl">3</span></div>
+<div class="kg-zusagen">
+<div><h3 class="kg-zusagen-titel">Wir an Lisa</h3>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="offen" quelle="Chat 30.09.">Kontakt zu Frau Weber vermitteln</x-import>
+</div>
+<div><h3 class="kg-zusagen-titel">Lisa an uns</h3>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 02.10." quelle="Chat 30.09.">Pitchdeck schicken</x-import>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 19.11." quelle="aus Julias Mail 21.09.">Pitch beim Pitch-Abend halten</x-import>
+</div>
+</div>
+</section>
+
+<section class="kg-abschnitt" aria-label="Dateien" style="max-width: 816px">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Dateien</h2><span class="kg-abschnitt-zahl">2</span><span class="kg-abschnitt-aside">Zusammenfassungen: <x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import> · <a class="kg-bezug" href="Dateien.dc.html">alle Dateien</a></span></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 120px; column-gap: 16px; padding-block: 8px; border-top: 1px solid var(--rule)">
+<a href="Dateien.dc.html" class="kg-bezug" style="font-family: var(--font-mono); font-size: 13px">Businessplan_Entwurf.pdf</a>
+<span class="mono" style="text-align: right">28.08.</span>
+<div style="grid-column: 1 / -1"><x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">Erster Entwurf, Markt- und Wettbewerbsteil fehlen</x-import></div>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 120px; column-gap: 16px; padding-block: 8px; border-top: 1px solid var(--rule)">
+<a href="Dateien.dc.html" class="kg-bezug" style="font-family: var(--font-mono); font-size: 13px">Pitchdeck_Solaro_Entwurf.pdf</a>
+<span class="mono" style="text-align: right">gestern</span>
+<div style="grid-column: 1 / -1"><x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">Zwölf Folien, Technik ausführlich, Finanzteil fehlt noch</x-import></div>
+</div>
+</section>
+
+<section class="kg-abschnitt" id="verlauf" aria-label="Alles mit Lisa" style="max-width: 816px">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Alles mit Lisa</h2><span class="kg-abschnitt-aside">über alle Vorgänge · Mails aus fremden Postfächern nur als Platzhalter</span></div>
+<x-import component-from-global-scope="Kollege.Verlauf" eintraege="{{verlauf}}" label="Verlauf Lisa Meier"></x-import>
+</section>
+</main>
+<sc-if value="{{kcOffen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Chat zum Kontext" style="position: absolute; top: 0; right: 0; bottom: 0; width: 520px; box-sizing: border-box; background: var(--paper); box-shadow: var(--shadow-sheet); border-left: 1px solid var(--rule); display: flex; flex-direction: column; z-index: 5">
+<div style="display: flex; align-items: baseline; gap: 8px; padding: 16px 24px; border-bottom: 1px solid var(--rule); flex-wrap: wrap">
+<span class="label">Chat</span>
+<x-import component-from-global-scope="Kollege.Etikett">{{kcName}}</x-import>
+<x-import component-from-global-scope="Kollege.Privat">persönlich</x-import>
+<span style="flex-grow: 1"></span>
+<a class="kg-aktion kg-aktion--text" href="Main.dc.html">Im Chatverlauf</a>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcZu}}">Schließen</button>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 8px">
+<div class="mono">Kontext geladen: {{kcKontext}}</div>
+<sc-for list="{{kcMsgs}}" as="m" hint-placeholder-count="2">
+<sc-if value="{{m.istDu}}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="jetzt">{{m.text}}</x-import>
+</sc-if>
+<sc-if value="{{m.istKollege}}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="Kollege.Nachricht" von="kollege" streamt="{{m.streamt}}">{{m.text}}</x-import>
+</sc-if>
+<sc-if value="{{m.istAussage}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Aussage" art="{{m.art}}" quelle="{{m.quelle}}">{{m.text}}</x-import></div>
+</sc-if>
+<sc-if value="{{m.istKarte}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Karte" punkte="{{m.punkte}}" privat="{{m.privat}}" folgen="{{m.folgen}}" link-text="{{m.linkText}}" link-href="{{m.linkHref}}"></x-import></div>
+</sc-if>
+<sc-if value="{{m.istLuecke}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="{{m.bekannt}}"></x-import></div>
+</sc-if>
+</sc-for>
+<sc-if value="{{kcLaden}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Lese den Kontext"></x-import></div>
+</sc-if>
+</div>
+<div style="padding: 16px 24px; border-top: 1px solid var(--rule)">
+<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe-2" platzhalter="Weiter fragen oder notieren" on-senden="{{kcSenden}}"></x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1900}}'>
+class Component extends DCLogic {
+  kgChats() {
+    return [
+      { id: 'c1', titel: 'Beratung Solaro, Pitchdeck', datum: 'heute', etikett: 'Solaro – EXIST-Antrag', angepinnt: true, href: 'Main.dc.html' },
+      { id: 'c2', titel: 'Social Media nur montags', datum: 'heute', href: 'Main.dc.html' },
+      { id: 'c3', titel: 'Was haben wir Solaro versprochen?', datum: 'gestern', etikett: 'Solaro', href: 'Main.dc.html' },
+      { id: 'c4', titel: 'Einladung Gründungsnacht', datum: '28.09.', etikett: 'Gründungsnacht 20.11.', href: 'Main.dc.html' },
+      { id: 'c5', titel: 'Wie lange dauert EXIST?', datum: '25.09.', href: 'Main.dc.html' },
+      { id: 'c6', titel: 'Notiz zu Tom', datum: '24.09.', etikett: 'Tom Kraus', href: 'Main.dc.html' }
+    ];
+  }
+  kcState() { return { kcOffen: false, kcMsgs: [], kcStream: null, kcLaden: false, kcPrivat: false, kcNotizen: [] }; }
+  kcCfg() { return { name: 'Vorgang', anzahl: '0 Einträge', platzhalter: 'Frag oder notiere etwas', antwort: '', belege: [], luecke: '' }; }
+  kcSenden(text) {
+    var self = this, cfg = this.kcCfg(), frage = text.indexOf('?') >= 0, privat = this.state.kcPrivat;
+    this.setState({ kcOffen: true, kcLaden: true, kcMsgs: this.state.kcMsgs.concat([{ typ: 'du', text: text }]) });
+    setTimeout(function () {
+      var antwort = '', rest = [];
+      if (frage && cfg.antwort && !/wie lange|dauer|chance/i.test(text)) {
+        antwort = cfg.antwort;
+        rest = cfg.belege.map(function (b) { return { typ: 'aussage', art: b.art, text: b.text, quelle: b.quelle }; });
+      } else if (frage) {
+        rest = [{ typ: 'luecke', bekannt: cfg.luecke }];
+      } else {
+        antwort = 'Notiert bei ' + cfg.name + (privat ? ' – privat, nur für dich sichtbar.' : '.');
+        var punkte = ['Notiz im Verlauf von „' + cfg.name + '“ abgelegt' + (privat ? ' (privat)' : '')];
+        var folgen = '';
+        if (/ bis |frist|morgen|freitag|montag|nächste woche/i.test(text)) { punkte.push('Aufgabe für dich angelegt: ' + (text.length > 52 ? text.slice(0, 52) + '…' : text)); folgen = 'entfernt auch 1 Aufgabe'; }
+        rest = [{ typ: 'karte', punkte: punkte, privat: privat, folgen: folgen, linkText: 'Im Verlauf ansehen', linkHref: '#verlauf' }];
+        self.setState({ kcNotizen: [{ text: text, privat: privat }].concat(self.state.kcNotizen) });
+      }
+      self.kcStreamen(antwort, rest);
+    }, 800);
+  }
+  kcStreamen(voll, rest) {
+    var self = this;
+    if (!voll) { this.setState({ kcLaden: false, kcMsgs: this.state.kcMsgs.concat(rest) }); return; }
+    this.setState({ kcLaden: false, kcStream: { voll: voll, n: 0, rest: rest } });
+    var t = setInterval(function () {
+      var s = self.state.kcStream;
+      if (!s) { clearInterval(t); return; }
+      var n = Math.min(s.voll.length, s.n + 4);
+      if (n >= s.voll.length) { clearInterval(t); self.setState({ kcStream: null, kcMsgs: self.state.kcMsgs.concat([{ typ: 'kollege', text: s.voll }], s.rest) }); }
+      else self.setState({ kcStream: { voll: s.voll, n: n, rest: s.rest } });
+    }, 30);
+  }
+  kcVals() {
+    var self = this, st = this.state, cfg = this.kcCfg();
+    var msgs = (st.kcMsgs || []).slice();
+    if (st.kcStream) msgs.push({ typ: 'kollege', text: st.kcStream.voll.slice(0, st.kcStream.n), streamt: true });
+    return {
+      sidebarChats: this.kgChats(),
+      kcName: cfg.name, kcKontext: cfg.name + ' · ' + cfg.anzahl, kcPlatzhalter: cfg.platzhalter,
+      kcOffen: !!st.kcOffen, kcLaden: !!st.kcLaden,
+      kcMsgs: msgs.map(function (m) { return Object.assign({ istDu: m.typ === 'du', istKollege: m.typ === 'kollege', istAussage: m.typ === 'aussage', istKarte: m.typ === 'karte', istLuecke: m.typ === 'luecke', streamt: false }, m); }),
+      kcSenden: function (t) { self.kcSenden(t); },
+      kcZu: function () { self.setState({ kcOffen: false }); },
+      kcAuf: function () { self.setState({ kcOffen: true }); },
+      kcHatMsgs: (st.kcMsgs || []).length > 0,
+      kcPrivat: !!st.kcPrivat,
+      kcPrivatToggle: function () { self.setState({ kcPrivat: !self.state.kcPrivat }); },
+      kcNotizen: st.kcNotizen || []
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = Object.assign({ merge: 'zu', wahl: null }, this.kcState());
+  }
+  kcCfg() {
+    return { name: 'Lisa Meier', anzahl: '11 Mails, 2 Vorgänge', platzhalter: 'Frag oder notiere etwas zu Lisa Meier',
+      antwort: 'Lisa hat zuletzt heute in der Beratung zugesagt, das Pitchdeck bis Freitag zu schicken. Offen von unserer Seite ist der Kontakt zu Frau Weber.',
+      belege: [{ art: 'belegt', text: 'Pitchdeck bis Fr 02.10.', quelle: 'Chat 30.09.' }, { art: 'belegt', text: 'Kontakt Frau Weber zugesagt', quelle: 'Chat 30.09.' }],
+      luecke: 'Wie Lisa zu Terminen am Wochenende steht, kann ich aus ihren Mails nicht sagen.' };
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var kandidaten = [
+      { name: 'L. Meier', adresse: 'l.meier@solaro-energy.de', umfang: '2 Termine, 1 Mail', grund: 'gleicher Nachname, Domain ähnlich wie Solaro' },
+      { name: 'Lisa Meyer', adresse: 'lisa.meyer@student.uni-augsburg.de', umfang: '1 Mail', grund: 'eher eine andere Person – andere Schreibweise, Studierendenadresse' }
+    ];
+    var adressen = [
+      { adresse: 'lisa@solaro.de', herkunft: 'aus 7 Mails', rolle: 'Hauptadresse' },
+      { adresse: 'l.meier@gmx.de', herkunft: 'aus 1 Mail · bestätigt 30.09.', rolle: 'privat genutzt' },
+      { adresse: 'lisa.meier@uni-augsburg.de', herkunft: 'aus Kalender · 2 Termine', rolle: '' }
+    ];
+    if (st.merge === 'fertig' && st.wahl) adressen.push({ adresse: st.wahl.adresse, herkunft: 'übernommen von „' + st.wahl.name + '“', rolle: 'neu' });
+    var verlauf = [
+      { monat: 'September 2026', datum: '30.09.', art: 'Notiz', text: 'EXIST-Antrag · Beratung, Pitchdeck bis Freitag', quelle: 'Chat' },
+      { monat: 'September 2026', datum: '28.09.', art: 'Mail', text: 'EXIST-Antrag · Rückfrage zum Pitchdeck-Format', quelle: 'Mail', herkunft: 'über Kollege' },
+      { monat: 'September 2026', datum: '28.09.', art: 'Mail', text: 'Lisa (gmx): Kurze Frage zum Termin', quelle: 'Mail', herkunft: 'Eingang' },
+      { monat: 'September 2026', datum: '24.09.', art: 'Mail', text: 'EXIST-Antrag · Merkblatt an Lisa', quelle: 'Mail', herkunft: 'aus Outlook' },
+      { monat: 'September 2026', datum: '21.09.', art: 'Mail', text: 'Mail von Julia an Lisa Meier · Inhalt nur für Julia', privat: true },
+      { monat: 'September 2026', datum: '12.09.', art: 'Mail', text: 'EXIST-Antrag · Fragen zum Gründungsstipendium', quelle: 'Mail', herkunft: 'Eingang' }
+    ];
+    (st.kcNotizen || []).slice().reverse().forEach(function (n) { verlauf.unshift({ monat: 'September 2026', datum: '30.09.', art: 'Notiz', text: n.text, quelle: 'Chat', privat: n.privat }); });
+    return Object.assign(this.kcVals(), {
+      mergeAuf: function () { self.setState({ merge: 'suche' }); },
+      mergeZu: function () { self.setState({ merge: 'zu', wahl: null }); },
+      mSuche: st.merge === 'suche',
+      mVorschau: st.merge === 'vorschau',
+      mFertig: st.merge === 'fertig',
+      kandidaten: kandidaten.map(function (k) { return Object.assign({}, k, { waehlen: function () { self.setState({ merge: 'vorschau', wahl: k }); } }); }),
+      wahl: st.wahl || {},
+      mergeLos: function () { self.setState({ merge: 'fertig' }); },
+      mergeRueck: function () { self.setState({ merge: 'zu', wahl: null }); },
+      mPunkte: st.wahl ? ['„' + st.wahl.name + '“ in Lisa Meier übernommen', 'Adresse ' + st.wahl.adresse + ' hinzugefügt', st.wahl.umfang + ' jetzt bei Lisa'] : [],
+      adressen: adressen,
+      adressAnzahl: adressen.length,
+      verlauf: verlauf
+    });
+  }
+}
+</script>
+</body>
+</html>

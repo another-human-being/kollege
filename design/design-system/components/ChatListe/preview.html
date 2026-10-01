@@ -1,0 +1,19 @@
+<!-- @dsCard group="Chat" height=460 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ChatListe</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{style:{width:'248px'}},h(K.ChatListe,{chats:[
+ {id:'1',titel:'Beratung Solaro, Pitchdeck',datum:'heute',etikett:'Solaro – EXIST-Antrag',aktiv:true,angepinnt:true},
+ {id:'2',titel:'Social Media nur montags',datum:'heute'},
+ {id:'3',titel:'Was haben wir Solaro versprochen?',datum:'gestern',etikett:'Solaro'},
+ {id:'4',titel:'Jury für den Pitch-Abend',datum:'28.09.',etikett:'Pitch-Abend'},
+ {id:'5',titel:'Wie lange dauert EXIST?',datum:'25.09.'}]})));
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!-- @dsCard group="Detail" height=330 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Verlauf</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h(K.Verlauf,{eintraege:[
+ {monat:'September 2026',datum:'29.09.',art:'System',text:'Erinnerung an Solaro vorgeschlagen'},
+ {monat:'September 2026',datum:'24.09.',art:'Termin',text:'Beratung mit Lisa Meier und Tom Kraus, 45 Min.',quelle:'Kalender'},
+ {monat:'September 2026',datum:'24.09.',art:'Notiz',text:'Tom wirkt unter Druck wegen Finanzierung',quelle:'Andreas',privat:true},
+ {monat:'September 2026',datum:'24.09.',art:'Mail',text:'An Lisa: EXIST-Merkblatt',quelle:'Mail',herkunft:'über Kollege'},
+ {monat:'September 2026',datum:'23.09.',art:'Mail',text:'An Tom: Termin bestätigt',quelle:'Mail',herkunft:'aus Outlook'},
+ {monat:'September 2026',datum:'12.09.',art:'Mail',text:'Lisa Meier: Fragen zum EXIST-Gründerstipendium',quelle:'Mail'},
+ {monat:'August 2026',datum:'28.08.',art:'Datei',text:'Businessplan_Entwurf.pdf',quelle:'Ablage'},
+ {monat:'August 2026',datum:'21.08.',art:'Mail',text:'Erstkontakt über Kontaktformular',quelle:'Mail'}]}));
+</script>
+</body>
+</html>

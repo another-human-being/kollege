@@ -1,0 +1,17 @@
+<!-- @dsCard group="Eingabe" height=420 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Quittung</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h(K.Quittung,{zeit:'heute 14:32',
+ verstanden:[{text:h(F,null,'Beratung mit ',h(K.Bezug,null,'Solaro'),' (',h(K.Bezug,null,'Lisa Meier'),', ',h(K.Bezug,null,'Tom Kraus'),') · Vorgang ',h(K.Bezug,null,'EXIST-Antrag'))}],
+ erledigt:[{text:'Termin „Beratung Solaro“ heute 13:30 im Verlauf abgelegt'},{text:h(F,null,'Zusage Solaro: Pitchdeck bis Fr 02.10. – Erinnerung am Fr 17:00')},{text:'Zusage wir: Kontakt zu Frau Weber vermitteln'}],
+ vorschlag:h(K.Entwurf,{kanal:'Mail',an:'Anna Weber, IHK Schwaben',betreff:'Vorstellung: Solaro (Solar-Startup, EXIST)',auszug:'Liebe Frau Weber, darf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? Die beiden bereiten gerade einen EXIST-Antrag vor und …',grund:h(K.Aussage,{art:'belegt',quelle:'Eingabe 14:32'},'„wir vermitteln Kontakt zu Frau Weber“')})}));
+</script>
+</body>
+</html>

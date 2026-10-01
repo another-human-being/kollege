@@ -1,0 +1,49 @@
+/* Kollege tokens — compiled from tokens.json */
+:root, [data-theme="light"] {
+  --paper: #fbfbfa;
+  --paper-sunk: #f2f2ef;
+  --ink: #16171a;
+  --ink-muted: #5a5d63;
+  --ink-faint: #83868c;
+  --rule: #e3e3df;
+  --line-control: #878a90;
+  --accent: #2440c2;
+  --on-accent: #ffffff;
+  --accent-soft: #eceffb;
+  --attention: #9c420b;
+  --attention-soft: #fbefe6;
+  --shadow-none: none;
+  --shadow-sheet: 0 8px 32px rgba(22,23,26,0.12);
+}
+[data-theme="dark"] {
+  --paper: #111214;
+  --paper-sunk: #191a1d;
+  --ink: #e8e8e5;
+  --ink-muted: #a0a3a9;
+  --ink-faint: #7a7d83;
+  --rule: #27292c;
+  --line-control: #6f737a;
+  --accent: #9fb0ff;
+  --on-accent: #0b1030;
+  --accent-soft: #1b2140;
+  --attention: #f0a570;
+  --attention-soft: #2b1e15;
+  --shadow-sheet: 0 8px 32px rgba(0,0,0,0.5);
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 48px;
+  --space-7: 72px;
+  --col-date: 96px;
+  --measure: 720px;
+  --radius-0: 0px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --font-sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+}

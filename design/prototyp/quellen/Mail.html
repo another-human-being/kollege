@@ -1,0 +1,94 @@
+Mail|1280|1000|.nachricht{display:flex;flex-direction:column;gap:6px;padding-block:14px;border-top:1px solid var(--rule)}.n-kopf{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.n-text{white-space:pre-line;font-size:15px;line-height:24px}.zitat{white-space:pre-line;font-size:13px;line-height:20px;color:var(--ink-muted);padding:8px 12px;background:var(--paper-sunk);border-radius:2px}.anhang{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:baseline;padding:6px 0;border-top:1px solid var(--rule);font-size:13px}.schreib{display:flex;flex-direction:column;gap:0;border:1px solid var(--line-control);border-radius:4px;background:var(--paper-sunk)}.schreib .zeile{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:baseline;padding:6px 12px;border-bottom:1px solid var(--rule)}.schreib .zeile label{font-family:var(--font-mono);font-size:12px;color:var(--ink-muted)}.schreib input,.schreib textarea{font:inherit;font-size:14px;border:0;background:transparent;color:var(--ink);outline:none;width:100%;box-sizing:border-box}.schreib textarea{font-size:15px;line-height:24px;padding:10px 12px;min-height:170px;resize:vertical}
+@@SIDE:mail@@
+<div class="ld">
+<div class="ld-liste">
+<div class="ld-kopf">
+<div style="display: flex; align-items: baseline; gap: 10px"><h1>Mail</h1><span class="mono">{{ungelesenZeile}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{neueMail}}">+ Neue Mail</button></div>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{postfaecher}}" wert="{{postfach}}" label="Postfach" on-wechsel="{{setPostfach}}"></x-import>
+<label for="mail-suche" class="kg-sr">Mails durchsuchen</label>
+<input id="mail-suche" class="such" value="{{suche}}" onChange="{{sucheTippen}}" placeholder="Suchen: Name, Betreff, Bereich">
+</div>
+<div class="ld-scroll">
+<sc-for list="{{threads}}" as="t" hint-placeholder-count="8">
+<button type="button" class="ld-zeile" aria-current="{{t.aktiv}}" onClick="{{t.los}}">
+<span class="ld-t" style="{{t.stil}}">{{t.von}}</span><span class="ld-m">{{t.zeit}}</span>
+<span class="ld-u" style="{{t.betreffStil}}">{{t.betreff}}</span>
+<span class="ld-u">{{t.vorschau}}</span>
+<span class="ld-u" style="font-family: var(--font-mono); font-size: 11px">{{t.meta}}</span>
+</button>
+</sc-for>
+<sc-if value="{{keineThreads}}" hint-placeholder-val="{{ false }}"><div style="padding: 20px"><x-import component-from-global-scope="Kollege.Leer" titel="Keine Mails gefunden." text="Anderes Postfach wählen oder die Suche leeren."></x-import></div></sc-if>
+</div>
+</div>
+
+<div class="ld-detail">
+<sc-if value="{{zeigeThread}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 500">{{th.betreff}}</h2>
+<div style="display: flex; gap: 8px 16px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-muted)">
+<label for="mail-vorgang" class="label" style="color: var(--ink-muted)">Gehört zu</label>
+<select id="mail-vorgang" class="fe" data-feld="vorgang" value="{{th.vorgang}}" onChange="{{th.feld.wahl}}" style="font-size: 13px"><sc-for list="{{vorgangOptionen}}" as="o" hint-placeholder-count="5"><option value="{{o}}">{{o}}</option></sc-for></select>
+<sc-if value="{{th.zuordnungUngeprueft}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><button type="button" class="kg-aktion kg-aktion--text" onClick="{{th.zuordnungOk}}">bestätigen</button></sc-if>
+<label for="mail-kontakt" class="label" style="color: var(--ink-muted)">Kontakt</label>
+<select id="mail-kontakt" class="fe" data-feld="kontakt" value="{{th.kontakt}}" onChange="{{th.feld.wahl}}" style="font-size: 13px"><sc-for list="{{kontaktOptionen}}" as="o" hint-placeholder-count="5"><option value="{{o}}">{{o}}</option></sc-for></select>
+<span class="mono">{{th.postfachText}}</span>
+</div>
+<div class="kg-aktionen" style="margin-top: 4px">
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{antworten}}">Antworten</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{allenAntworten}}">Allen antworten</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{weiterleiten}}">Weiterleiten</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{archivieren}}">Archivieren</button>
+<sc-if value="{{th.hatVorgangLink}}" hint-placeholder-val="{{ true }}"><a class="kg-aktion kg-aktion--text" href="{{th.vorgangHref}}">Öffnen</a></sc-if>
+</div>
+</div>
+<div>
+<sc-for list="{{th.nachrichten}}" as="n" hint-placeholder-count="2">
+<div class="nachricht">
+<div class="n-kopf"><b style="font-weight: 500">{{n.von}}</b><span class="mono">an {{n.an}}</span><span class="mono" style="margin-left: auto">{{n.zeit}}</span></div>
+<div class="n-text">{{n.text}}</div>
+<sc-if value="{{n.hatZitat}}" hint-placeholder-val="{{ false }}">
+<div><button type="button" class="kg-aktion kg-aktion--text" onClick="{{n.zitatToggle}}" style="font-size: 12px">{{n.zitatLabel}}</button></div>
+<sc-if value="{{n.zitatOffen}}" hint-placeholder-val="{{ false }}"><div class="zitat">{{n.zitat}}</div></sc-if>
+</sc-if>
+<sc-for list="{{n.anhaenge}}" as="a" hint-placeholder-count="0">
+<div class="anhang"><span style="font-family: var(--font-mono); font-size: 13px">{{a.name}}</span><span class="mono">{{a.groesse}}</span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{a.oeffnen}}" style="font-size: 12px">Öffnen</button></div>
+</sc-for>
+<sc-if value="{{n.hatHerkunft}}" hint-placeholder-val="{{ false }}"><span class="mono">{{n.herkunft}}</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{zeigeSchreiben}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{senden}}" style="display: flex; flex-direction: column; gap: 10px">
+<div class="label">{{schreibTitel}}</div>
+<div class="schreib">
+<div class="zeile"><label for="s-an">An</label><input id="s-an" value="{{sAn}}" onChange="{{sTippen}}" data-feld="an"></div>
+<div class="zeile"><label for="s-cc">CC</label><input id="s-cc" value="{{sCc}}" onChange="{{sTippen}}" data-feld="cc" placeholder="optional"></div>
+<div class="zeile"><label for="s-betreff">Betreff</label><input id="s-betreff" value="{{sBetreff}}" onChange="{{sTippen}}" data-feld="betreff"></div>
+<label for="s-text" class="kg-sr">Text</label>
+<textarea id="s-text" value="{{sText}}" onChange="{{sTippen}}" data-feld="text"></textarea>
+<sc-for list="{{sAnhaenge}}" as="a" hint-placeholder-count="0"><div class="anhang" style="padding: 6px 12px"><span style="font-family: var(--font-mono)">{{a.name}}</span><span class="mono">{{a.groesse}}</span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{a.weg}}" style="font-size: 12px">Entfernen</button></div></sc-for>
+</div>
+<sc-if value="{{hatWissen}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border: 1px dashed var(--line-control); border-radius: 4px">
+<span class="mono">Kollege weiß dazu</span>
+<sc-for list="{{wissen}}" as="w" hint-placeholder-count="2"><x-import component-from-global-scope="Kollege.Aussage" art="{{w.art}}" quelle="{{w.quelle}}">{{w.text}}</x-import></sc-for>
+</div>
+</sc-if>
+<div class="kg-aktionen">
+<button type="submit" class="kg-aktion kg-aktion--primaer">Senden</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{anhangDazu}}">+ Anhang</button>
+<a class="kg-aktion kg-aktion--text" href="Chat.dc.html">Entwurf mit Kollege</a>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{schreibenZu}}">Verwerfen</button>
+<span class="mono" style="margin-left: auto">geht über {{sVon}} · liegt danach in „Gesendet“</span>
+</div>
+</form>
+</sc-if>
+
+<sc-if value="{{nichtsOffen}}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="Kollege.Leer" titel="Keine Mail geöffnet." text="Links eine Mail wählen oder eine neue schreiben."></x-import>
+</sc-if>
+</div>
+</div>
+@@TOAST@@

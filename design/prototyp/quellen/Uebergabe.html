@@ -1,0 +1,69 @@
+Übergabe an Julia|1280|1300
+@@SIDE:main@@
+@@ALS:Julia@@
+<main style="height: 100%; box-sizing: border-box; overflow-y: auto; padding: 40px 72px 96px; display: flex; flex-direction: column; gap: 28px">
+<div class="mono">Julias Ansicht · Heute · heute 15:10</div>
+<section style="display: flex; flex-direction: column; gap: 20px; max-width: 816px; border-top: 1px solid var(--ink); padding-top: 14px">
+<div style="display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap">
+<span class="label">Übergabe an dich</span>
+<span class="mono" style="margin-left: auto">heute 15:10</span>
+</div>
+<h1 class="h1" style="font-size: 22px; line-height: 30px">Andreas hat dir die Beratung von <a class="kg-bezug" href="Gruendungsteams.dc.html">Solaro</a> übergeben</h1>
+<div style="font-size: 15px">„Frau Weber kennst du vom Pitch-Abend – magst du das übernehmen?“ <span class="mono">– Andreas</span></div>
+
+<div style="display: grid; grid-template-columns: 140px minmax(0, 1fr); column-gap: 16px; row-gap: 20px">
+<div class="label" style="color: var(--ink-muted); line-height: 24px">Stand</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div>Status <b style="font-weight: 500">wartet</b> – auf das finale Pitchdeck von Solaro (Entwurf kam gestern, ohne Finanzteil).</div>
+<x-import component-from-global-scope="Kollege.Aussage" art="berechnet">EXIST-Einreichung geplant 30.10. = in 30 Tagen</x-import>
+</div>
+
+<div class="label" style="color: var(--ink-muted); line-height: 24px">Nächster Schritt</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div>Pitchdeck abwarten (bis Fr 02.10.), dann <strong style="font-weight: 500">Termin mit Frau Weber</strong> vereinbaren.</div>
+<x-import component-from-global-scope="Kollege.Aussage" art="belegt" quelle="Chat Andreas 30.09.">Solaro hat das Pitchdeck bis Freitag zugesagt</x-import>
+</div>
+
+<div class="label" style="color: var(--ink-muted); line-height: 24px">Offene Zusagen</div>
+<div class="kg-zusagen">
+<div><h3 class="kg-zusagen-titel">Wir</h3>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="heute" quelle="Mail 26.09.">Feedback zum Finanzplan an Tom</x-import>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="offen" quelle="Chat 30.09.">Kontakt zu Frau Weber vermitteln</x-import>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 13.11." quelle="deine Mail 23.09.">Pitch-Slot beim Pitch-Abend bestätigen</x-import>
+</div>
+<div><h3 class="kg-zusagen-titel">Solaro</h3>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 02.10." quelle="Chat 30.09.">Pitchdeck final inkl. Finanzteil</x-import>
+<x-import component-from-global-scope="Kollege.Zusage" faellig="bis 15.10." quelle="Notiz 22.09.">Finanzplan überarbeiten</x-import>
+</div>
+</div>
+
+<div class="label" style="color: var(--ink-muted); line-height: 24px">Zuletzt</div>
+<x-import component-from-global-scope="Kollege.Verlauf" eintraege="{{letzte}}" label="Letzte Ereignisse"></x-import>
+</div>
+
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; background: var(--paper-sunk); border-radius: 4px">
+<x-import component-from-global-scope="Kollege.Privat">Andreas’ private Notizen zu Tom bleiben bei Andreas</x-import>
+</div>
+
+<sc-if value="{{offen}}" hint-placeholder-val="{{ true }}">
+<div class="kg-aktionen">
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{uebernehmen}}">Übernehmen</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{rueckfrage}}">Rückfrage an Andreas</button>
+<a class="kg-aktion kg-aktion--text" href="Gruendungsteams.dc.html">Ganze Beratungsakte ansehen</a>
+</div>
+</sc-if>
+<sc-if value="{{fragt}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{fragen}}" style="display: flex; gap: 8px; align-items: center; max-width: 640px">
+<label for="rf" class="kg-sr">Rückfrage</label>
+<input id="rf" defaultValue="Hat Frau Weber schon von Solaro gehört?" style="flex-grow: 1; font: inherit; font-size: 15px; padding: 6px 10px; border: 1px solid var(--line-control); border-radius: 2px; background: var(--paper); color: var(--ink)">
+<button type="submit" class="kg-aktion kg-aktion--primaer" aria-label="Rückfrage abschicken">→</button>
+</form>
+</sc-if>
+<sc-if value="{{uebernommen}}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="Kollege.Karte" titel="Übernommen" punkte="{{punkte}}" link-text="Zur Beratungsakte: Solaro" link-href="Gruendungsteams.dc.html" folgen="gibt Solaro an Andreas zurück" on-rueckgaengig="{{zurueck}}"></x-import>
+</sc-if>
+<sc-if value="{{gefragt}}" hint-placeholder-val="{{ false }}">
+<div class="kg-aktionen" style="font-size: 14px; color: var(--ink-muted)"><span>✓ Rückfrage an Andreas gestellt · Übergabe bleibt offen, bis du übernimmst</span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{uebernehmen}}">Trotzdem übernehmen</button></div>
+</sc-if>
+</section>
+</main>

@@ -1,0 +1,164 @@
+Einstellungen|1280|1000|.schritt{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;padding-block:12px;border-top:1px solid var(--rule)}.schritt-nr{font-family:var(--font-mono);font-size:13px;color:var(--ink-muted)}.schritt-ok{color:var(--ink)}.schritt-offen{color:var(--attention)}.balken{height:4px;background:var(--paper-sunk);border-radius:2px;overflow:hidden}.balken span{display:block;height:100%;background:var(--ink)}.qz{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding-block:8px;border-top:1px solid var(--rule);font-size:14px}.neu-form{display:flex;gap:6px}.neu-form input{flex:1}
+@@SIDE:einstellungen@@
+<div class="ld">
+<div class="ld-liste">
+<div class="ld-kopf">
+<h1>Einstellungen</h1>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{tabs}}" wert="{{tab}}" label="Abschnitt" on-wechsel="{{setTab}}"></x-import>
+<sc-if value="{{tAnw}}" hint-placeholder-val="{{ false }}">
+<form class="neu-form" onSubmit="{{anwHinzu}}">
+<label for="anw-neu" class="kg-sr">Neue Anweisung</label>
+<input id="anw-neu" class="such" value="{{anwText}}" onChange="{{anwTippen}}" placeholder="Neue Anweisung, z. B. „Mails an Partner siezen“">
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">+ Anweisung</button>
+</form>
+</sc-if>
+</div>
+<div class="ld-scroll">
+<sc-for list="{{gruppen}}" as="g" hint-placeholder-count="2">
+<div class="ld-gruppe">{{g.titel}}</div>
+<sc-for list="{{g.zeilen}}" as="z" hint-placeholder-count="4">
+<button type="button" class="ld-zeile" aria-current="{{z.aktiv}}" onClick="{{z.los}}"><span class="ld-t">{{z.titel}}</span><span class="ld-m" style="{{z.metaStil}}">{{z.meta}}</span><span class="ld-u">{{z.unter}}</span></button>
+</sc-for>
+</sc-for>
+<sc-if value="{{tQuellen}}" hint-placeholder-val="{{ true }}">
+<form class="neu-form" onSubmit="{{einladen}}" style="padding: 12px 20px">
+<label for="einl" class="kg-sr">Person einladen</label>
+<input id="einl" class="such" value="{{einladText}}" onChange="{{einladTippen}}" placeholder="name@uni-augsburg.de">
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">Einladen</button>
+</form>
+</sc-if>
+</div>
+</div>
+
+<div class="ld-detail">
+<!-- Einrichtung -->
+<sc-if value="{{dEinrichtung}}" hint-placeholder-val="{{ true }}">
+<div><h2 class="h1" style="font-size: 24px">Einrichtung</h2><p style="margin: 6px 0 0; color: var(--ink-muted); font-size: 14px">{{einrichtungZeile}}</p></div>
+<div>
+<sc-for list="{{schritte}}" as="s" hint-placeholder-count="4">
+<div class="schritt"><span class="schritt-nr">{{s.nr}}</span><span><b style="font-weight: 500">{{s.titel}}</b></span><span class="{{s.statusKlasse}}" style="font-size: 13px">{{s.status}}</span>
+<span></span><span style="font-size: 14px; color: var(--ink-muted)">{{s.text}}</span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{s.los}}" style="font-size: 13px">{{s.knopf}}</button></div>
+</sc-for>
+</div>
+<sc-if value="{{vorschlagOffen}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px dashed var(--line-control); border-radius: 4px">
+<div style="display: flex; gap: 8px; align-items: baseline"><b style="font-weight: 500">Ich schlage diese Bereiche vor – passt das?</b><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import></div>
+<sc-for list="{{vorschlag}}" as="vs" hint-placeholder-count="4"><div class="qz"><span style="font-weight: 500">{{vs.name}}</span><span style="font-size: 13px"><span style="color: var(--ink-muted)">{{vs.grund}}</span><br><span class="mono">Spalten: {{vs.spalten}}</span></span><span></span></div></sc-for>
+<div class="qz"><span style="color: var(--ink-muted)">nicht vorgeschlagen</span><span style="font-size: 13px; color: var(--ink-muted)">Partner und Kooperationen (Stadtwerke, IHK) – nur 9 Mails; bleiben ohne Bereich, bis ihr einen anlegt.</span><span></span></div>
+<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{vorschlagPasst}}">Passt</button><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{vorschlagAnpassen}}">Anpassen</button><span class="mono">Der Import ordnet erst danach zu.</span></div>
+</div>
+</sc-if>
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>214 Einträge aus dem Import sind noch ungeprüft.</span><span style="flex-grow: 1"></span><a class="kg-aktion kg-aktion--sekundaer" href="Gruendungsteams.dc.html">Gründungsteams prüfen</a><a class="kg-aktion kg-aktion--text" href="Kontakte.dc.html">Kontakte prüfen</a></div>
+</sc-if>
+
+<!-- Quelle -->
+<sc-if value="{{dQuelle}}" hint-placeholder-val="{{ false }}">
+<div><h2 class="h1" style="font-size: 24px">{{q.titel}}</h2><p style="margin: 6px 0 0; color: var(--ink-muted); font-size: 14px">{{q.fuer}}</p></div>
+<div class="felder">
+<span class="fl">Konto</span><span style="font-family: var(--font-mono); font-size: 13px; line-height: 28px">{{q.konto}}</span>
+<span class="fl">Status</span><span style="font-size: 14px; line-height: 28px; {{q.statusStil}}">{{q.status}}</span>
+<span class="fl">Zuletzt</span><span class="mono" style="line-height: 28px">= {{q.zuletzt}}</span>
+<span class="fl">Liest</span><span style="font-size: 14px; line-height: 28px">{{q.liest}}</span>
+<sc-if value="{{q.hatPfad}}" hint-placeholder-val="{{ false }}">
+<label for="q-pfad">Pfad</label>
+<input id="q-pfad" class="fe" data-feld="pfad" value="{{q.pfad}}" onFocus="{{q.f.fokus}}" onChange="{{q.f.tippen}}" onBlur="{{q.f.fertig}}" style="font-family: var(--font-mono); font-size: 13px; width: 100%">
+</sc-if>
+<sc-if value="{{q.hatSenden}}" hint-placeholder-val="{{ false }}">
+<label for="q-senden">Senden</label>
+<select id="q-senden" class="fe" data-feld="senden" value="{{q.senden}}" onChange="{{q.f.wahl}}" style="justify-self: start"><option value="über dieses Postfach">über dieses Postfach (liegt in „Gesendet“)</option><option value="nur Entwürfe">nur Entwürfe – Senden in Outlook</option></select>
+</sc-if>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px; max-width: 600px">{{q.erklaerung}}</p>
+<div class="kg-aktionen">
+<sc-if value="{{q.verbunden}}" hint-placeholder-val="{{ true }}"><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{q.sync}}">Jetzt abgleichen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{q.trennen}}">Trennen</button></sc-if>
+<sc-if value="{{q.getrennt}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{q.verbinden}}">Verbinden</button></sc-if>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{zuAusschluessen}}">Ausschlüsse ({{ausAnzahl}})</button>
+</div>
+</sc-if>
+
+<!-- Person im Team -->
+<sc-if value="{{dPerson}}" hint-placeholder-val="{{ false }}">
+<div><h2 class="h1" style="font-size: 24px">{{t.name}}</h2><p style="margin: 6px 0 0; color: var(--ink-muted); font-size: 14px">{{t.rolle}}</p></div>
+<div>
+<sc-for list="{{t.quellen}}" as="x" hint-placeholder-count="2"><div class="qz"><span class="fl" style="font-size: 12px">{{x.name}}</span><span style="{{x.stil}}">{{x.status}}</span><span class="mono">{{x.zuletzt}}</span></div></sc-for>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 22px; max-width: 600px; color: var(--ink-muted)">Jede Person verbindet ihr Postfach selbst. Du siehst nur den Status, nie die Inhalte – fremde Mails erscheinen im Verlauf nur als Platzhalter.</p>
+<div class="kg-aktionen"><sc-if value="{{t.hatAktion}}" hint-placeholder-val="{{ true }}"><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{t.aktion}}">{{t.aktionText}}</button></sc-if></div>
+</sc-if>
+
+<!-- Import -->
+<sc-if value="{{dImport}}" hint-placeholder-val="{{ false }}">
+<div><h2 class="h1" style="font-size: 24px">Import</h2><p style="margin: 6px 0 0; color: var(--ink-muted); font-size: 14px">Bei der Einrichtung: die letzten 12 Monate aller verbundenen Quellen.</p></div>
+<div>
+<sc-for list="{{importErgebnis}}" as="x" hint-placeholder-count="4"><div class="qz"><span class="fl" style="font-size: 12px">{{x.was}}</span><span>{{x.wert}}</span><span></span></div></sc-for>
+</div>
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>214 Einträge ungeprüft – je Bereich und Liste über den Filter „ungeprüft“.</span><span style="flex-grow: 1"></span><a class="kg-aktion kg-aktion--text" href="Gruendungsteams.dc.html">prüfen</a></div>
+<section class="kg-abschnitt" aria-label="Weitere Vergangenheit">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Weiter zurück importieren</h2></div>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{zeitraeume}}" wert="{{zeitraum}}" label="Zeitraum" on-wechsel="{{setZeitraum}}"></x-import>
+<div style="display: flex; gap: 16px; font-size: 14px"><sc-for list="{{importQuellen}}" as="x" hint-placeholder-count="3"><label style="display: inline-flex; gap: 6px; align-items: center"><input type="checkbox" checked="{{x.an}}" onChange="{{x.toggle}}" style="accent-color: var(--ink)">{{x.name}}</label></sc-for></div>
+<span class="mono">= {{schaetzung}}</span>
+<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{importStarten}}" disabled="{{importLaeuft}}">Import starten</button><span style="font-size: 13px; color: var(--ink-muted)">läuft im Hintergrund; Neues landet als „ungeprüft“</span></div>
+<sc-for list="{{teile}}" as="x" hint-placeholder-count="0"><div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px"><span>{{x.text}} <span class="mono">{{x.zahl}}</span></span><div class="balken"><span style="{{x.breite}}"></span></div></div></sc-for>
+</section>
+</sc-if>
+
+<!-- Anweisung -->
+<sc-if value="{{dAnweisung}}" hint-placeholder-val="{{ false }}">
+<div class="label" style="color: var(--ink-muted)">Anweisung</div>
+<label for="a-text" class="kg-sr">Anweisung</label>
+<textarea id="a-text" class="fe" data-feld="text" rows="3" value="{{a.text}}" onFocus="{{a.f.fokus}}" onChange="{{a.f.tippen}}" onBlur="{{a.f.fertig}}" style="width: 100%; font-size: 20px; line-height: 28px"></textarea>
+<div class="felder">
+<label for="a-geltung">Gilt für</label>
+<select id="a-geltung" class="fe" data-feld="geltung" value="{{a.geltung}}" onChange="{{a.f.wahl}}" style="justify-self: start"><sc-for list="{{geltungen}}" as="g2" hint-placeholder-count="6"><option value="{{g2}}">{{g2}}</option></sc-for></select>
+<span class="fl">Von</span><span style="font-size: 14px; line-height: 28px">{{a.von}} · {{a.datum}}</span>
+<span class="fl">Angewandt</span><span class="mono" style="line-height: 28px">= {{a.angewandt}}</span>
+<sc-if value="{{a.hatBeziehung}}" hint-placeholder-val="{{ false }}"><span class="fl">Vorrang</span><span style="font-size: 14px; line-height: 22px; padding-top: 3px">{{a.beziehung}}</span></sc-if>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 20px; color: var(--ink-muted); max-width: 600px">Gilt für: alle Bereiche, einen Bereich oder nur dich. Reihenfolge bei Widerspruch: Bereich vor „Alle“ · spezieller vor allgemeiner · persönlich vor Team (nur für dich) · neuer vor älter. Widersprüche zeige ich hier an, statt still eine zu wählen.</p>
+<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{a.loeschen}}">Löschen</button></div>
+</sc-if>
+
+<!-- Ausschluss -->
+<sc-if value="{{dAusschluss}}" hint-placeholder-val="{{ false }}">
+<div class="label" style="color: var(--ink-muted)">Ausschluss</div>
+<div class="felder">
+<label for="x-art">Art</label>
+<select id="x-art" class="fe" data-feld="art" value="{{x.art}}" onChange="{{x.f.wahl}}" style="justify-self: start"><option value="Absender">Absender</option><option value="Domain">Domain</option><option value="Ordner">Ordner</option></select>
+<label for="x-wert">Wert</label>
+<input id="x-wert" class="fe" data-feld="wert" value="{{x.wert}}" onFocus="{{x.f.fokus}}" onChange="{{x.f.tippen}}" onBlur="{{x.f.fertig}}" style="font-family: var(--font-mono); font-size: 13px; width: 100%">
+<label for="x-geltung">Gilt für</label>
+<select id="x-geltung" class="fe" data-feld="geltung" value="{{x.geltung}}" onChange="{{x.f.wahl}}" style="justify-self: start"><option value="persönlich">mein Postfach</option><option value="Team">alle Postfächer</option></select>
+<span class="fl">Wirkung</span><span class="mono" style="line-height: 28px">= {{x.wirkung}}</span>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 20px; color: var(--ink-muted)">Gilt rückwirkend: Bereits Gelesenes wird aus dem Record entfernt. Rückgängig holt es zurück.</p>
+<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{x.entfernen}}">Ausschluss entfernen</button></div>
+</sc-if>
+<!-- Bereich -->
+<sc-if value="{{dBereich}}" hint-placeholder-val="{{ false }}">
+<div class="label" style="color: var(--ink-muted)">Bereich</div>
+<label for="br-name" class="kg-sr">Name</label>
+<input id="br-name" class="fe fe-titel" data-feld="name" value="{{bv.name}}" onFocus="{{bv.f.fokus}}" onChange="{{bv.f.tippen}}" onBlur="{{bv.f.fertig}}">
+<div class="felder">
+<span class="fl">Reihenfolge</span><span style="display: flex; gap: 8px; align-items: baseline; line-height: 28px"><span class="mono">{{bv.position}}</span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{bv.hoch}}" aria-label="nach oben">↑</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{bv.runter}}" aria-label="nach unten">↓</button></span>
+<span class="fl">Einträge</span><span class="mono" style="line-height: 28px">= {{bv.umfang}} · <a class="kg-bezug" href="{{bv.seite}}">öffnen</a></span>
+</div>
+<section class="kg-abschnitt" aria-label="Spalten">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Spalten</h2><span class="kg-abschnitt-aside">{{bv.spaltenZeile}} · die erste ist der Titel</span></div>
+<sc-for list="{{bv.spalten}}" as="sp" hint-placeholder-count="4"><div class="qz" style="grid-template-columns: 28px minmax(0,1fr) auto"><span class="mono">{{sp.nr}}</span><span><label for="{{sp.htmlId}}" class="kg-sr">Spalte</label><input id="{{sp.htmlId}}" class="fe" value="{{sp.name}}" onChange="{{sp.aendern}}" style="width: 260px"></span><sc-if value="{{sp.nichtErste}}" hint-placeholder-val="{{ true }}"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{sp.weg}}" style="font-size: 13px">entfernen</button></sc-if><sc-if value="{{sp.erste}}" hint-placeholder-val="{{ false }}"><span class="mono">Titel</span></sc-if></div></sc-for>
+<sc-if value="{{bv.kannSpalte}}" hint-placeholder-val="{{ true }}"><div><button type="button" class="kg-aktion kg-aktion--text" onClick="{{bv.spalteDazu}}">+ Spalte</button></div></sc-if>
+<sc-if value="{{bv.voll}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: var(--ink-muted)">Fünf Spalten sind das Maximum – erst eine entfernen. Weitere Angaben gehören in die Detailansicht.</span></sc-if>
+</section>
+<section class="kg-abschnitt" aria-label="Phasen">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Phase-Werte</h2><span class="kg-abschnitt-aside">in dieser Reihenfolge · die letzte gilt als abgeschlossen</span></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
+<sc-for list="{{bv.phasen}}" as="ph" hint-placeholder-count="3"><span style="display: inline-flex; gap: 4px; align-items: baseline; font-size: 13px; padding: 2px 4px 2px 8px; border: 1px solid var(--rule); border-radius: 2px">{{ph.name}}<button type="button" onClick="{{ph.weg}}" aria-label="{{ph.wegLabel}}" style="all: unset; cursor: pointer; color: var(--ink-muted); padding: 0 4px">×</button></span></sc-for>
+<sc-if value="{{bv.keinePhasen}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: var(--ink-muted)">Keine Phasen – gefiltert wird nach Semester.</span></sc-if>
+<form onSubmit="{{bv.phaseDazu}}"><label for="br-phase" class="kg-sr">Phase hinzufügen</label><input id="br-phase" class="such" value="{{bv.phaseText}}" onChange="{{bv.phaseTippen}}" placeholder="+ Phase" style="width: 140px"></form>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{dLeer}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Leer" titel="Nichts gewählt." text="Links einen Eintrag wählen."></x-import></sc-if>
+</div>
+</div>
+@@TOAST@@

@@ -1,0 +1,38 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Cover</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+html,body{margin:0;background:var(--paper)}
+.cv{position:relative;width:960px;height:288px;overflow:hidden;background:var(--paper)}
+.cv svg{position:absolute;inset:0}
+.ink{fill:var(--ink)}.acc{fill:var(--accent)}.soft{fill:var(--accent-soft)}.att{fill:var(--attention)}
+.hair{stroke:var(--line-control);stroke-width:1}
+.tile{rx:var(--radius-2)}
+.txt{position:absolute;left:40px;bottom:32px;max-width:440px}
+.name{font-family:var(--font-sans);font-weight:600;font-size:100px;line-height:.92;letter-spacing:-0.03em;color:var(--ink);margin:0}
+.tag{font-family:var(--font-sans);font-size:14px;line-height:20px;color:var(--ink-muted);margin:16px 0 0}
+</style></head>
+<body>
+<div class="cv">
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+<!--
+  blocks: ink 192×312 (bleeds top) · accent 120×144 · accent-soft 120×168 (bleeds top/right) · attention 48×48 — sides are 24px multiples (body line height), corners radius-0, one block radius-2
+  arrangement: flush modular grid on the 24px baseline, one tall slab with satellites, weighted to ink (the brand is ink on paper)
+  pattern row: editorial, "borders not shadows", hairline rules = ruled logbook paper; four line-control hairlines on the 24px grid pass behind the blocks
+  steps/radii: space-5 (24) pitch, space-7 (72) offsets, col-date (96) gap rhythm, radius-0 / radius-2
+-->
+<line class="hair" x1="480" y1="48.5" x2="960" y2="48.5"/>
+<line class="hair" x1="480" y1="120.5" x2="960" y2="120.5"/>
+<line class="hair" x1="480" y1="192.5" x2="960" y2="192.5"/>
+<line class="hair" x1="480" y1="264.5" x2="960" y2="264.5"/>
+<rect class="ink" x="504" y="-24" width="192" height="312"/>
+<rect class="acc" x="720" y="72" width="120" height="144"/>
+<rect class="soft tile" x="864" y="-24" width="120" height="168"/>
+<rect class="att" x="864" y="168" width="48" height="48"/>
+</svg>
+<div class="txt"><p class="name">Kollege</p><p class="tag">Schreibt mit, merkt sich, erinnert. Mit Quelle.</p></div>
+</div>
+</body>
+</html>

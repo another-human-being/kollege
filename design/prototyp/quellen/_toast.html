@@ -1,0 +1,7 @@
+<sc-if value="{{zeigeToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: absolute; left: 24px; bottom: 20px; display: flex; gap: 14px; align-items: baseline; padding: 8px 14px; background: var(--ink); color: var(--paper); border-radius: 4px; font-size: 13px; z-index: 8; max-width: 560px">
+<span>✓ {{toastText}}</span>
+<sc-if value="{{toastKannZurueck}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{toastUndo}}" style="all: unset; cursor: pointer; text-decoration: underline; text-underline-offset: 3px">↶ Rückgängig</button></sc-if>
+<button type="button" onClick="{{toastZu}}" aria-label="Hinweis schließen" style="all: unset; cursor: pointer; opacity: .7">×</button>
+</div>
+</sc-if>

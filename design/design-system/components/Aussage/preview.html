@@ -1,0 +1,18 @@
+<!-- @dsCard group="Wissen" height=150 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Aussage</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{style:{display:'grid',gap:'4px'}},
+ h(K.Aussage,{art:'belegt',quelle:'Mail 12.09.'},'Lisa Meier: „Pitchdeck schicken wir bis Freitag.“'),
+ h(K.Aussage,{art:'berechnet'},'seit 9 Tagen keine Antwort'),
+ h(K.Aussage,{art:'berechnet',dringend:true},'1 Tag überfällig'),
+ h(K.Aussage,{art:'einschaetzung'},'möglicherweise gefährdet – EXIST-Frist ist in 3 Wochen')));
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!-- @dsCard group="Klärung" height=260 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Klaerung</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',null,
+ h(K.Klaerung,{frage:'Ist „Lisa“ in der Mail vom 28.09. Lisa Meier von Solaro?',grund:'Gleiche Absenderdomain, aber neue Adresse',quelle:'Mail 28.09.',antworten:['Ja','Andere Person','Neu anlegen'],bestaetigt:function(a){return a==='Ja'?'Zugeordnet zu Lisa Meier (Solaro)':'Gemerkt: '+a}}),
+ h(K.Klaerung,{frage:'Gehört „Jury-Briefing“ zum Pitch-Abend oder zur Gründungsnacht?',grund:'Beide Events im November, beide mit Jury',quelle:'Termin 04.11.',antworten:['Pitch-Abend','Gründungsnacht','Keins davon']})));
+</script>
+</body>
+</html>

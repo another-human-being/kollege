@@ -1,0 +1,14 @@
+<!-- @dsCard group="Aktionen" height=96 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Aktion</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'kg-aktionen'},h(K.Aktion,{variante:'primaer'},'Senden'),h(K.Aktion,{variante:'sekundaer'},'Ansehen'),h(K.Aktion,{variante:'sekundaer'},'Übergeben an …'),h(K.Aktion,{variante:'text'},'Falsch zugeordnet?'),h(K.Aktion,{variante:'rueckgaengig'}),h(K.Aktion,{variante:'primaer',disabled:true},'Merken')));
+</script>
+</body>
+</html>

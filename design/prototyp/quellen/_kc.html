@@ -1,0 +1,38 @@
+<sc-if value="{{kcOffen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Chat zum Kontext" style="position: absolute; top: 0; right: 0; bottom: 0; width: 520px; box-sizing: border-box; background: var(--paper); box-shadow: var(--shadow-sheet); border-left: 1px solid var(--rule); display: flex; flex-direction: column; z-index: 5">
+<div style="display: flex; align-items: baseline; gap: 8px; padding: 16px 24px; border-bottom: 1px solid var(--rule); flex-wrap: wrap">
+<span class="label">Chat</span>
+<x-import component-from-global-scope="Kollege.Etikett">{{kcName}}</x-import>
+<x-import component-from-global-scope="Kollege.Privat">persönlich</x-import>
+<span style="flex-grow: 1"></span>
+<a class="kg-aktion kg-aktion--text" href="Chat.dc.html">Im Chatverlauf</a>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcZu}}">Schließen</button>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 8px">
+<div class="mono">Kontext geladen: {{kcKontext}}</div>
+<sc-for list="{{kcMsgs}}" as="m" hint-placeholder-count="2">
+<sc-if value="{{m.istDu}}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="jetzt">{{m.text}}</x-import>
+</sc-if>
+<sc-if value="{{m.istKollege}}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="Kollege.Nachricht" von="kollege" streamt="{{m.streamt}}">{{m.text}}</x-import>
+</sc-if>
+<sc-if value="{{m.istAussage}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Aussage" art="{{m.art}}" quelle="{{m.quelle}}">{{m.text}}</x-import></div>
+</sc-if>
+<sc-if value="{{m.istKarte}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Karte" punkte="{{m.punkte}}" privat="{{m.privat}}" folgen="{{m.folgen}}" link-text="{{m.linkText}}" link-href="{{m.linkHref}}"></x-import></div>
+</sc-if>
+<sc-if value="{{m.istLuecke}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="{{m.bekannt}}"></x-import></div>
+</sc-if>
+</sc-for>
+<sc-if value="{{kcLaden}}" hint-placeholder-val="{{ false }}">
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Lese den Kontext"></x-import></div>
+</sc-if>
+</div>
+<div style="padding: 16px 24px; border-top: 1px solid var(--rule)">
+<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe-2" platzhalter="Weiter fragen oder notieren" on-senden="{{kcSenden}}"></x-import>
+</div>
+</div>
+</sc-if>

@@ -1,0 +1,85 @@
+Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid var(--rule);padding:20px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}.baum{display:flex;flex-direction:column;gap:1px}.baum button{all:unset;cursor:pointer;font-size:13px;line-height:20px;padding:3px 8px;border-radius:2px;color:var(--ink-muted);display:flex;justify-content:space-between;gap:8px}.baum button[aria-pressed="true"]{background:var(--paper-sunk);color:var(--ink)}.baum button:focus-visible{outline:2px solid var(--accent)}.ld-liste--schmal{width:340px}.tagz{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.tag{display:inline-flex;gap:4px;align-items:baseline;font-size:13px;padding:1px 4px 1px 8px;border:1px solid var(--rule);border-radius:2px}.tag button{all:unset;cursor:pointer;color:var(--ink-muted);padding:0 4px}.tag button:focus-visible{outline:2px solid var(--accent)}.pfad{font-family:var(--font-mono);font-size:12px;line-height:18px;color:var(--ink-muted);word-break:break-all}
+@@SIDE:dateien@@
+<div class="ld">
+<nav class="baum-spalte" aria-label="Ordner auf dem Netzlaufwerk">
+<div class="label" style="color: var(--ink-muted)">Netzlaufwerk</div>
+<div class="pfad">\\fs.uni-augsburg.de\gruendung</div>
+<div class="baum">
+<sc-for list="{{ordner}}" as="ob" hint-placeholder-count="10"><button type="button" aria-pressed="{{ob.an}}" onClick="{{ob.los}}" style="{{ob.einzug}}"><span>{{ob.name}}</span><span class="mono">{{ob.zahl}}</span></button></sc-for>
+</div>
+<div class="mono" style="margin-top: auto">synchronisiert vor 4 Min.</div>
+</nav>
+<div class="ld-liste ld-liste--schmal">
+<div class="ld-kopf">
+<div style="display: flex; align-items: baseline; gap: 10px"><h1>{{ordnerName}}</h1><span class="mono">{{zaehler}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{hochladen}}">Hochladen</button></div>
+<label for="d-suche" class="kg-sr">Dateien durchsuchen</label>
+<input id="d-suche" class="such" value="{{suche}}" onChange="{{sucheTippen}}" placeholder="Dateiname oder Inhalt">
+<div class="filterzeile">
+<sc-for list="{{filter}}" as="f" hint-placeholder-count="3"><button type="button" class="chip" aria-pressed="{{f.an}}" onClick="{{f.los}}">{{f.label}}</button></sc-for>
+</div>
+</div>
+@@PRUEF@@
+<div class="ld-scroll">
+<sc-for list="{{zeilen}}" as="z" hint-placeholder-count="8">
+<sc-if value="{{z.pruef}}" hint-placeholder-val="{{ false }}">
+<div class="pz"><input type="checkbox" aria-label="Auswählen: {{z.name}}" checked="{{z.gewaehlt}}" onChange="{{z.waehlen}}">
+<button type="button" class="ld-zeile" aria-current="{{z.aktiv}}" onClick="{{z.los}}"><span class="ld-t" style="font-family: var(--font-mono); font-size: 13px">{{z.name}}</span><span class="ld-m">{{z.datum}}</span><span class="ld-u">{{z.unter}}</span></button></div>
+</sc-if>
+<sc-if value="{{z.normal}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="ld-zeile" aria-current="{{z.aktiv}}" onClick="{{z.los}}"><span class="ld-t" style="font-family: var(--font-mono); font-size: 13px">{{z.name}}</span><span class="ld-m">{{z.datum}}</span><span class="ld-u">{{z.unter}}</span></button>
+</sc-if>
+</sc-for>
+<sc-if value="{{keine}}" hint-placeholder-val="{{ false }}"><div style="padding: 20px"><x-import component-from-global-scope="Kollege.Leer" titel="Keine Dateien hier." text="Anderen Ordner wählen oder hochladen."></x-import></div></sc-if>
+</div>
+</div>
+
+<div class="ld-detail">
+<sc-if value="{{hatDetail}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{d.istUngeprueft}}" hint-placeholder-val="{{ false }}">
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Zuordnung von Kollege – {{d.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Verwerfen</button></div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<label for="d-name" class="kg-sr">Dateiname</label>
+<input id="d-name" class="fe fe-titel" data-feld="name" value="{{d.name}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" style="font-family: var(--font-mono); font-size: 20px">
+<div class="pfad">{{d.pfad}}</div>
+<div class="kg-aktionen">
+<button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{d.oeffnen}}">{{d.oeffnenLabel}}</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.pfadKopieren}}">Pfad kopieren</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
+</div>
+<div class="felder">
+<label for="d-ordner">Ordner</label>
+<select id="d-ordner" class="fe" data-feld="ordner" value="{{d.ordner}}" onChange="{{d.f.wahl}}" style="justify-self: start"><sc-for list="{{ordnerOptionen}}" as="o" hint-placeholder-count="8"><option value="{{o.key}}">{{o.name}}</option></sc-for></select>
+<span class="fl">Geändert</span><span style="font-size: 14px; line-height: 28px">{{d.zeit}}</span>
+<span class="fl">Umfang</span><span style="font-size: 14px; line-height: 28px">{{d.fakten}}</span>
+<span class="fl">Sichtbar</span><span style="font-size: 14px; line-height: 28px; display: flex; gap: 8px; align-items: center"><sc-if value="{{d.privat}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Privat"></x-import></sc-if>{{d.sichtbar}}</span>
+</div>
+</div>
+
+<section class="kg-abschnitt" aria-label="Zugeordnet">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Zugeordnet</h2><span class="kg-abschnitt-aside">Bereiche und Personen</span></div>
+<div class="tagz">
+<sc-for list="{{d.bezuege}}" as="b" hint-placeholder-count="2"><span class="tag"><a class="kg-bezug" href="{{b.href}}">{{b.name}}</a><button type="button" onClick="{{b.weg}}" aria-label="{{b.wegLabel}}">×</button></span></sc-for>
+<label for="d-zuordnen" class="kg-sr">Zuordnen</label>
+<select id="d-zuordnen" class="fe" value="" onChange="{{d.zuordnen}}" style="font-size: 13px"><option value="">+ Zuordnen …</option><sc-for list="{{d.moeglich}}" as="m" hint-placeholder-count="4"><option value="{{m.key}}">{{m.name}}</option></sc-for></select>
+</div>
+</section>
+
+<section class="kg-abschnitt" aria-label="Zusammenfassung">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Worum es geht</h2><span class="kg-abschnitt-aside"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import> aus dem Dateiinhalt</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{d.kurz}}</x-import>
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{d.lang}}</x-import>
+</div>
+</section>
+
+<section class="kg-abschnitt" aria-label="Verlauf">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Verlauf</h2></div>
+<x-import component-from-global-scope="Kollege.Verlauf" eintraege="{{d.verlauf}}" label="Verlauf der Datei"></x-import>
+</section>
+</sc-if>
+<sc-if value="{{keinDetail}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Leer" titel="Keine Datei geöffnet." text="In der Mitte eine Datei wählen."></x-import></sc-if>
+</div>
+</div>
+@@KC@@
+@@TOAST@@

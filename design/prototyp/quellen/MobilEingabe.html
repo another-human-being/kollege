@@ -1,0 +1,28 @@
+Chat mobil|390|844|.kg-aktion{min-height:44px}.kg-nachricht{grid-template-columns:minmax(0,1fr)!important;row-gap:2px}.kg-nachricht-wer{flex-direction:row!important;gap:8px}.kg-entwurf-fuss .kg-aktion{flex-grow:1;justify-content:center}
+<div style="height: 844px; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 12px; border-bottom: 1px solid var(--rule)">
+<a href="MobilUebersicht.dc.html" style="font-size: 14px; color: var(--ink-muted); text-decoration: none; min-height: 44px; display: flex; align-items: center">← Heute</a>
+<span style="flex-grow: 1; font-weight: 500; font-size: 14px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{titel}}</span>
+<x-import component-from-global-scope="Kollege.Privat" nur-symbol="{{ true }}"></x-import>
+</header>
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{leer}}" hint-placeholder-val="{{ true }}">
+<div style="padding-top: 24px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 20px; line-height: 28px; font-weight: 500">Gerade aus dem Gespräch?</div>
+<div style="font-size: 14px; color: var(--ink-muted)">Schreib in eigenen Worten, was passiert ist. Ich ordne zu, trage ein und zeige dir, was ich getan habe.</div>
+</div>
+</sc-if>
+<sc-for list="{{nachrichten}}" as="m" hint-placeholder-count="3">
+<sc-if value="{{m.istDu}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="jetzt">{{m.text}}</x-import></sc-if>
+<sc-if value="{{m.istKollege}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Nachricht" von="kollege" streamt="{{m.streamt}}">{{m.text}}</x-import></sc-if>
+<sc-if value="{{m.istKarte}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Karte" punkte="{{m.punkte}}" folgen="{{m.folgen}}" link-text="Zur Beratungsakte" link-href="Gruendungsteams.dc.html"></x-import></sc-if>
+<sc-if value="{{m.istKlaerung}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Klaerung" frage="Ist „Frau Weber“ Anna Weber (IHK)?" grund="einzige Frau Weber in euren Kontakten" quelle="Mail 21.09." antworten="{{antworten}}" on-antwort="{{beantworten}}"></x-import></sc-if>
+<sc-if value="{{m.istEntwurf}}" hint-placeholder-val="{{ false }}"><sc-if value="{{wartet}}" hint-placeholder-val="{{ true }}"><div class="mono">↑ wartet auf deine Antwort oben</div></sc-if><div style="{{wartetStil}}"><x-import component-from-global-scope="Kollege.Entwurf" kanal="Mail" an="Anna Weber, IHK" betreff="Vorstellung: Solaro" auszug="Liebe Frau Weber, darf ich Ihnen Lisa Meier und Tom Kraus von Solaro vorstellen? …" hinweis="Geht über dein Postfach, liegt danach in „Gesendet“." on-senden="{{m.senden}}"></x-import></div></sc-if>
+<sc-if value="{{m.istGesendet}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Karte" titel="Gesendet" punkte="{{m.gesendetPunkte}}" folgen="nur 30 Sekunden möglich" on-rueckgaengig="{{m.senden}}"></x-import></sc-if>
+</sc-for>
+<sc-if value="{{laden}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Lese mit, ordne zu"></x-import></sc-if>
+</div>
+<div style="padding: 12px 12px 20px; border-top: 1px solid var(--rule)">
+<x-import component-from-global-scope="Kollege.Eingabe" id="mobil-eingabe" wert="{{startText}}" hilfe="Notiz, Frage oder Anweisung" on-senden="{{senden}}"></x-import>
+</div>
+</div>

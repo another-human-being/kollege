@@ -1,0 +1,17 @@
+<!-- @dsCard group="Chat" height=420 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Karte</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{style:{display:'grid',gap:'24px'}},
+ h(K.Karte,{zeit:'14:32',punkte:['Zusage bei Solaro eingetragen: Pitchdeck bis Fr 02.10.','Aufgabe für dich angelegt: Kontakt zu Frau Weber vermitteln'],linkText:'Zum Vorgang: Solaro – EXIST-Antrag',folgen:'entfernt auch 1 Aufgabe und 1 Erinnerung'}),
+ h(K.Karte,{art:'anweisung',geltung:'persoenlich',punkte:['„Hinweise zu Social Media nur montags.“'],linkText:'Zur Anweisungsliste'}),
+ h(K.Karte,{titel:'Erledigt',punkte:['Einladung zur Gründungsnacht als Entwurf vorbereitet'],anweisung:'Events: Einladung 4 Wochen vorher',linkText:'Zum Vorgang: Gründungsnacht 20.11.',zurueck:true})));
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+Leer, Laden, Fehler|1280|1500|.fall{display:flex;flex-direction:column;gap:16px;min-width:0} .fall-titel{font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);padding-bottom:8px;border-bottom:1px solid var(--ink)}
+<main style="padding: 56px 96px 96px; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 500; letter-spacing: -0.01em">Leer, Laden, Fehler</h1>
+<div style="color: var(--ink-muted); max-width: 640px">Jeder Zustand ist ein Satz: was fehlt, warum, und was als Nächstes passiert. Keine Illustrationen, keine Spinner.</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px 80px">
+
+<div class="fall">
+<div class="fall-titel">Heute · erster Tag, noch nichts verbunden</div>
+<x-import component-from-global-scope="Kollege.Eingabe" id="leer-eingabe"></x-import>
+<section class="kg-abschnitt" aria-label="Heute">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Heute</h2><span class="kg-abschnitt-zahl">0</span></div>
+<x-import component-from-global-scope="Kollege.Leer" titel="Noch nichts zu tun." text="Schreib oben, was passiert ist, oder frag etwas – oder verbinde dein Postfach, dann lese ich die letzten 12 Monate."></x-import>
+<div class="kg-aktionen"><a class="kg-aktion kg-aktion--sekundaer" href="Einstellungen.dc.html">Postfach verbinden</a></div>
+</section>
+<section class="kg-abschnitt" aria-label="Wartet auf uns">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Wartet auf uns</h2><span class="kg-abschnitt-zahl">0</span></div>
+<x-import component-from-global-scope="Kollege.Leer" titel="Nichts wartet auf euch." text="Wenn jemand eine Antwort von euch erwartet, steht es hier."></x-import>
+</section>
+</div>
+
+<div class="fall">
+<div class="fall-titel">Eingabe wird verarbeitet</div>
+<x-import component-from-global-scope="Kollege.Eingabe" id="laden-eingabe" zustand="verarbeitet" wert="Julia übernimmt ab nächster Woche die Jury für den Pitch-Abend."></x-import>
+<div class="fall-titel" style="margin-top: 24px">Einrichtung · Quelle wird gelesen</div>
+<x-import component-from-global-scope="Kollege.Laden" text="Lese Mails der letzten 12 Monate" wert="{{ 1214 }}" max="{{ 5640 }}"></x-import>
+<x-import component-from-global-scope="Kollege.Laden" text="Lese Termine" wert="{{ 88 }}" max="{{ 88 }}"></x-import>
+<div class="fall-titel" style="margin-top: 24px">Suche läuft</div>
+<x-import component-from-global-scope="Kollege.Laden" inline="{{ true }}" text="Suche in 4 Bereichen und 1.380 Mails"></x-import>
+</div>
+
+<div class="fall">
+<div class="fall-titel">Suche ohne Treffer</div>
+<x-import component-from-global-scope="Kollege.Leer" titel="Dazu habe ich nichts gefunden." text="Gesucht in 4 Bereichen, 1.380 Mails und 88 Terminen. Versuch einen Namen, ein Team oder ein Datum."></x-import>
+<div class="fall-titel" style="margin-top: 24px">Chat · zu wenig Erfahrung statt geratener Antwort</div>
+<x-import component-from-global-scope="Kollege.Nachricht" von="du" zeit="09:40">Wie lange dauert es bei EXIST bis zur Bewilligung?</x-import>
+<div style="padding-left: 112px"><x-import component-from-global-scope="Kollege.Wissensluecke" bekannt="Ich kenne zwei EXIST-Anträge aus euren Mails, aber keinen bis zur Bewilligung. Raten will ich nicht."></x-import></div>
+<div class="fall-titel" style="margin-top: 24px">Chatverlauf leer</div>
+<div style="width: 248px"><x-import component-from-global-scope="Kollege.ChatListe" chats="{{keineChats}}"></x-import></div>
+</div>
+
+<div class="fall">
+<div class="fall-titel">Quelle nicht erreichbar</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div>Ich kann dein Postfach gerade nicht lesen.</div>
+<x-import component-from-global-scope="Kollege.Aussage" art="berechnet" dringend="{{ true }}">seit 2 Stunden keine Verbindung</x-import>
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung">vermutlich abgelaufene Anmeldung – das passiert alle 90 Tage</x-import>
+<div style="font-size: 13px; color: var(--ink-muted); margin-top: 4px">Hinweise aus Mails können bis dahin fehlen. Alles andere läuft weiter.</div>
+<div class="kg-aktionen" style="margin-top: 8px"><a class="kg-aktion kg-aktion--sekundaer" href="Einstellungen.dc.html">Neu verbinden</a></div>
+</div>
+<div class="fall-titel" style="margin-top: 24px">Eingabe nicht zugeordnet</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div>Das konnte ich keinem Bereich zuordnen.</div>
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung">„das Team von gestern“ – gestern gab es zwei Beratungen</x-import>
+<div class="kg-aktionen" style="margin-top: 8px">
+<button type="button" class="kg-aktion kg-aktion--sekundaer">Kitchen Loop</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer">Nordlicht Analytics</button>
+<button type="button" class="kg-aktion kg-aktion--text">Ohne Bereich ablegen</button>
+</div>
+</div>
+</div>
+
+</div>
+</main>

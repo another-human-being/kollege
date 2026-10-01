@@ -1,0 +1,17 @@
+<!-- @dsCard group="Anweisungen" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Anweisung</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',null,
+ h(K.Anweisung,{geltung:'team',von:'Julia · 03.09.',angewandt:'4× angewandt'},'Events: Einladung 4 Wochen vorher, Erinnerung 1 Woche vorher.'),
+ h(K.Anweisung,{geltung:'persoenlich',von:'Andreas',datum:'15.09.',angewandt:'6× angewandt',onLoeschen:function(){}},'Hinweise zu Social Media nur montags.'),
+ h(K.Anweisung,{geltung:'team',von:'Mehmet · 01.09.',angewandt:'11× angewandt'},'Beratungen ohne Folgetermin nach 3 Wochen als „hängt“ melden.')));
+</script>
+</body>
+</html>

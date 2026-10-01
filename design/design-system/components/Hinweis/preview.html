@@ -1,0 +1,24 @@
+<!-- @dsCard group="Übersicht" height=420 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Hinweis</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',null,
+ h(K.Hinweis,{zeit:'gestern',dringend:true,
+   titel:h(F,null,h(K.Bezug,{art:'Team'},'Solaro'),' hat das ',h('strong',null,'Pitchdeck'),' nicht geschickt.'),
+   kontext:h(F,null,h(K.Etikett,{art:'beratung'}),h('span',null,'EXIST-Antrag · Andreas')),
+   gruende:[{art:'belegt',text:'Zugesagt in der Beratung, fällig Freitag 25.09.',quelle:'Notiz 22.09.'},{art:'berechnet',text:'1 Tag überfällig',dringend:true}],
+   frage:'Soll ich nachfragen?',
+   aktionen:h(F,null,h(K.Aktion,{variante:'sekundaer'},'Entwurf ansehen'),h(K.Aktion,{variante:'text'},'Später'))}),
+ h(K.Hinweis,{zeit:'seit 9 T.',
+   titel:h(F,null,h(K.Bezug,{art:'Person'},'Frau Weber'),' hat nicht auf die ',h('strong',null,'Juryanfrage'),' geantwortet.'),
+   kontext:h(F,null,h(K.Etikett,{art:'event'}),h('span',null,'Pitch-Abend · Julia')),
+   gruende:[{art:'belegt',text:'Anfrage gesendet',quelle:'Mail 21.09.'},{art:'einschaetzung',text:'Jury wird knapp, wenn bis Mitte Oktober niemand zusagt'}]})));
+</script>
+</body>
+</html>

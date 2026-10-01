@@ -1,0 +1,111 @@
+{
+  "_comment": "Soll-Ergebnis. 'model' ist exakt die Antwort, die das Orakel in Stufe 1 statt des fast-Modells liefert (Schema BAUVORLAGE §7.2.4). 'assert' sind Prüfungen nach der Verarbeitung. Keys (solaro, lisa, …) sind Testschlüssel, keine DB-IDs.",
+
+  "orgs": [
+    { "key": "solaro", "name": "Solaro", "role": "founding_team", "domains": ["solaro.example"] },
+    { "key": "greenbyte", "name": "Greenbyte", "role": "founding_team", "domains": ["greenbyte.example"] },
+    { "key": "kitchenloop", "name": "Kitchen Loop", "role": "founding_team", "domains": ["kitchenloop.example"] },
+    { "key": "ihk", "name": "IHK Schwaben", "role": "partner", "domains": ["ihk-schwaben.example"] },
+    { "key": "uni", "name": "Universität Augsburg", "role": "university", "domains": ["wiwi.uni-augsburg.example"] }
+  ],
+  "people": [
+    { "key": "lisa", "name": "Lisa Meier", "emails": ["lisa@solaro.example", "l.meier@gmx.example"], "org": "solaro", "role": "founder" },
+    { "key": "tom", "name": "Tom Kraus", "emails": ["tom@solaro.example"], "org": "solaro", "role": "founder" },
+    { "key": "nora", "name": "Nora Kim", "emails": ["nora@greenbyte.example"], "org": "greenbyte", "role": "founder" },
+    { "key": "sara", "name": "Sara Yilmaz", "emails": ["sara@kitchenloop.example"], "org": "kitchenloop", "role": "founder" },
+    { "key": "ben", "name": "Ben Hofer", "emails": ["ben@kitchenloop.example"], "org": "kitchenloop", "role": "founder" },
+    { "key": "weber", "name": "Anna Weber", "emails": ["a.weber@ihk-schwaben.example"], "org": "ihk", "role": "partner" },
+    { "key": "hartmann", "name": "Prof. Dr. Martin Hartmann", "emails": ["hartmann@wiwi.uni-augsburg.example"], "org": "uni", "role": "university" }
+  ],
+  "matters": [
+    { "key": "solaro_exist", "area": "founding_teams", "title": "EXIST-Antrag", "org": "solaro", "owner": "andreas" },
+    { "key": "greenbyte_first", "area": "founding_teams", "title": "Erstberatung", "org": "greenbyte", "owner": "andreas" },
+    { "key": "kitchenloop_mensa", "area": "founding_teams", "title": "Mensa-Kooperation", "org": "kitchenloop", "owner": "julia" },
+    { "key": "pitch_abend", "area": "events", "title": "Pitch-Abend 19.11.", "owner": "julia", "fields": { "date": "2026-11-19" } },
+    { "key": "gn_2026", "area": "events", "title": "Gründungsnacht 2026", "owner": "julia", "predecessor": "gn_2025", "fields": { "date": "2026-11-20", "location": "Hörsaalzentrum", "capacity": 60 } },
+    { "key": "gn_2025", "area": "events", "title": "Gründungsnacht 2025", "owner": "julia", "status": "done", "fields": { "date": "2025-11-21", "capacity": 60, "registrations": 18 } },
+    { "key": "eb_ws2627", "area": "teaching", "title": "Entrepreneurship Basics WS 26/27", "owner": "andreas", "fields": { "semester": "WS 26/27", "format": "Vorlesung" } },
+    { "key": "redaktionsplan_q4", "area": "social", "title": "Redaktionsplan Q4", "owner": "mehmet" }
+  ],
+
+  "items": {
+    "m01": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "new": { "key": "solaro_exist", "title": "EXIST-Antrag", "area_key": "founding_teams" } }, "people": [{ "new": { "key": "lisa", "name": "Lisa Meier", "email": "lisa@solaro.example", "org": "solaro" } }], "org": { "new": { "key": "solaro", "name": "Solaro", "role": "founding_team" } }, "tasks": [], "summary": "Solaro (Balkonkraftwerke) bittet um Beratung zum EXIST-Gründungsstipendium.", "confidence": "high" },
+      "assert": { "visibility": "team", "review_state": "unreviewed", "creates": ["org:solaro", "person:lisa", "matter:solaro_exist"] }
+    },
+    "m02": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [{ "key": "lisa" }], "org": { "key": "solaro" }, "tasks": [], "summary": "Andreas schlägt Erstberatung am 22.09., 10 Uhr vor.", "confidence": "high" },
+      "assert": { "visibility": "team", "link_origin": "rule", "note": "Thread über In-Reply-To → fester Treffer; liegt auch im StartHub-Postfach (CC)" }
+    },
+    "m03": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [{ "key": "lisa" }], "org": { "key": "solaro" }, "tasks": [], "summary": "Lisa fragt nach Einschreibung und Finanzplan-Detail für EXIST.", "confidence": "high" },
+      "assert": { "visibility": "restricted", "visible_to": ["andreas"] }
+    },
+    "m04": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [{ "key": "lisa" }], "org": { "key": "solaro" }, "tasks": [], "summary": "EXIST-Merkblatt an Lisa geschickt, Fragen beantwortet.", "confidence": "high" },
+      "assert": { "visibility": "restricted", "visible_to": ["andreas"], "attachment_entry": true }
+    },
+    "m05": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [{ "new": { "key": "tom", "name": "Tom Kraus", "email": "tom@solaro.example", "org": "solaro" } }, { "key": "lisa" }], "org": { "key": "solaro" }, "tasks": [{ "title": "Feedback zum Finanzplan an Tom Kraus", "direction": "ours", "owner_hint": "andreas", "due": "2026-09-30", "quote": "Könntet ihr bis Mitte der Woche drüberschauen?" }], "summary": "Tom schickt Finanzplan v2 und bittet bis Mitte der Woche um Feedback.", "confidence": "high" },
+      "assert": { "visibility": "restricted", "visible_to": ["andreas"], "tasks_visible_to_team": true, "attachment_entry": true }
+    },
+    "m06": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [], "org": null, "tasks": [], "summary": "„Lisa – Solaro“ fragt vom privaten Konto, ob der Termin Mittwoch 13:30 bleibt.", "confidence": "low", "question": "Ist „Lisa“ (l.meier@gmx.example) Lisa Meier von Solaro?" },
+      "assert": { "no_org_for_domain": "gmx.example", "hint": "clarify", "after_answer_yes": "person_emails: lisa += l.meier@gmx.example" }
+    },
+    "m07": {
+      "model": { "relevant": true, "area_key": "events", "matter": { "new": { "key": "pitch_abend", "title": "Pitch-Abend 19.11.", "area_key": "events" } }, "people": [{ "new": { "key": "weber", "name": "Anna Weber", "email": "a.weber@ihk-schwaben.example", "org": "ihk" } }], "org": { "new": { "key": "ihk", "name": "IHK Schwaben", "role": "partner" } }, "tasks": [{ "title": "Rückmeldung zur Jury-Anfrage", "direction": "theirs", "owner_hint": "weber", "due": "2026-09-30", "quote": "Über eine Rückmeldung bis Ende September würde ich mich freuen." }], "summary": "Julia fragt Anna Weber (IHK) als Jurorin für den Pitch-Abend an.", "confidence": "high" },
+      "assert": { "visibility": "restricted", "visible_to": ["julia"], "andreas_sees": "stub + task" }
+    },
+    "m08": {
+      "model": { "relevant": true, "area_key": "events", "matter": { "key": "pitch_abend" }, "people": [{ "key": "lisa" }], "org": { "key": "solaro" }, "tasks": [{ "title": "Zusage zum Pitch-Abend", "direction": "theirs", "owner_hint": "lisa", "due": "2026-10-10", "quote": "Sag mir bis 10.10. Bescheid, ob ihr dabei seid." }], "summary": "Julia lädt Solaro zum Pitch-Abend ein, Rückmeldung bis 10.10.", "confidence": "high" },
+      "assert": { "visibility": "restricted", "visible_to": ["julia"], "also_link": "org:solaro" }
+    },
+    "m09": {
+      "model": { "relevant": true, "area_key": "teaching", "matter": { "new": { "key": "eb_ws2627", "title": "Entrepreneurship Basics WS 26/27", "area_key": "teaching" } }, "people": [{ "new": { "key": "hartmann", "name": "Prof. Dr. Martin Hartmann", "email": "hartmann@wiwi.uni-augsburg.example", "org": "uni" } }], "org": { "new": { "key": "uni", "name": "Universität Augsburg", "role": "university" } }, "tasks": [{ "title": "Raum mit Beamer für Sitzung 3 buchen (40 Personen)", "direction": "ours", "owner_hint": "andreas", "due": "2026-09-29", "quote": "Könntest du das bis morgen klären?" }, { "title": "Folien für Sitzung 3 schicken", "direction": "theirs", "owner_hint": "hartmann", "due": "2026-10-06", "quote": "Meine Folien schicke ich bis 06.10." }], "summary": "Prof. Hartmann braucht einen Raum für Sitzung 3 und schickt Folien bis 06.10.", "confidence": "high" },
+      "assert": { "single_entry": true, "visibility": "restricted", "visible_to": ["andreas", "julia"] }
+    },
+    "m10": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "new": { "key": "greenbyte_first", "title": "Erstberatung", "area_key": "founding_teams" } }, "people": [{ "new": { "key": "nora", "name": "Nora Kim", "email": "nora@greenbyte.example", "org": "greenbyte" } }], "org": { "new": { "key": "greenbyte", "name": "Greenbyte", "role": "founding_team" } }, "tasks": [], "summary": "Greenbyte (Energiesparen in Rechenzentren) möchte einen Beratungstermin.", "confidence": "high" },
+      "assert": { "visibility": "team", "review_state": "unreviewed", "team_overview": "neu, niemand zuständig" }
+    },
+    "m11": {
+      "model": { "relevant": false, "area_key": null, "matter": null, "people": [], "org": null, "tasks": [], "summary": "Rechnung für Catering am 19.09.", "confidence": "high" },
+      "assert": { "visibility": "team", "no_founding_team_created": true }
+    },
+    "m12": { "model": null, "assert": { "processing_state": "skipped", "reason": "bulk" } },
+    "m13": {
+      "model": { "relevant": true, "area_key": null, "matter": null, "people": [], "org": null, "tasks": [], "summary": "Stadtwerke schlagen gemeinsame Challenge für Energie-Startups vor und bitten um ein Gespräch.", "confidence": "low", "question": "Kooperationsanfrage der Stadtwerke – keinem Bereich zuordenbar. Neuen Bereich „Kooperationen“ anlegen oder unter Events ablegen?" },
+      "assert": { "hint": "clarify", "nothing_created": true }
+    },
+    "m14": { "model": null, "assert": { "processing_state": "skipped", "reason": "internal_only" } },
+    "m15": {
+      "model": { "relevant": true, "area_key": "founding_teams", "matter": { "new": { "key": "kitchenloop_mensa", "title": "Mensa-Kooperation", "area_key": "founding_teams" } }, "people": [{ "new": { "key": "sara", "name": "Sara Yilmaz", "email": "sara@kitchenloop.example", "org": "kitchenloop" } }], "org": { "new": { "key": "kitchenloop", "name": "Kitchen Loop", "role": "founding_team" } }, "tasks": [], "summary": "Sara fragt vor dem Termin, ob für die Mensa-Kooperation eine Hygieneschulung nötig ist.", "confidence": "high" },
+      "assert": { "visibility": "restricted", "visible_to": ["julia"], "open_question_in_waiting_on_us": true }
+    },
+
+    "e1": { "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [{ "key": "lisa" }, { "key": "tom" }], "org": { "key": "solaro" }, "tasks": [], "summary": "Beratungstermin Solaro.", "confidence": "high" }, "assert": { "link_origin": "rule" } },
+    "e2": { "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "kitchenloop_mensa" }, "people": [{ "key": "sara" }, { "new": { "key": "ben", "name": "Ben Hofer", "email": "ben@kitchenloop.example", "org": "kitchenloop" } }], "org": { "key": "kitchenloop" }, "tasks": [], "summary": "Beratungstermin Kitchen Loop.", "confidence": "high" }, "assert": {} },
+    "e3": { "model": null, "assert": { "processing_state": "skipped", "reason": "internal_only" } },
+    "e4": { "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "greenbyte_first" }, "people": [{ "key": "nora" }], "org": { "key": "greenbyte" }, "tasks": [], "summary": "Erstberatung Greenbyte.", "confidence": "high" }, "assert": {} },
+    "e5": { "model": { "relevant": true, "area_key": "events", "matter": { "new": { "key": "gn_2026", "title": "Gründungsnacht 2026", "area_key": "events" } }, "people": [], "org": null, "tasks": [], "summary": "Gründungsnacht 2026 im Hörsaalzentrum.", "confidence": "high" }, "assert": { "predecessor_suggested": "gn_2025" } },
+    "e6": { "model": { "relevant": true, "area_key": "teaching", "matter": { "key": "eb_ws2627" }, "people": [{ "key": "hartmann" }], "org": { "key": "uni" }, "tasks": [], "summary": "Erste Sitzung Entrepreneurship Basics, wöchentlich.", "confidence": "high" }, "assert": {} },
+    "e7": { "model": { "relevant": true, "area_key": "events", "matter": { "new": { "key": "gn_2025", "title": "Gründungsnacht 2025", "area_key": "events" } }, "people": [], "org": null, "tasks": [], "summary": "Gründungsnacht 2025 (vergangen).", "confidence": "high" }, "assert": { "historical": true } },
+
+    "f1": { "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [{ "key": "lisa" }, { "key": "tom" }], "org": { "key": "solaro" }, "tasks": [{ "title": "Pitchdeck schicken", "direction": "theirs", "owner_hint": "solaro", "due": "2026-09-29", "quote": "Solaro schickt Pitchdeck bis 29.09." }, { "title": "Finanzplan überarbeiten", "direction": "theirs", "owner_hint": "tom", "due": "2026-10-15", "quote": "Finanzplan überarbeitet bis 15.10." }, { "title": "Kontakt zur IHK für Jury/Mentoring prüfen", "direction": "ours", "owner_hint": "andreas", "due": null, "quote": "StartHub prüft Kontakt zur IHK" }], "summary": "Protokoll der Erstberatung Solaro: Pitchdeck bis 29.09., Finanzplan bis 15.10., EXIST-Einreichung 30.10.", "confidence": "high" }, "assert": { "folder_hint": "Beratungen/Solaro" } },
+    "f2": { "model": { "relevant": true, "area_key": "founding_teams", "matter": { "key": "solaro_exist" }, "people": [], "org": { "key": "solaro" }, "tasks": [], "summary": "Erster Entwurf des Businessplans, Markt- und Wettbewerbsteil fehlen.", "confidence": "high" }, "assert": {} },
+    "f3": { "model": { "relevant": true, "area_key": "events", "matter": { "key": "gn_2026" }, "people": [], "org": null, "tasks": [], "summary": "Ablaufplan Gründungsnacht 2026: 6 Pitches, zwei Workshops, Catering offen, Save-the-Date am 02.10.", "confidence": "high" }, "assert": { "fields_suggested": { "capacity": 60 } } },
+    "f4": { "model": { "relevant": true, "area_key": "events", "matter": { "key": "gn_2025" }, "people": [], "org": null, "tasks": [], "summary": "Rückblick 2025: Einladung 12 Tage vorher, 18 von 60 Plätzen, Absagen wegen Terminkollision.", "confidence": "high" }, "assert": { "historical": true, "used_for_advice_in_stage_8": true } },
+    "f5": { "model": null, "assert": { "metadata_only": true, "linked_by_folder_to": "eb_ws2627" } },
+    "f6": { "model": { "relevant": true, "area_key": "social", "matter": { "new": { "key": "redaktionsplan_q4", "title": "Redaktionsplan Q4", "area_key": "social" } }, "people": [], "org": null, "tasks": [], "summary": "Redaktionsplan Q4 mit drei geplanten Beiträgen.", "confidence": "medium" }, "assert": { "review_state": "unreviewed" } }
+  },
+
+  "rls_checks": [
+    { "as": "andreas", "entry": "m07", "expect": "stub_only" },
+    { "as": "andreas", "task_from": "m07", "expect": "visible" },
+    { "as": "julia", "entry": "m05", "expect": "stub_only" },
+    { "as": "julia", "entry": "m09", "expect": "full" },
+    { "as": "mehmet", "entry": "m01", "expect": "full" },
+    { "as": "mehmet", "entry": "m03", "expect": "stub_only" }
+  ]
+}

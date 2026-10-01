@@ -1,0 +1,16 @@
+<!-- @dsCard group="Nach außen" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Entwurf</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h(K.Entwurf,{kanal:'Mail',an:'Lisa Meier <lisa@solaro.de>',betreff:'Kurze Erinnerung: Pitchdeck',
+ auszug:'Hallo Lisa, wir hatten ja besprochen, dass ihr uns das Pitchdeck bis Freitag schickt. Kommt ihr dazu? Dann kann ich es vor dem Termin mit Frau Weber noch anschauen. Viele Grüße, Andreas',
+ grund:h(K.Aussage,{art:'belegt',quelle:'Notiz 22.09.'},'Zusage aus der Beratung')}));
+</script>
+</body>
+</html>

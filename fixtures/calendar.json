@@ -1,0 +1,51 @@
+[
+  {
+    "key": "e1", "uid": "e1@fixture", "calendar": "andreas",
+    "title": "Beratung Solaro", "start": "2026-09-22T10:00:00+02:00", "end": "2026-09-22T11:00:00+02:00",
+    "location": "StartHub, Raum 2.14",
+    "organizer": "andreas@gruendung.uni-augsburg.example",
+    "attendees": ["lisa@solaro.example", "tom@solaro.example"]
+  },
+  {
+    "key": "e2", "uid": "e2@fixture", "calendar": "julia",
+    "title": "Beratung Kitchen Loop", "start": "2026-09-30T10:00:00+02:00", "end": "2026-09-30T11:00:00+02:00",
+    "location": "Raum 2.14",
+    "organizer": "julia@gruendung.uni-augsburg.example",
+    "attendees": ["sara@kitchenloop.example", "ben@kitchenloop.example"]
+  },
+  {
+    "key": "e3", "uid": "e3@fixture", "calendar": "andreas",
+    "title": "Jour fixe Team", "start": "2026-09-28T10:00:00+02:00", "end": "2026-09-28T11:00:00+02:00",
+    "location": "Büro",
+    "organizer": "andreas@gruendung.uni-augsburg.example",
+    "attendees": ["julia@gruendung.uni-augsburg.example", "mehmet@gruendung.uni-augsburg.example"]
+  },
+  {
+    "key": "e4", "uid": "e4@fixture", "calendar": "andreas",
+    "title": "Erstberatung Greenbyte", "start": "2026-10-01T14:00:00+02:00", "end": "2026-10-01T15:00:00+02:00",
+    "location": "Raum 2.14",
+    "organizer": "andreas@gruendung.uni-augsburg.example",
+    "attendees": ["nora@greenbyte.example"]
+  },
+  {
+    "key": "e5", "uid": "e5@fixture", "calendar": "julia",
+    "title": "Gründungsnacht 2026", "start": "2026-11-20T18:00:00+01:00", "end": "2026-11-20T23:00:00+01:00",
+    "location": "Hörsaalzentrum",
+    "organizer": "julia@gruendung.uni-augsburg.example",
+    "attendees": ["andreas@gruendung.uni-augsburg.example", "mehmet@gruendung.uni-augsburg.example"]
+  },
+  {
+    "key": "e6", "uid": "e6@fixture", "calendar": "andreas",
+    "title": "Entrepreneurship Basics – Sitzung 1", "start": "2026-10-06T10:00:00+02:00", "end": "2026-10-06T11:30:00+02:00",
+    "location": "Hörsaal 1004", "recurrence": "FREQ=WEEKLY;COUNT=12",
+    "organizer": "andreas@gruendung.uni-augsburg.example",
+    "attendees": ["hartmann@wiwi.uni-augsburg.example"]
+  },
+  {
+    "key": "e7", "uid": "e7@fixture", "calendar": "julia",
+    "title": "Gründungsnacht 2025", "start": "2025-11-21T18:00:00+01:00", "end": "2025-11-21T23:00:00+01:00",
+    "location": "Hörsaalzentrum",
+    "organizer": "julia@gruendung.uni-augsburg.example",
+    "attendees": ["andreas@gruendung.uni-augsburg.example"]
+  }
+]

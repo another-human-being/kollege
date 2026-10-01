@@ -1,0 +1,21 @@
+<sc-if value="{{pruefModus}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 10px 20px; border-bottom: 1px solid var(--rule); background: var(--paper-sunk)">
+<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
+<label style="display: inline-flex; gap: 6px; align-items: center; font-size: 12px"><input type="checkbox" checked="{{pruefAlle}}" onChange="{{pruefAlleToggle}}" style="accent-color: var(--ink)"> alle {{pruefGesamt}}</label>
+<span class="mono" style="flex-grow: 1">{{pruefZeile}}</span>
+</div>
+<sc-if value="{{pruefHatAuswahl}}" hint-placeholder-val="{{ false }}">
+<div class="kg-aktionen">
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefUebernehmen}}">Übernehmen</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{pruefWarumAuf}}">Verwerfen</button>
+</div>
+</sc-if>
+<sc-if value="{{pruefWarumOffen}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{pruefVerwerfen}}" style="display: flex; gap: 6px; align-items: center">
+<label for="pruef-warum" class="kg-sr">Warum verwerfen?</label>
+<input id="pruef-warum" value="{{pruefWarum}}" onChange="{{pruefWarumTippen}}" placeholder="Warum? (optional) z. B. „Rechnungen sind keine Gründungsteams“" class="such" style="flex: 1">
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">Verwerfen</button>
+</form>
+</sc-if>
+</div>
+</sc-if>

@@ -1,0 +1,138 @@
+Kontakte|1280|1000|.adr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:baseline}.merge{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border:1px solid var(--line-control);border-radius:4px;background:var(--paper-sunk)}.kand{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:baseline;padding-block:8px;border-top:1px solid var(--rule)}.lz{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding-block:6px;border-top:1px solid var(--rule);font-size:14px}
+@@SIDE:kontakte@@
+<div class="ld">
+<div class="ld-liste">
+<div class="ld-kopf">
+<div style="display: flex; align-items: baseline; gap: 10px"><h1>Kontakte</h1><span class="mono">{{zaehler}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{neu}}">+ Kontakt</button></div>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{ansichten}}" wert="{{ansicht}}" label="Ansicht" on-wechsel="{{setAnsicht}}"></x-import>
+<label for="k-suche" class="kg-sr">Kontakte durchsuchen</label>
+<input id="k-suche" class="such" value="{{suche}}" onChange="{{sucheTippen}}" placeholder="Name, Organisation, E-Mail">
+<div class="filterzeile">
+<sc-for list="{{filter}}" as="f" hint-placeholder-count="5"><button type="button" class="chip" aria-pressed="{{f.an}}" onClick="{{f.los}}">{{f.label}}</button></sc-for>
+</div>
+</div>
+@@PRUEF@@
+<div class="ld-scroll">
+<sc-if value="{{kopfZeile}}" hint-placeholder-val="{{ true }}"><div class="ld-gruppe" style="display: flex; justify-content: space-between"><span>{{spalteLinks}}</span><span>Kontakt über</span></div></sc-if>
+<sc-for list="{{zeilen}}" as="z" hint-placeholder-count="10">
+<sc-if value="{{z.pruef}}" hint-placeholder-val="{{ false }}">
+<div class="pz"><input type="checkbox" aria-label="Auswählen: {{z.titel}}" checked="{{z.gewaehlt}}" onChange="{{z.waehlen}}">
+<button type="button" class="ld-zeile" aria-current="{{z.aktiv}}" onClick="{{z.los}}"><span class="ld-t">{{z.titel}}</span><span class="ld-m">{{z.ueber}}</span><span class="ld-u">{{z.unter}}</span></button></div>
+</sc-if>
+<sc-if value="{{z.normal}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="ld-zeile" aria-current="{{z.aktiv}}" onClick="{{z.los}}"><span class="ld-t">{{z.titel}}</span><span class="ld-m">{{z.ueber}}</span><span class="ld-u" style="{{z.unterStil}}">{{z.unter}}</span></button>
+</sc-if>
+</sc-for>
+<sc-if value="{{keine}}" hint-placeholder-val="{{ false }}"><div style="padding: 20px"><x-import component-from-global-scope="Kollege.Leer" titel="Niemand gefunden." text="Filter lösen oder „+ Kontakt“."></x-import></div></sc-if>
+</div>
+</div>
+
+<div class="ld-detail">
+<sc-if value="{{zeigePerson}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{p.istUngeprueft}}" hint-placeholder-val="{{ false }}">
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Von Kollege angelegt – {{p.grund}}</span><x-import component-from-global-scope="Kollege.Quelle">{{p.quelle}}</x-import><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{p.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{p.verwerfen}}">Verwerfen</button></div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<label for="k-name" class="kg-sr">Name</label>
+<input id="k-name" class="fe fe-titel" data-feld="name" value="{{p.name}}" onFocus="{{p.f.fokus}}" onChange="{{p.f.tippen}}" onBlur="{{p.f.fertig}}">
+<div class="felder">
+<label for="k-rolle">Rolle</label>
+<select id="k-rolle" class="fe" data-feld="rolle" value="{{p.rolle}}" onChange="{{p.f.wahl}}" style="justify-self: start"><sc-for list="{{rollen}}" as="op" hint-placeholder-count="5"><option value="{{op}}">{{op}}</option></sc-for></select>
+<label for="k-org">Organisation</label>
+<div style="display: flex; gap: 10px; align-items: baseline"><select id="k-org" class="fe" data-feld="org" value="{{p.org}}" onChange="{{p.f.wahl}}"><sc-for list="{{orgNamen}}" as="op" hint-placeholder-count="6"><option value="{{op}}">{{op}}</option></sc-for></select><button type="button" class="kg-aktion kg-aktion--text" onClick="{{p.zurOrg}}" style="font-size: 13px">öffnen</button></div>
+<span class="fl">E-Mail</span>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{p.adressen}}" as="m" hint-placeholder-count="2">
+<div class="adr"><label class="kg-sr" for="{{m.htmlId}}">E-Mail-Adresse</label><input id="{{m.htmlId}}" class="fe" value="{{m.adresse}}" onChange="{{m.tippen}}" onBlur="{{m.fertig}}" onFocus="{{m.fokus}}" style="font-family: var(--font-mono); font-size: 13px"><span class="mono">{{m.info}}</span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{m.weg}}" style="font-size: 12px">entfernen</button></div>
+</sc-for>
+<div><button type="button" class="kg-aktion kg-aktion--text" onClick="{{p.adresseDazu}}" style="font-size: 13px">+ Adresse</button></div>
+</div>
+<label for="k-tel">Telefon</label>
+<input id="k-tel" class="fe" data-feld="telefon" value="{{p.telefon}}" onFocus="{{p.f.fokus}}" onChange="{{p.f.tippen}}" onBlur="{{p.f.fertig}}" placeholder="–" style="width: 240px">
+<label for="k-ueber">Kontakt über</label>
+<div style="display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap"><select id="k-ueber" class="fe" data-feld="ueber" value="{{p.ueber}}" onChange="{{p.f.wahl}}"><sc-for list="{{ueberOptionen}}" as="op" hint-placeholder-count="4"><option value="{{op}}">{{op}}</option></sc-for></select><span class="mono">= {{p.ueberBerechnet}}</span></div>
+<span class="fl">Letzter Kontakt</span>
+<span class="mono" style="line-height: 28px; {{p.letzterStil}}">= {{p.letzter}}</span>
+</div>
+<div class="kg-aktionen">
+<a class="kg-aktion kg-aktion--sekundaer" href="Mail.dc.html">Mail schreiben</a>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{mergeAuf}}">Zusammenführen …</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{p.loeschen}}">Löschen</button>
+</div>
+<sc-if value="{{mOffen}}" hint-placeholder-val="{{ false }}">
+<div class="merge">
+<div style="display: flex; align-items: baseline"><b style="font-weight: 500">{{mTitel}}</b><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{mergeZu}}">Abbrechen</button></div>
+<sc-if value="{{mSuche}}" hint-placeholder-val="{{ true }}">
+<span style="font-size: 13px; color: var(--ink-muted)">Wer ist dieselbe Person? Kollege schlägt vor, du entscheidest.</span>
+<sc-for list="{{kandidaten}}" as="k" hint-placeholder-count="2">
+<div class="kand"><span><b style="font-weight: 500">{{k.name}}</b> <span class="mono">{{k.adresse}}</span></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{k.waehlen}}">Vorschau</button>
+<span style="grid-column: 1 / -1; font-size: 13px; color: var(--ink-muted)">{{k.umfang}} · <x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{k.grund}}</x-import></span></div>
+</sc-for>
+</sc-if>
+<sc-if value="{{mVorschau}}" hint-placeholder-val="{{ false }}">
+<ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 22px"><sc-for list="{{mPunkte}}" as="x" hint-placeholder-count="3"><li>{{x}}</li></sc-for></ul>
+<div class="kg-aktionen"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{mergeLos}}">Zusammenführen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{mergeZurueck}}">anderen wählen</button></div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+
+<section class="kg-abschnitt" aria-label="Notiz">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Notiz</h2><span class="kg-abschnitt-aside">fürs Team sichtbar</span></div>
+<label for="k-notiz" class="kg-sr">Notiz</label>
+<textarea id="k-notiz" class="fe" data-feld="notiz" rows="3" value="{{p.notiz}}" onFocus="{{p.f.fokus}}" onChange="{{p.f.tippen}}" onBlur="{{p.f.fertig}}" placeholder="Was sollte das Team über diese Person wissen?" style="width: 100%; font-size: 15px"></textarea>
+</section>
+
+<section class="kg-abschnitt" aria-label="Gehört zu">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Gehört zu</h2><span class="kg-abschnitt-zahl">{{p.vorgaengeAnzahl}}</span></div>
+<sc-for list="{{p.vorgaenge}}" as="v" hint-placeholder-count="2"><div class="lz"><a class="kg-bezug" href="{{v.href}}">{{v.titel}}</a><span class="mono">{{v.info}}</span></div></sc-for>
+<sc-if value="{{p.keineVorgaenge}}" hint-placeholder-val="{{ false }}"><span style="font-size: 14px; color: var(--ink-muted)">Noch keinem Bereich zugeordnet.</span></sc-if>
+</section>
+
+<section class="kg-abschnitt" aria-label="Verlauf">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Verlauf</h2><span class="kg-abschnitt-aside">Mails aus fremden Postfächern nur als Platzhalter</span></div>
+<x-import component-from-global-scope="Kollege.Verlauf" eintraege="{{p.verlauf}}" label="Verlauf"></x-import>
+</section>
+</sc-if>
+
+<sc-if value="{{zeigeOrg}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{o.istUngeprueft}}" hint-placeholder-val="{{ false }}">
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Von Kollege angelegt – {{o.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{o.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{o.verwerfen}}">Verwerfen</button></div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<label for="o-name" class="kg-sr">Name</label>
+<input id="o-name" class="fe fe-titel" data-feld="name" value="{{o.name}}" onFocus="{{o.f.fokus}}" onChange="{{o.f.tippen}}" onBlur="{{o.f.fertig}}">
+<div class="felder">
+<label for="o-art">Art</label>
+<select id="o-art" class="fe" data-feld="art" value="{{o.art}}" onChange="{{o.f.wahl}}" style="justify-self: start"><sc-for list="{{orgArten}}" as="x" hint-placeholder-count="4"><option value="{{x}}">{{x}}</option></sc-for></select>
+<label for="o-web">Website</label>
+<input id="o-web" class="fe" data-feld="web" value="{{o.web}}" onFocus="{{o.f.fokus}}" onChange="{{o.f.tippen}}" onBlur="{{o.f.fertig}}" placeholder="–" style="width: 320px; font-family: var(--font-mono); font-size: 13px">
+<label for="o-ort">Ort</label>
+<input id="o-ort" class="fe" data-feld="ort" value="{{o.ort}}" onFocus="{{o.f.fokus}}" onChange="{{o.f.tippen}}" onBlur="{{o.f.fertig}}" placeholder="–" style="width: 320px">
+<label for="o-ueber">Kontakt über</label>
+<select id="o-ueber" class="fe" data-feld="ueber" value="{{o.ueber}}" onChange="{{o.f.wahl}}" style="justify-self: start"><sc-for list="{{ueberOptionen}}" as="x" hint-placeholder-count="4"><option value="{{x}}">{{x}}</option></sc-for></select>
+</div>
+<div class="kg-aktionen"><sc-if value="{{o.istTeam}}" hint-placeholder-val="{{ false }}"><a class="kg-aktion kg-aktion--sekundaer" href="Gruendungsteams.dc.html">Zur Beratungsakte</a></sc-if><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{mergeAuf}}">Zusammenführen …</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button></div>
+<sc-if value="{{mOffen}}" hint-placeholder-val="{{ false }}"><div class="merge"><div style="display: flex"><b style="font-weight: 500">{{mTitel}}</b><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{mergeZu}}">Abbrechen</button></div><span style="font-size: 14px">Kollege findet keine ähnliche Organisation. Andere Organisation links wählen, um sie hierher zu übernehmen.</span></div></sc-if>
+</div>
+<section class="kg-abschnitt" aria-label="Personen">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Personen</h2><span class="kg-abschnitt-zahl">{{o.personenAnzahl}}</span></div>
+<sc-for list="{{o.personen}}" as="x" hint-placeholder-count="2"><div class="lz"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{x.los}}" style="justify-self: start">{{x.name}}</button><span class="mono">{{x.rolle}} · über {{x.ueber}}</span></div></sc-for>
+</section>
+<section class="kg-abschnitt" aria-label="Gehört zu">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Gehört zu</h2></div>
+<sc-for list="{{o.vorgaenge}}" as="v" hint-placeholder-count="2"><div class="lz"><a class="kg-bezug" href="{{v.href}}">{{v.titel}}</a><span class="mono">{{v.info}}</span></div></sc-for>
+<sc-if value="{{o.keineVorgaenge}}" hint-placeholder-val="{{ false }}"><span style="font-size: 14px; color: var(--ink-muted)">Noch keinem Bereich zugeordnet.</span></sc-if>
+</section>
+<section class="kg-abschnitt" aria-label="Notiz">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Notiz</h2></div>
+<label for="o-notiz" class="kg-sr">Notiz</label>
+<textarea id="o-notiz" class="fe" data-feld="notiz" rows="3" value="{{o.notiz}}" onFocus="{{o.f.fokus}}" onChange="{{o.f.tippen}}" onBlur="{{o.f.fertig}}" placeholder="–" style="width: 100%; font-size: 15px"></textarea>
+</section>
+</sc-if>
+<sc-if value="{{nichtsOffen}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Leer" titel="Niemand geöffnet." text="Links eine Person oder Organisation wählen."></x-import></sc-if>
+</div>
+</div>
+@@KC@@
+@@TOAST@@

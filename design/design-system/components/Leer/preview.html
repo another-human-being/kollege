@@ -1,0 +1,16 @@
+<!-- @dsCard group="Zustände" height=180 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Leer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@1,400&display=swap">
+<style>html,body{margin:0;background:var(--paper)}#root{padding:16px}</style></head>
+<body>
+<div id="root" class="kg"></div>
+<script>
+var K=window.Kollege,h=React.createElement,F=React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',null,
+ h(K.Leer,{titel:'Nichts wartet auf euch.',text:'Wenn jemand eine Antwort von euch erwartet, steht es hier.'}),
+ h(K.Leer,{titel:'Noch keine Vorgänge.',text:'Schreib oben, was passiert ist – oder verbinde dein Postfach, dann lese ich die letzten 90 Tage.',aktion:h(K.Aktion,{variante:'sekundaer'},'Postfach verbinden')})));
+</script>
+</body>
+</html>

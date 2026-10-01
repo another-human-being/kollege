@@ -1,0 +1,398 @@
+[
+  {
+    "key": "m01",
+    "message_id": "<m01.solaro@solaro.example>",
+    "mailboxes": [
+      "starthub"
+    ],
+    "date": "2026-08-21T09:14:00+02:00",
+    "from": {
+      "name": "Lisa Meier",
+      "email": "lisa@solaro.example"
+    },
+    "to": [
+      {
+        "name": "StartHub",
+        "email": "starthub@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Anfrage Gründungsberatung – Solaro",
+    "headers": {},
+    "body": "Hallo zusammen,\n\nwir sind Solaro, ein Team aus drei Studierenden (Lisa Meier, Tom Kraus und noch eine Person), und entwickeln steckerfertige Balkonkraftwerke mit eigener Speicherlösung. Wir möchten uns für das EXIST-Gründungsstipendium bewerben und würden uns sehr über eine Beratung freuen.\n\nViele Grüße\nLisa Meier\nSolaro – Mitgründerin Technik",
+    "attachments": []
+  },
+  {
+    "key": "m02",
+    "message_id": "<m02.andreas@gruendung.uni-augsburg.example>",
+    "in_reply_to": "<m01.solaro@solaro.example>",
+    "mailboxes": [
+      "andreas",
+      "starthub"
+    ],
+    "folder": "Sent",
+    "date": "2026-08-22T11:02:00+02:00",
+    "from": {
+      "name": "Andreas",
+      "email": "andreas@gruendung.uni-augsburg.example"
+    },
+    "to": [
+      {
+        "name": "Lisa Meier",
+        "email": "lisa@solaro.example"
+      }
+    ],
+    "cc": [
+      {
+        "name": "StartHub",
+        "email": "starthub@gruendung.uni-augsburg.example"
+      }
+    ],
+    "subject": "Re: Anfrage Gründungsberatung – Solaro",
+    "headers": {},
+    "body": "Hallo Lisa,\n\ndanke für eure Nachricht. Lass uns gern einen ersten Termin machen – passt euch der 22.09. um 10 Uhr bei uns im StartHub? Bringt Tom gern mit.\n\nViele Grüße\nAndreas",
+    "attachments": []
+  },
+  {
+    "key": "m03",
+    "message_id": "<m03.solaro@solaro.example>",
+    "mailboxes": [
+      "andreas"
+    ],
+    "date": "2026-09-12T16:40:00+02:00",
+    "from": {
+      "name": "Lisa Meier",
+      "email": "lisa@solaro.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Fragen zum EXIST-Gründungsstipendium",
+    "headers": {},
+    "body": "Hallo Andreas,\n\nvor unserem Termin hätten wir zwei Fragen: Müssen alle Teammitglieder noch eingeschrieben sein? Und wie detailliert muss der Finanzplan für den Antrag sein?\n\nDanke dir!\nLisa",
+    "attachments": []
+  },
+  {
+    "key": "m04",
+    "message_id": "<m04.andreas@gruendung.uni-augsburg.example>",
+    "in_reply_to": "<m03.solaro@solaro.example>",
+    "mailboxes": [
+      "andreas"
+    ],
+    "folder": "Sent",
+    "date": "2026-09-24T09:30:00+02:00",
+    "from": {
+      "name": "Andreas",
+      "email": "andreas@gruendung.uni-augsburg.example"
+    },
+    "to": [
+      {
+        "name": "Lisa Meier",
+        "email": "lisa@solaro.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Re: Fragen zum EXIST-Gründungsstipendium",
+    "headers": {},
+    "body": "Hallo Lisa,\n\nwie besprochen hier das EXIST-Merkblatt. Kurz zu euren Fragen: Mindestens eine Person muss beim Antrag noch eingeschrieben oder Absolvent:in sein; der Finanzplan sollte die 12 Monate Förderzeit plus Ausblick abdecken.\n\nViele Grüße\nAndreas",
+    "attachments": [
+      {
+        "filename": "EXIST-Merkblatt.pdf",
+        "mime": "application/pdf",
+        "text": "EXIST-Gründungsstipendium – Merkblatt. Förderdauer 12 Monate. Antragstellung über die Hochschule. Benötigt: Ideenpapier, Lebensläufe, Finanzplan, Mentorenerklärung."
+      }
+    ]
+  },
+  {
+    "key": "m05",
+    "message_id": "<m05.solaro@solaro.example>",
+    "mailboxes": [
+      "andreas"
+    ],
+    "date": "2026-09-26T18:05:00+02:00",
+    "from": {
+      "name": "Tom Kraus",
+      "email": "tom@solaro.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [
+      {
+        "name": "Lisa Meier",
+        "email": "lisa@solaro.example"
+      }
+    ],
+    "subject": "Finanzplan v2",
+    "headers": {},
+    "body": "Hi Andreas,\n\nanbei die überarbeitete Version unseres Finanzplans. Könntet ihr bis Mitte der Woche drüberschauen? Uns interessiert vor allem, ob die Personalplanung realistisch ist.\n\nDanke und Grüße\nTom",
+    "attachments": [
+      {
+        "filename": "Finanzplan_Solaro_v2.xlsx",
+        "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text": "Finanzplan Solaro, 36 Monate, drei Szenarien. Umsatz ab Monat 9. Break-even Monat 28. Personalkosten größter Posten; setzt zwei EXIST-Stipendien voraus."
+      }
+    ]
+  },
+  {
+    "key": "m06",
+    "message_id": "<m06.gmx@gmx.example>",
+    "mailboxes": [
+      "andreas"
+    ],
+    "date": "2026-09-28T07:55:00+02:00",
+    "from": {
+      "name": "Lisa",
+      "email": "l.meier@gmx.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Kurze Frage zum Termin",
+    "headers": {},
+    "body": "Hi Andreas, schreibe vom privaten Handy: Bleibt es bei Mittwoch, 13:30? Wir bringen den Pitchdeck-Entwurf mit.\n\nLisa – Solaro",
+    "attachments": []
+  },
+  {
+    "key": "m07",
+    "message_id": "<m07.julia@gruendung.uni-augsburg.example>",
+    "mailboxes": [
+      "julia"
+    ],
+    "folder": "Sent",
+    "date": "2026-09-21T10:12:00+02:00",
+    "from": {
+      "name": "Julia",
+      "email": "julia@gruendung.uni-augsburg.example"
+    },
+    "to": [
+      {
+        "name": "Anna Weber",
+        "email": "a.weber@ihk-schwaben.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Anfrage Jury Pitch-Abend am 19.11.",
+    "headers": {},
+    "body": "Liebe Frau Weber,\n\nam 19.11. veranstalten wir wieder unseren Pitch-Abend mit sechs Gründungsteams. Hätten Sie Lust, Teil der Jury zu sein? Über eine Rückmeldung bis Ende September würde ich mich freuen.\n\nHerzliche Grüße\nJulia",
+    "attachments": []
+  },
+  {
+    "key": "m08",
+    "message_id": "<m08.julia@gruendung.uni-augsburg.example>",
+    "mailboxes": [
+      "julia"
+    ],
+    "folder": "Sent",
+    "date": "2026-09-21T10:30:00+02:00",
+    "from": {
+      "name": "Julia",
+      "email": "julia@gruendung.uni-augsburg.example"
+    },
+    "to": [
+      {
+        "name": "Lisa Meier",
+        "email": "lisa@solaro.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Einladung zum Pitch am 19.11.",
+    "headers": {},
+    "body": "Hallo Lisa,\n\nwir würden Solaro gern beim Pitch-Abend am 19.11. dabeihaben. Fünf Minuten Pitch, danach Fragen der Jury. Sag mir bis 10.10. Bescheid, ob ihr dabei seid.\n\nLiebe Grüße\nJulia",
+    "attachments": []
+  },
+  {
+    "key": "m09",
+    "message_id": "<m09.hartmann@wiwi.uni-augsburg.example>",
+    "mailboxes": [
+      "andreas",
+      "julia"
+    ],
+    "date": "2026-09-28T14:20:00+02:00",
+    "from": {
+      "name": "Prof. Dr. Martin Hartmann",
+      "email": "hartmann@wiwi.uni-augsburg.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [
+      {
+        "name": "Julia",
+        "email": "julia@gruendung.uni-augsburg.example"
+      }
+    ],
+    "subject": "Entrepreneurship Basics – Raum für Sitzung 3",
+    "headers": {},
+    "body": "Lieber Andreas,\n\nfür Sitzung 3 von Entrepreneurship Basics (20.10.) bräuchten wir einen Raum mit Beamer für etwa 40 Personen. Könntest du das bis morgen klären? Meine Folien schicke ich bis 06.10.\n\nBeste Grüße\nMartin Hartmann",
+    "attachments": []
+  },
+  {
+    "key": "m10",
+    "message_id": "<m10.greenbyte@greenbyte.example>",
+    "mailboxes": [
+      "starthub"
+    ],
+    "date": "2026-09-29T08:47:00+02:00",
+    "from": {
+      "name": "Nora Kim",
+      "email": "nora@greenbyte.example"
+    },
+    "to": [
+      {
+        "name": "StartHub",
+        "email": "starthub@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Beratungstermin",
+    "headers": {},
+    "body": "Guten Tag,\n\nwir sind Greenbyte und entwickeln eine Software, die Rechenzentren beim Energiesparen hilft. Wir würden gern einen Beratungstermin vereinbaren – am liebsten nächste Woche.\n\nViele Grüße\nNora Kim\nGründerin, Greenbyte",
+    "attachments": []
+  },
+  {
+    "key": "m11",
+    "message_id": "<m11.rechnung@kitchenloop-catering.example>",
+    "mailboxes": [
+      "starthub"
+    ],
+    "date": "2026-09-23T12:00:00+02:00",
+    "from": {
+      "name": "Kitchen Loop Catering",
+      "email": "rechnung@kitchenloop-catering.example"
+    },
+    "to": [
+      {
+        "name": "StartHub",
+        "email": "starthub@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Rechnung 0923",
+    "headers": {},
+    "body": "Sehr geehrte Damen und Herren,\n\nanbei erhalten Sie die Rechnung für das Catering am 19.09.\n\nMit freundlichen Grüßen\nSven Ott\nKitchen Loop Catering",
+    "attachments": [
+      {
+        "filename": "Rechnung_0923.pdf",
+        "mime": "application/pdf",
+        "text": "Rechnung Nr. 0923. Catering 19.09.2026, 40 Personen. Betrag 480,00 EUR."
+      }
+    ]
+  },
+  {
+    "key": "m12",
+    "message_id": "<m12.news@startup-news.example>",
+    "mailboxes": [
+      "andreas"
+    ],
+    "date": "2026-09-27T06:00:00+02:00",
+    "from": {
+      "name": "Startup News",
+      "email": "newsletter@startup-news.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Die Woche in der Gründerszene",
+    "headers": {
+      "List-Unsubscribe": "<mailto:unsubscribe@startup-news.example>",
+      "Precedence": "bulk"
+    },
+    "body": "Die wichtigsten Finanzierungsrunden der Woche …",
+    "attachments": []
+  },
+  {
+    "key": "m13",
+    "message_id": "<m13.vogt@stadtwerke.example>",
+    "mailboxes": [
+      "andreas"
+    ],
+    "date": "2026-09-25T11:15:00+02:00",
+    "from": {
+      "name": "Karin Vogt",
+      "email": "k.vogt@stadtwerke.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Kooperation Stadtwerke × StartHub",
+    "headers": {},
+    "body": "Hallo Herr Andreas,\n\nwir überlegen, gemeinsam mit dem StartHub eine Challenge für Energie-Startups auszuschreiben. Hätten Sie Zeit für ein Gespräch in den nächsten zwei Wochen?\n\nFreundliche Grüße\nKarin Vogt\nStadtwerke Augsburg (fiktiv)",
+    "attachments": []
+  },
+  {
+    "key": "m14",
+    "message_id": "<m14.mehmet@gruendung.uni-augsburg.example>",
+    "mailboxes": [
+      "andreas",
+      "mehmet"
+    ],
+    "date": "2026-09-29T09:10:00+02:00",
+    "from": {
+      "name": "Mehmet",
+      "email": "mehmet@gruendung.uni-augsburg.example"
+    },
+    "to": [
+      {
+        "name": "Andreas",
+        "email": "andreas@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Mittagessen?",
+    "headers": {},
+    "body": "Gehen wir heute um 12 in die Mensa?",
+    "attachments": []
+  },
+  {
+    "key": "m15",
+    "message_id": "<m15.kitchenloop@kitchenloop.example>",
+    "mailboxes": [
+      "julia"
+    ],
+    "date": "2026-09-28T15:45:00+02:00",
+    "from": {
+      "name": "Sara Yilmaz",
+      "email": "sara@kitchenloop.example"
+    },
+    "to": [
+      {
+        "name": "Julia",
+        "email": "julia@gruendung.uni-augsburg.example"
+      }
+    ],
+    "cc": [],
+    "subject": "Vor unserem Termin am Mittwoch",
+    "headers": {},
+    "body": "Hallo Julia,\n\nvor dem Termin am Mittwoch noch eine Frage: Brauchen wir für die Mensa-Kooperation eine Hygieneschulung, oder reicht die vom Studierendenwerk? Unser Konzept hängt an.\n\nLiebe Grüße\nSara",
+    "attachments": [
+      {
+        "filename": "Konzept_Mensa-Kooperation.pdf",
+        "mime": "application/pdf",
+        "text": "Kitchen Loop – Resteverwertung aus der Mensa als Mittagsbox. Pilot im Wintersemester mit dem Studierendenwerk."
+      }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+Aufgaben|1280|1000|.pz--erl .ld-t{text-decoration:line-through;color:var(--ink-muted)}.neu-form{display:flex;gap:6px}.neu-form input{flex:1}
+@@SIDE:aufgaben@@
+<div class="ld">
+<div class="ld-liste">
+<div class="ld-kopf">
+<div style="display: flex; align-items: baseline; gap: 10px"><h1>Aufgaben</h1><span class="mono">{{zaehler}}</span><span style="flex-grow: 1"></span><x-import component-from-global-scope="Kollege.Umschalter" optionen="{{scopes}}" wert="{{scope}}" label="Wessen Aufgaben" on-wechsel="{{setScope}}"></x-import></div>
+<form class="neu-form" onSubmit="{{anlegen}}">
+<label for="a-neu" class="kg-sr">Neue Aufgabe</label>
+<input id="a-neu" class="such" value="{{neuText}}" onChange="{{neuTippen}}" placeholder="{{neuPlatzhalter}}">
+<button type="submit" class="kg-aktion kg-aktion--sekundaer">+ Aufgabe</button>
+</form>
+<div class="filterzeile">
+<sc-for list="{{filter}}" as="f" hint-placeholder-count="4"><button type="button" class="chip" aria-pressed="{{f.an}}" onClick="{{f.los}}">{{f.label}}</button></sc-for>
+</div>
+</div>
+@@PRUEF@@
+<div class="ld-scroll">
+<sc-for list="{{gruppen}}" as="g" hint-placeholder-count="4">
+<div class="ld-gruppe" style="{{g.stil}}">{{g.titel}} · {{g.anzahl}}</div>
+<sc-for list="{{g.items}}" as="a" hint-placeholder-count="3">
+<div class="{{a.klasse}}">
+<input type="checkbox" aria-label="{{a.hakenLabel}}" checked="{{a.haken}}" onChange="{{a.hakenLos}}">
+<button type="button" class="ld-zeile" aria-current="{{a.aktiv}}" onClick="{{a.los}}"><span class="ld-t">{{a.titel}}</span><span class="ld-m" style="{{a.faelligStil}}">{{a.faellig}}</span><span class="ld-u">{{a.unter}}</span></button>
+</div>
+</sc-for>
+</sc-for>
+<sc-if value="{{keine}}" hint-placeholder-val="{{ false }}"><div style="padding: 20px"><x-import component-from-global-scope="Kollege.Leer" titel="Nichts in dieser Ansicht." text="Anderen Filter wählen oder oben eine Aufgabe anlegen."></x-import></div></sc-if>
+<sc-if value="{{hatErledigte}}" hint-placeholder-val="{{ true }}"><div style="padding: 12px 20px"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{erledigteToggle}}" style="font-size: 13px">{{erledigteZeile}}</button></div></sc-if>
+</div>
+</div>
+
+<div class="ld-detail">
+<sc-if value="{{hatDetail}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{d.istUngeprueft}}" hint-placeholder-val="{{ false }}">
+<div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Von Kollege erkannt – {{d.grund}}</span><x-import component-from-global-scope="Kollege.Quelle">{{d.quelle}}</x-import><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Verwerfen</button></div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; gap: 10px; align-items: center">
+<input type="checkbox" id="a-erl" checked="{{d.erledigt}}" onChange="{{d.toggle}}" style="accent-color: var(--ink); width: 18px; height: 18px">
+<label for="a-erl" class="mono">{{d.erledigtText}}</label>
+</div>
+<label for="a-titel" class="kg-sr">Titel</label>
+<input id="a-titel" class="fe fe-titel" data-feld="titel" value="{{d.titel}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}">
+<div class="felder">
+<label for="a-richtung">Richtung</label>
+<select id="a-richtung" class="fe" data-feld="richtung" value="{{d.richtung}}" onChange="{{d.f.wahl}}" style="justify-self: start"><option value="von uns">von uns – wir haben zugesagt</option><option value="an uns">an uns – andere haben uns zugesagt</option></select>
+<sc-if value="{{d.anUns}}" hint-placeholder-val="{{ false }}">
+<label for="a-von">Von wem</label>
+<input id="a-von" class="fe" data-feld="von" value="{{d.von}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" style="width: 320px">
+</sc-if>
+<label for="a-wer">{{d.werLabel}}</label>
+<select id="a-wer" class="fe" data-feld="wer" value="{{d.wer}}" onChange="{{d.f.wahl}}" style="justify-self: start"><sc-for list="{{personen}}" as="o" hint-placeholder-count="3"><option value="{{o}}">{{o}}</option></sc-for></select>
+<label for="a-faellig">Fällig</label>
+<div style="display: flex; gap: 10px; align-items: baseline"><select id="a-faellig" class="fe" data-feld="faellig" value="{{d.faellig}}" onChange="{{d.f.wahl}}"><sc-for list="{{termine}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><sc-if value="{{d.hatBerechnet}}" hint-placeholder-val="{{ false }}"><span class="mono" style="{{d.berechnetStil}}">= {{d.berechnet}}</span></sc-if></div>
+<label for="a-vorgang">Gehört zu</label>
+<div style="display: flex; gap: 10px; align-items: baseline"><select id="a-vorgang" class="fe" data-feld="vorgang" value="{{d.vorgang}}" onChange="{{d.f.wahl}}"><sc-for list="{{vorgaenge}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><a class="kg-bezug" href="{{d.gehoertHref}}" style="font-size: 13px">öffnen</a></div>
+<span class="fl">Herkunft</span>
+<div style="font-size: 14px; display: flex; gap: 8px; align-items: baseline">{{d.herkunft}}<x-import component-from-global-scope="Kollege.Quelle">{{d.quelle}}</x-import></div>
+<span class="fl">Sichtbar</span>
+<div style="font-size: 14px; display: flex; gap: 8px; align-items: center"><sc-if value="{{d.privat}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Privat"></x-import></sc-if>{{d.sichtbarText}}<button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.privatToggle}}" style="font-size: 13px">{{d.privatKnopf}}</button></div>
+</div>
+</div>
+
+<section class="kg-abschnitt" aria-label="Notiz">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Notiz</h2><span class="kg-abschnitt-aside">wird beim Verlassen des Feldes gespeichert</span></div>
+<label for="a-notiz" class="kg-sr">Notiz</label>
+<textarea id="a-notiz" class="fe" data-feld="notiz" rows="4" value="{{d.notiz}}" onFocus="{{d.f.fokus}}" onChange="{{d.f.tippen}}" onBlur="{{d.f.fertig}}" placeholder="Was muss man dazu wissen?" style="width: 100%; font-size: 15px"></textarea>
+</section>
+
+<div class="kg-aktionen">
+<sc-if value="{{d.anUns}}" hint-placeholder-val="{{ false }}"><a class="kg-aktion kg-aktion--sekundaer" href="Mail.dc.html">Nachfassen per Mail</a></sc-if>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.loeschen}}">Löschen</button>
+</div>
+</sc-if>
+<sc-if value="{{keinDetail}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Leer" titel="Keine Aufgabe geöffnet." text="Links eine Aufgabe wählen oder oben eine anlegen."></x-import></sc-if>
+</div>
+</div>
+@@KC@@
+@@TOAST@@

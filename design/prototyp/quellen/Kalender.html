@@ -1,0 +1,96 @@
+Kalender|1280|1000|.kal{display:flex;height:100%}.kal-haupt{flex:1;min-width:0;display:flex;flex-direction:column;padding:20px 20px 0;gap:12px;overflow:hidden}.kal-kopf{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.kal-kopf h1{margin:0;font-size:20px;line-height:28px;font-weight:500}.raster{display:grid;flex:1;min-height:0;overflow-y:auto;border-top:1px solid var(--rule)}.r-kopf{position:sticky;top:0;background:var(--paper);z-index:3;font-family:var(--font-mono);font-size:11px;line-height:16px;color:var(--ink-muted);padding:6px 4px;border-bottom:1px solid var(--rule);border-left:1px solid var(--rule)}.r-kopf--heute{color:var(--ink);box-shadow:inset 0 2px 0 var(--ink)}.r-frist{display:block;margin-top:3px;color:var(--attention);border:1px dashed var(--attention);border-radius:2px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.r-zeiten{position:relative}.r-zeit{position:absolute;right:6px;font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);transform:translateY(-6px)}.r-tag{position:relative;border-left:1px solid var(--rule)}.r-slot{all:unset;position:absolute;left:0;right:0;height:48px;box-sizing:border-box;border-top:1px solid var(--rule);cursor:copy}.r-slot:hover{background:var(--accent-soft)}.r-slot:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.r-t{all:unset;box-sizing:border-box;position:absolute;left:3px;right:3px;z-index:1;cursor:pointer;overflow:hidden;padding:3px 5px;border-radius:2px;background:var(--paper-sunk);border-left:2px solid var(--ink);font-size:12px;line-height:15px}.r-t:focus-visible{outline:2px solid var(--accent)}.r-t[aria-current="true"]{background:var(--accent-soft);border-left-color:var(--accent)}.r-t--vorbei{color:var(--ink-muted);border-left-color:var(--ink-faint)}.r-t--entwurf{background:transparent;border:1px dashed var(--line-control);border-left-width:2px}.r-t--ab{text-decoration:line-through;color:var(--ink-faint);background:transparent;border-left-color:var(--rule)}.r-t b{font-weight:500;display:block}.r-t .m{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted)}.r-frage{display:block;font-family:var(--font-mono);font-size:10px;color:var(--accent)}.r-jetzt{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--attention);z-index:2}.r-we{border-left:1px solid var(--rule);padding:10px 6px;font-size:12px;color:var(--ink-muted);display:flex;flex-direction:column;gap:8px}.monat{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule);overflow-y:auto}.zelle{min-height:118px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:4px 6px;display:flex;flex-direction:column;gap:2px}.zelle-kopf{all:unset;cursor:copy;font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);display:flex;justify-content:space-between}.zelle-kopf:focus-visible{outline:2px solid var(--accent)}.zelle--fremd .zelle-kopf{color:var(--ink-faint)}.zelle--heute{box-shadow:inset 0 2px 0 var(--ink)}.zelle-t{all:unset;cursor:pointer;font-size:12px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.zelle-t:hover{text-decoration:underline}.panel{width:360px;flex-shrink:0;border-left:1px solid var(--rule);padding:20px 24px 96px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}.panel .felder{grid-template-columns:96px minmax(0,1fr)}.panel .fe{width:100%}.ofz{display:flex;flex-direction:column;gap:2px;padding-block:8px;border-top:1px solid var(--rule);font-size:14px}
+@@SIDE:kalender@@
+<div class="kal">
+<div class="kal-haupt">
+<div class="kal-kopf">
+<h1>Kalender</h1>
+<span class="mono">{{zeitraum}}</span>
+<span style="flex-grow: 1"></span>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{modi}}" wert="{{modus}}" label="Ansicht" on-wechsel="{{setModus}}"></x-import>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{scopes}}" wert="{{scope}}" label="Wessen Termine" on-wechsel="{{setScope}}"></x-import>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{neuerTermin}}">+ Termin</button>
+</div>
+<div class="mono">{{quellenZeile}}</div>
+
+<sc-if value="{{istWoche}}" hint-placeholder-val="{{ true }}">
+<div class="raster" style="{{rasterSpalten}}">
+<div class="r-kopf" style="border-left: 0"></div>
+<sc-for list="{{tage}}" as="t" hint-placeholder-count="5"><div class="{{t.kopfKlasse}}">{{t.kopf}}<sc-for list="{{t.fristen}}" as="fr" hint-placeholder-count="0"><span class="r-frist" title="{{fr}}">Frist: {{fr}}</span></sc-for></div></sc-for>
+<div class="r-kopf">Sa/So</div>
+<div class="r-zeiten" style="height: 528px"><sc-for list="{{stunden}}" as="h" hint-placeholder-count="11"><span class="r-zeit" style="{{h.top}}">{{h.label}}</span></sc-for></div>
+<sc-for list="{{tage}}" as="t" hint-placeholder-count="5">
+<div class="r-tag" style="height: 528px">
+<sc-for list="{{t.slots}}" as="s" hint-placeholder-count="11"><button type="button" class="r-slot" style="{{s.top}}" aria-label="{{s.label}}" onClick="{{s.los}}"></button></sc-for>
+<sc-if value="{{t.istHeute}}" hint-placeholder-val="{{ false }}"><div class="r-jetzt" style="{{jetztTop}}" aria-hidden="true"></div></sc-if>
+<sc-for list="{{t.termine}}" as="e" hint-placeholder-count="2">
+<button type="button" class="{{e.klasse}}" style="{{e.pos}}" aria-current="{{e.aktiv}}" onClick="{{e.los}}"><span class="m">{{e.zeit}}</span><b>{{e.titel}}</b><span class="m">{{e.unter}}</span><sc-if value="{{e.fragen}}" hint-placeholder-val="{{ false }}"><span class="r-frage">Was kam raus?</span></sc-if></button>
+</sc-for>
+</div>
+</sc-for>
+<div class="r-we" style="height: 528px; box-sizing: border-box"><span>Wochenende frei</span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{wochenendeTermin}}" style="font-size: 12px">+ Termin</button></div>
+</div>
+</sc-if>
+
+<sc-if value="{{istMonat}}" hint-placeholder-val="{{ false }}">
+<div class="monat">
+<sc-for list="{{zellen}}" as="z" hint-placeholder-count="35">
+<div class="{{z.klasse}}">
+<button type="button" class="zelle-kopf" onClick="{{z.neu}}" aria-label="{{z.neuLabel}}"><span>{{z.tag}}</span><span aria-hidden="true">+</span></button>
+<sc-for list="{{z.termine}}" as="e" hint-placeholder-count="1"><button type="button" class="zelle-t" style="{{e.stil}}" onClick="{{e.los}}">{{e.text}}</button></sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<aside class="panel" aria-label="Termin">
+<sc-if value="{{zeigeForm}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: baseline; gap: 8px"><span class="label" style="color: var(--ink-muted)">{{formTitel}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--text" onClick="{{schliessen}}">Schließen</button></div>
+<sc-if value="{{e.istAbgesagt}}" hint-placeholder-val="{{ false }}"><div class="ungeprueft-banner" style="border-style: solid">Abgesagt. <button type="button" class="kg-aktion kg-aktion--text" onClick="{{e.wiederherstellen}}">wiederherstellen</button></div></sc-if>
+<label for="t-titel" class="kg-sr">Titel</label>
+<input id="t-titel" class="fe fe-titel" style="font-size: 20px; line-height: 28px" data-feld="titel" value="{{e.titel}}" onFocus="{{e.f.fokus}}" onChange="{{e.f.tippen}}" onBlur="{{e.f.fertig}}" placeholder="Titel">
+<div class="felder">
+<label for="t-tag">Tag</label>
+<select id="t-tag" class="fe" data-feld="tag" value="{{e.tag}}" onChange="{{e.f.wahl}}"><sc-for list="{{tagOptionen}}" as="o" hint-placeholder-count="7"><option value="{{o.wert}}">{{o.label}}</option></sc-for></select>
+<label for="t-start">Beginn</label>
+<select id="t-start" class="fe" data-feld="start" value="{{e.start}}" onChange="{{e.f.wahl}}"><sc-for list="{{zeitOptionen}}" as="o" hint-placeholder-count="10"><option value="{{o}}">{{o}}</option></sc-for></select>
+<label for="t-dauer">Dauer</label>
+<select id="t-dauer" class="fe" data-feld="dauer" value="{{e.dauer}}" onChange="{{e.f.wahl}}"><option value="0.5">30 Min.</option><option value="1">1 Std.</option><option value="1.5">1,5 Std.</option><option value="2">2 Std.</option><option value="3">3 Std.</option></select>
+<label for="t-ort">Ort</label>
+<input id="t-ort" class="fe" data-feld="ort" value="{{e.ort}}" onFocus="{{e.f.fokus}}" onChange="{{e.f.tippen}}" onBlur="{{e.f.fertig}}" placeholder="Raum oder Link">
+<label for="t-leute">Mit</label>
+<input id="t-leute" class="fe" data-feld="leute" value="{{e.leute}}" onFocus="{{e.f.fokus}}" onChange="{{e.f.tippen}}" onBlur="{{e.f.fertig}}" placeholder="Namen, mit Komma">
+<label for="t-vorgang">Gehört zu</label>
+<select id="t-vorgang" class="fe" data-feld="vorgang" value="{{e.vorgang}}" onChange="{{e.f.wahl}}"><sc-for list="{{vorgaenge}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select>
+</div>
+<sc-if value="{{e.hatExterne}}" hint-placeholder-val="{{ false }}"><div class="mono">= extern: {{e.externe}}</div></sc-if>
+<div style="font-size: 14px; color: var(--ink-muted)">{{e.statusText}}</div>
+<div class="kg-aktionen">
+<sc-if value="{{e.istNeu}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{e.anlegen}}">{{e.anlegenLabel}}</button></sc-if>
+<sc-if value="{{e.kannEinladen}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--primaer" onClick="{{e.einladen}}">Einladung senden</button></sc-if>
+<sc-if value="{{e.kannAbsagen}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{e.absagen}}">{{e.absagenLabel}}</button></sc-if>
+<sc-if value="{{e.hatVorgangLink}}" hint-placeholder-val="{{ false }}"><a class="kg-aktion kg-aktion--text" href="{{e.gehoertHref}}">Öffnen</a></sc-if>
+</div>
+<sc-if value="{{e.zeigeWasKam}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{e.wasKamSpeichern}}" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--line-control); border-radius: 4px; background: var(--paper-sunk)">
+<label for="t-was" style="font-weight: 500">Was kam raus?</label>
+<textarea id="t-was" value="{{wasText}}" onChange="{{wasTippen}}" rows="3" placeholder="Stichworte reichen – Zusagen trage ich ein" class="such" style="font-size: 14px; resize: vertical"></textarea>
+<div class="kg-aktionen"><button type="submit" class="kg-aktion kg-aktion--primaer" aria-label="Im Verlauf ablegen">→</button><span style="font-size: 12px; color: var(--ink-muted)">landet im Verlauf von {{e.vorgang}}</span></div>
+</form>
+</sc-if>
+<sc-if value="{{e.hatErgebnis}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Aussage" art="belegt" quelle="deine Notiz">{{e.ergebnis}}</x-import></sc-if>
+</sc-if>
+
+<sc-if value="{{zeigeUebersicht}}" hint-placeholder-val="{{ true }}">
+<span class="label" style="color: var(--ink-muted)">Nachtragen</span>
+<sc-for list="{{nachtragen}}" as="n" hint-placeholder-count="2"><div class="ofz"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{n.los}}" style="justify-self: start; text-align: left">{{n.titel}}</button><span class="mono">{{n.wann}} · Was kam raus?</span></div></sc-for>
+<sc-if value="{{nichtsNachzutragen}}" hint-placeholder-val="{{ false }}"><span style="font-size: 14px; color: var(--ink-muted)">Alles nachgetragen.</span></sc-if>
+<span class="label" style="color: var(--ink-muted); margin-top: 8px">Einladungen</span>
+<sc-for list="{{entwuerfe}}" as="n" hint-placeholder-count="1"><div class="ofz"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{n.los}}" style="justify-self: start; text-align: left">{{n.titel}}</button><span class="mono">{{n.wann}}</span></div></sc-for>
+<sc-if value="{{keineEntwuerfe}}" hint-placeholder-val="{{ true }}"><span style="font-size: 14px; color: var(--ink-muted)">Keine offenen Einladungen.</span></sc-if>
+<p style="margin: 8px 0 0; font-size: 13px; line-height: 20px; color: var(--ink-muted)">In einen freien Platz klicken legt einen Termin an. Externe bekommen die Einladung erst, wenn du „Einladung senden“ drückst.</p>
+</sc-if>
+</aside>
+</div>
+@@KC@@
+@@TOAST@@

@@ -1,0 +1,69 @@
+# Entscheidungen, offene Fragen, Grenzen
+
+Stand 30.09.2026. Entstanden in vier Iterationen: (1) Design System + 8 Screens, (2) Chat als Eingang, Einstellungen, Personen, (3) Kalender, Aufgaben, Kontakte, Dateien, Neu angelegt, Import, (4) Sichtbarkeit, Status, Übergabe, Import 12 Monate, Mengen.
+
+## Getroffene Entscheidungen
+
+| # | Entscheidung | Begründung |
+| --- | --- | --- |
+| E1 | Herkunft (belegt/berechnet/KI-Vermutung) wird über **Schrift** unterschieden, nicht über Farbe; zusätzlich Zeichen ▪ = ~ und Screenreader-Präfix. | Muss in Graustufen, bei Farbfehlsichtigkeit und für Screenreader funktionieren. Drei Schnitte einer Familie (IBM Plex Sans/Mono/Serif) = verwandt, aber unterscheidbar. |
+| E2 | **Rahmen = Grenze:** nur Eingabefeld und Entwurf sind gerahmt. | Ein Rahmen signalisiert „hier berührt etwas die Außenwelt“. Alles andere bleibt Text auf Papier. |
+| E3 | Farbe nur mit Bedeutung: `accent` = Handlung möglich, `attention` = überfällig/hängt. Vorgangsarten farblos. | Farbe als knappe Ressource; verhindert Dashboard-Optik. |
+| E4 | Chat ist Eingang, **Record ist Wahrheit**. Jede Ablage erzeugt eine `Karte` mit Link, Rückgängig und Folgeschritten. | Löst den Widerspruch zum ursprünglichen „kein Chatfenster“: Wissen darf nicht in Chats verschwinden. |
+| E5 | „KI-Vermutung“ ist die **einzige** Bezeichnung für Ungeprüftes (gestrichelte Marke). Vom System angelegte Vorgänge/Personen gelten bis „Übernehmen“ ebenfalls als KI-Vermutung. | Einheitliche Semantik vom Satz bis zum Datensatz. |
+| E6 | Chat-Knopf ist **→**, „Senden“ nur für externen Versand („Über mein Postfach senden“). | Die Grenze nach außen bleibt sprachlich eindeutig. |
+| E7 | Einziges Piktogramm: **Schloss** für privat. | Sichtbarkeit ist zu wichtig für ein Wort allein; sonst typografische Zeichen. |
+| E8 | „Lieber Lücke als Raten“: `Wissensluecke` („Dazu habe ich noch zu wenig Erfahrung“). | Eine plausible falsche Antwort kostet mehr Vertrauen als eine ehrliche Lücke. |
+| E9 | Klärungen ohne eigene Seite: „Kurz klären“ auf der Übersicht und direkt im Chat. | Frage dort stellen, wo die Unsicherheit entsteht. |
+| E10 | Neue Termine nur als Einladungsentwurf; stehen erst nach Versand (vorläufig) im Kalender. | Konsistent mit „nach außen nur als Entwurf“. |
+| E11 | Mails aus Outlook und aus dem System sehen im Verlauf gleich aus, nur mit kleinem Herkunftshinweis. | Ein Verlauf, keine zwei Welten. |
+| E12 | Seitenleiste mit Navigation + Chatverlauf statt oberer Navigation; Navigation in drei Gruppen (Übersicht, Chat · Arbeitsbereiche · Neu angelegt, Einstellungen). | Chatverlauf braucht Platz; Gruppen machen die neun Punkte lesbar. |
+| E13 | Mails aus fremden Postfächern (nicht in CC) nur als Platzhalter: „Mail von Julia an Lisa Meier · Inhalt nur für Julia“ mit Schloss. Abgeleitete Zusagen/Aufgaben bleiben sichtbar und nennen „aus Julias Mail“. | Wissen über Verpflichtungen gehört dem Team, der Wortlaut der Person. |
+| E14 | *(präzisiert durch E27)* Status eines Vorgangs: offen · wartet · erledigt. „hängt“ ist berechnet (= seit 21 Tagen nichts passiert), kein Status. | Status setzt ein Mensch; „hängt“ ist eine Messung. Deckt sich mit der Anweisung „nach 3 Wochen als hängt melden“. |
+| E15 | „Als erledigt markieren“ fragt „Wie lief’s?“ (eine Zeile, überspringbar); die Antwort landet im Verlauf. | Billigster Moment, Erfahrung festzuhalten. |
+| E16 | Verlauf streng chronologisch; Systemschritte kleiner und zusammengefasst („3 Systemschritte · anzeigen“). | Menschliche Ereignisse bleiben lesbar, Maschinenschritte nachprüfbar. |
+| E17 | Übergabe erzeugt beim Empfänger einen Kurzstand (nächster Schritt, Zusagen beider Seiten, letzte 3 Ereignisse) mit „Übernehmen“; private Notizen bleiben beim Übergebenden. | Übergabe ist erst vollzogen, wenn jemand annimmt. |
+| E18 | Entwürfe, die von einer offenen Klärung abhängen, sind ausgegraut („wartet auf deine Antwort oben“); bei „Andere Person“ entfällt der Entwurf. | Kein Entwurf auf ungeklärter Grundlage. |
+| E19 | KI-Vermutung bei Dateizusammenfassungen einmal pro Abschnitt; Einzelmarke nur für echte Einschätzungen. | Marke verliert Wirkung, wenn sie an jeder Zeile steht. |
+| E20 | Quellen: persönliche Postfächer + Kalender, Team-Postfach starthub@uni-augsburg.de (für alle sichtbar), Netzlaufwerk \\fs.uni-augsburg.de\gruendung über einen Rechner im Uni-Netz. Einrichtung importiert 12 Monate. | Entspricht der realen Infrastruktur des Gründungszentrums. |
+| E21 | *(Ort geändert durch E25: Filter statt eigener Screen)* Große Importe (214 Einträge) werden mit Anzahl und Mehrfachauswahl geprüft; Verwerfen mit optionaler Begründung wird zur Anweisung. | Einzelprüfung skaliert nicht; die Begründung verhindert Wiederholung. |
+| E22 | Bei überlappenden Anweisungen gilt die speziellere; beide Einträge zeigen das („gilt vor …“). | Konflikte sichtbar statt still aufgelöst. |
+| E23 | **Alles, was der Chat kann, geht auch von Hand.** Jedes Werkzeug: Liste links, geöffnetes Element rechts, Felder direkt bearbeitbar. Nur der Kalender hat ein eigenes Layout (Raster). | Ein System, in dem man nur über den Chat arbeiten kann, ist bei Routine langsamer und schwer zu überprüfen. Ein Muster für alle Werkzeuge = nichts neu lernen. |
+| E24 | **Speichern ohne Knopf, Rückgängig überall.** Tippen speichert, Verlassen des Feldes zeigt „Gespeichert · Rückgängig“ unten links (9 s). Gilt für Felder, Status, Zuordnungen, Löschen, Anlegen. | Ein „Speichern“-Knopf je Feld wäre Reibung; ohne Rückgängig wäre sofortiges Speichern riskant. Beides zusammen ist die ehrliche Kombination. |
+| E25 | **„Ungeprüft“ ist ein Filter, kein Screen** (gilt auch je Bereich). „Neu angelegt“ entfällt; jede Liste hat „ungeprüft · N“ mit Mehrfachauswahl, „alle N“, Übernehmen / Verwerfen (+ optional Warum → wird Anweisung). Heute zeigt „214 ungeprüft – prüfen“. | Geprüft wird dort, wo die Dinge leben – mit derselben Detailansicht wie sonst. Ein separater Prüf-Screen dupliziert jede Ansicht. |
+| E26 | **Mail ist ein eigenes Werkzeug** mit Postfach-Umschalter (Mein / StartHub / Alle); Vorgang und Kontakt sind im Thread-Kopf änderbar; Senden ist primär, „Entwurf mit Kollege“ optional; Kollege zeigt beim Schreiben, was er dazu weiß. | Mail ist der größte Eingangskanal. Ohne eigenen Mail-Screen müsste man für jede Antwort zurück nach Outlook – dann wird Kollege umgangen. |
+| E27 | *(für Bereiche ersetzt durch Phasen, E29)* Status nur **offen / erledigt** von Hand; „wartet“ und „hängt“ werden berechnet und mit „=“ angezeigt. Zusagen anderer sind Aufgaben mit Richtung „an uns“. | Von Hand gepflegte Zwischenstatus veralten. Was sich aus Fristen und letzter Aktivität ergibt, rechnet das System. |
+| E28 | **Einladungen an Externe gehen erst nach „Einladung senden“** raus; vorher steht der Termin gestrichelt als „Einladung nicht verschickt“ im Kalender. | Konsistent mit E10 und „nach außen nur bewusst“; interne Termine brauchen den Zwischenschritt nicht. |
+| E29 | **Bereiche statt Vorgänge.** Die Arbeit ist in Bereiche gegliedert (Gründungsteams, Events, Lehre, Social Media, erweiterbar). Jeder Bereich hat eigene Spalten (max. 5) und Phasen; eine Vorlage für alle. „Vorgang“ kommt in der Oberfläche nicht mehr vor. | So spricht das Team: „bei Solaro“, „bei der Gründungsnacht“ – nicht „im Vorgang“. Eigene Spalten pro Bereich zeigen, was dort wirklich zählt (Phase eines Teams ≠ Datum eines Events). |
+| E30 | **Gründungsteam = Beratungsakte:** Personen, Gespräche, Zusagen beider Seiten, Themen (optional). Kontakte bleibt das Adressbuch; eine Organisation mit Art „Gründungsteam“ verlinkt „Zur Beratungsakte“. | Trennt Arbeitsansicht (was läuft mit dem Team?) von Stammdaten (wie erreiche ich wen?). |
+| E31 | **Bezüge über Bereiche hinweg** (Beitrag ↔ Team ↔ Event) sind symmetrisch und von Hand pflegbar; von Kollege vermutete Bezüge sind gestrichelt und als KI-Vermutung markiert, bis bestätigt. | Querverbindungen sind der eigentliche Mehrwert gegenüber Ordnern, dürfen aber nicht still erfunden werden. |
+| E32 | **KI-ausgefüllte Felder** tragen eine KI-Vermutung, bis sie bestätigt oder geändert werden; Ändern gilt als Bestätigung. | Verlängert E5 von ganzen Einträgen auf einzelne Felder. |
+| E33 | **Bereiche schlägt Kollege bei der Einrichtung vor** („Ich schlage diese Bereiche vor – passt das?“), vor dem Import; der Import ordnet erst danach zu. Anweisungen gelten für alle, einen Bereich oder nur dich. | Ohne bestätigte Bereiche würde der Import in eine geratene Struktur sortieren. Bereichsbezogene Anweisungen vermeiden Regeln, die woanders stören. |
+
+## Offene Fragen
+
+- **Was ohne Bereich bleibt:** Die Stadtwerke-Kooperation, Presseanfragen und Rechnungen passen in keinen der vier Bereiche und stehen als „– (ohne Bereich)“. Wird das viel, fehlt ein Bereich (z. B. „Partner & Kooperationen“) – oder es braucht bewusst einen Sammelort. Erst im Test entscheiden.
+- **Feste Spalten vs. frei konfigurierbar:** Max. 5 Spalten je Bereich sind gesetzt; ob Spalten auch neue Datenfelder anlegen (mit Typ) oder nur vorhandene zeigen, ist offen. Im Prototyp ändert die Einstellung nur die Beschriftung.
+
+- **Reichweite „Chats sind persönlich“:** Im Prototyp sieht das Team, was ein Chat im Record ablegt, aber nicht den Chat selbst. Stimmt das für Beratungen, die jemand später nachlesen muss?
+- **Zwölf Navigationspunkte** (2 + 5 Werkzeuge + 4 Bereiche + Einstellungen) widersprechen dem ruhigen Grundgedanken. Gruppiert sind sie lesbar; im Test messen, was genutzt wird.
+- **Sofort speichern bei Mehrpersonen-Bearbeitung:** Was passiert, wenn Julia und Andreas gleichzeitig denselben Vorgang ändern? Im Prototyp nicht modelliert.
+- **„Warum verworfen?“ als Anweisung:** Soll jede Begründung automatisch zur Team-Anweisung werden oder nur auf Nachfrage? Prototyp: wird gemerkt und als Anweisung angezeigt (a6).
+- **Arbeitsname „Kollege“** ist Platzhalter.
+- Verhältnis zu `cos/` (persönlicher Chief of Staff) und zum CAM-Kern (Rollen, Mandate, Übergaben) ist nicht entschieden; siehe `Brainstorming_Team-Betriebssystem.md`.
+- Die referenzierten Screenshots aus dem ersten Briefing lagen nie vor; visuelle Referenz war nur pg-lang.com (übernommen: Datum-zuerst-Logbuch, Schrägstrich-Pfade, knappe Sätze).
+
+## Bekannte Grenzen des Prototyps
+
+- Ausgearbeitet ist vor allem Solaro (Beratungsakte, Gespräche, Verlauf, Dateien, Kontakt Lisa Meier); andere Einträge haben echte, aber dünnere Daten. Links aus Heute/Mail/Bezügen führen auf die Seite des Bereichs, nicht auf den konkreten Eintrag.
+- Änderungen in Einstellungen → Bereiche (Spalten, Phasen, Reihenfolge, „+ Bereich“) wirken im Prototyp nicht auf die Bereichsseiten und die Seitenleiste.
+- Kalender: nur KW 40 ist mit Daten ausgearbeitet; im Monat sind ältere Termine nur angedeutet.
+- Ungeprüft: je Liste 3–6 Beispiele; „alle N“ wirkt auf die nicht sichtbaren als Zahl.
+- Notizen-Editor nutzt `contentEditable` (Rückgängig dort mit ⌘Z, nicht über den Toast).
+- „Chat“ in der Navigation öffnet von anderen Seiten aus den angepinnten Solaro-Chat.
+- Antworten im Chat sind geskriptet (Stichwörter: Anweisung, Frage, Solaro, Notiz).
+- „Neu, niemand zuständig“ (Team-Postfach) erscheint nur in der Team-Ansicht der Übersicht.
+- Die Adresse starthub@uni-augsburg.de ist ein Platzhalter für die echte Team-Adresse.
+- Kleinere Systemschritte im Verlauf sind im Prototyp per Screen-CSS gelöst, noch nicht im Baustein `Verlauf`.
+- Zeilenmuster für Aufgabe, Termin, Datei, Import, Übergabe sind noch **nicht** als Bausteine im Design System – sie leben als Markup in den Screens. Nächster sinnvoller Schritt: als Bausteine aufnehmen.
+- Kein Browser-Durchklicktest der Canvas-Artboards; geprüft wurden mit einem Node-Skript: Platzhalter lösen auf, Tags sind ausgeglichen, Abläufe (Bearbeiten → Rückgängig, Prüfen, Anlegen, Senden, Einladen, Zusammenführen) liefern die erwarteten Zustände.

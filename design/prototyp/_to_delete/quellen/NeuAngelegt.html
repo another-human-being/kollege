@@ -1,0 +1,55 @@
+Neu angelegt|1280|1700|.gk{display:grid;grid-template-columns:24px minmax(0,1fr) auto;column-gap:12px;align-items:center;padding-block:12px;border-top:1px solid var(--rule)}.gk-titel{all:unset;cursor:pointer;display:flex;gap:10px;align-items:baseline;font-weight:500}.gk-titel:focus-visible{outline:2px solid var(--accent)}.na{display:grid;grid-template-columns:24px minmax(0,1fr) auto;column-gap:12px;align-items:baseline;padding:10px 0 10px 24px;border-top:1px solid var(--rule)}.na-meta{grid-column:2/-1;display:flex;gap:8px 12px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--ink-muted)}.leiste{position:sticky;top:0;z-index:2;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:var(--paper);border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+@@SIDE:neu@@
+<main style="height: 100%; box-sizing: border-box; overflow-y: auto; padding: 40px 72px 96px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px; max-width: 880px">
+<h1 class="h1">Neu angelegt</h1>
+<div style="color: var(--ink-muted); max-width: 660px">Vorgänge und Personen, die ich selbst angelegt habe – die meisten aus dem Import der letzten 12 Monate. Bis ihr sie übernehmt, gelten sie als KI-Vermutung.</div>
+<x-import component-from-global-scope="Kollege.Aussage" art="berechnet">{{summe}}</x-import>
+</div>
+<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; max-width: 880px">
+<span class="label" style="color: var(--ink-muted)">Herkunft</span>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{herkuenfte}}" wert="{{herkunft}}" label="Herkunft" on-wechsel="{{setHerkunft}}"></x-import>
+<span class="label" style="color: var(--ink-muted)">Gruppieren nach</span>
+<x-import component-from-global-scope="Kollege.Umschalter" optionen="{{gruppierungen}}" wert="{{gruppierung}}" label="Gruppieren" on-wechsel="{{setGruppierung}}"></x-import>
+</div>
+
+<div style="max-width: 880px">
+<div class="leiste">
+<span class="mono" style="flex-grow: 1; font-size: 13px; color: var(--ink)">{{auswahlZeile}}</span>
+<sc-if value="{{hatAuswahl}}" hint-placeholder-val="{{ false }}">
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{alleUebernehmen}}">Übernehmen</button>
+<button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{verwerfenAuf}}">Verwerfen</button>
+<button type="button" class="kg-aktion kg-aktion--text" onClick="{{auswahlLeeren}}">Auswahl aufheben</button>
+</sc-if>
+</div>
+<sc-if value="{{zeigeWarum}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{alleVerwerfen}}" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding: 12px; border: 1px solid var(--line-control); border-radius: 4px; background: var(--paper-sunk)">
+<label class="label" for="warum">Warum? (optional)</label>
+<input id="warum" value="{{warum}}" onChange="{{warumTippen}}" placeholder="z. B. „Rechnungen sind keine Vorgänge“" style="font: inherit; font-size: 15px; padding: 6px 10px; border: 1px solid var(--line-control); border-radius: 2px; background: var(--paper); color: var(--ink)">
+<div class="kg-aktionen"><button type="submit" class="kg-aktion kg-aktion--sekundaer">{{verwerfenText}}</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{verwerfenAuf}}">Abbrechen</button><span style="font-size: 13px; color: var(--ink-muted)">Eine Begründung hilft mir, Ähnliches nicht wieder anzulegen.</span></div>
+</form>
+</sc-if>
+<sc-if value="{{hatKarte}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px"><x-import component-from-global-scope="Kollege.Karte" titel="{{karteTitel}}" punkte="{{kartePunkte}}" folgen="{{karteFolgen}}" link-text="{{karteLink}}" link-href="Einstellungen.dc.html" on-rueckgaengig="{{karteRueck}}"></x-import></div>
+</sc-if>
+
+<sc-for list="{{gruppen}}" as="g" hint-placeholder-count="5">
+<div class="gk">
+<input type="checkbox" aria-label="Ganze Gruppe auswählen: {{g.titel}}" checked="{{g.gewaehlt}}" onChange="{{g.waehlen}}" disabled="{{g.erledigt}}" style="width: 16px; height: 16px; margin: 0; accent-color: var(--ink)">
+<button type="button" class="gk-titel" aria-expanded="{{g.aufText}}" onClick="{{g.toggle}}"><span class="mono" style="width: 1ch">{{g.pfeil}}</span><span style="{{g.titelStil}}">{{g.titel}}</span><span class="mono">{{g.anzahl}}</span></button>
+<span class="mono" style="{{g.statusStil}}">{{g.status}}</span>
+</div>
+<sc-if value="{{g.offen}}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="3">
+<div class="na">
+<input type="checkbox" aria-label="Auswählen: {{n.titel}}" checked="{{n.gewaehlt}}" onChange="{{n.waehlen}}" disabled="{{n.gesperrt}}" style="width: 16px; height: 16px; margin: 0; accent-color: var(--ink)">
+<span style="font-size: 15px; {{n.stil}}">{{n.titel}}</span>
+<span class="kg-aktionen"><sc-if value="{{n.offen}}" hint-placeholder-val="{{ true }}"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{n.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{n.verwerfen}}">Verwerfen</button></sc-if><sc-if value="{{n.erledigt}}" hint-placeholder-val="{{ false }}"><span class="mono">{{n.status}}</span><button type="button" class="kg-aktion kg-aktion--rueckgaengig" onClick="{{n.rueck}}"><span aria-hidden="true">↶</span>Rückgängig</button></sc-if></span>
+<div class="na-meta"><x-import component-from-global-scope="Kollege.Aussage" art="belegt" quelle="{{n.quelle}}">{{n.grund}}</x-import><span class="mono">{{n.herkunft}}</span></div>
+</div>
+</sc-for>
+<sc-if value="{{g.hatMehr}}" hint-placeholder-val="{{ false }}"><div class="na" style="color: var(--ink-muted); font-size: 13px"><span></span><span>+ {{g.mehr}} weitere – mit der Gruppe oben gemeinsam bearbeiten oder über die Suche eingrenzen</span></div></sc-if>
+</sc-if>
+</sc-for>
+</div>
+</main>

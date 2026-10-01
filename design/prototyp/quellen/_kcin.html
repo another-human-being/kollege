@@ -1,0 +1,7 @@
+<div style="display: flex; flex-direction: column; gap: 8px; max-width: 816px">
+<x-import component-from-global-scope="Kollege.Eingabe" id="kc-eingabe" kontext="{{kcKontext}}" platzhalter="{{kcPlatzhalter}}" on-senden="{{kcSenden}}"></x-import>
+<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap">
+<label style="display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-muted)"><input type="checkbox" checked="{{kcPrivat}}" onChange="{{kcPrivatToggle}}"> Notiz nur für mich (privat)</label>
+<sc-if value="{{kcHatMsgs}}" hint-placeholder-val="{{ false }}"><button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Gespräch zu {{kcName}} anzeigen</button></sc-if>
+</div>
+</div>
