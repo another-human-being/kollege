@@ -7,6 +7,7 @@ import { runAction } from '@/lib/actions';
 import { teamConfig } from '@/lib/config';
 import { berlinDate } from '@/lib/time';
 import { closeDb, withSystem } from './client';
+import { runMigrations } from './migrate';
 import { areas, connections, users } from './schema';
 
 export interface SeedResult {
@@ -73,7 +74,8 @@ export async function seed(opts: { now?: Date } = {}): Promise<SeedResult> {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  seed()
-    .then((r) => console.log(`Seed: ${Object.keys(r.users).length} Personen, ${r.connections.length} Quellen`))
+  runMigrations()
+    .then(() => seed())
+    .then((r) => console.log(`Seed: ${Object.keys(r.users).length} Teammitglieder, ${r.connections.length} Quellen`))
     .finally(() => closeDb());
 }

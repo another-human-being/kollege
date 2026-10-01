@@ -1,0 +1,57 @@
+# Three containers (BAUVORLAGE §3). Settings come from .env (see .env.example).
+# Start:   docker compose up -d --build
+# Seed:    docker compose run --rm worker npm run db:seed   (then: docker compose restart worker → import)
+x-app-env: &app-env
+  DATABASE_URL: postgres://kollege:kollege@postgres:5432/kollege
+  BLOB_DIR: /data/blobs
+  TZ: Europe/Berlin
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: kollege
+      POSTGRES_PASSWORD: kollege
+      POSTGRES_DB: kollege
+      TZ: Europe/Berlin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kollege -d kollege"]
+      interval: 5s
+      retries: 20
+
+  # applies migrations on start, then runs import/sync/process jobs (pg-boss)
+  worker:
+    build: .
+    command: npm run worker
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    volumes:
+      - blobs:/data/blobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build: .
+    command: npm run start
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    volumes:
+      - blobs:/data/blobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      worker:
+        condition: service_started
+
+volumes:
+  pgdata:
+  blobs:
