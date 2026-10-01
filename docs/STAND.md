@@ -13,7 +13,7 @@
 - [ ] 7 Laufwerk
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 1 abgeschlossen (01.10.2026). Als Nächstes Stufe 2.
+**Aktuell:** Stufe 2 läuft. Alles ohne Oberfläche ist gebaut und getestet. Die Oberfläche wartet auf den neuen Design-Export (Entscheidung 10).
 
 ## Stufe 1 – erledigt
 
@@ -24,6 +24,19 @@
 - Seed aus `fixtures/config.json` (`npm run db:seed`): 3 Teammitglieder, 4 Bereiche, 8 Fixture-Quellen.
 - Eingangsweg `lib/pipeline/`: Rohspeicherung (Blob + `entries`, Upsert über `dedupe_key`), Filter, feste Zuordnung, Kandidaten, Modell `fast` (Stufe 1: Orakel, `MODEL_FAST=oracle`), Schranke, Anhänge, Import mit `review_batch`. Der Worker führt die pg-boss-Jobs `import`, `sync` und `process` aus.
 - Tests (63, `npm test`, brauchen ein lokales Postgres 16, siehe README): alle Abnahmen aus §13, alle `rls_checks` und alle `assert`-Einträge aus `expected.json`, die zu Stufe 1 gehören. Ein Test schlägt fehl, wenn `expected.json` einen Prüfschlüssel bekommt, der weder geprüft noch ausdrücklich zurückgestellt ist. `tsc --noEmit` ist sauber.
+
+## Stufe 2 – Stand
+
+Erledigt (95 Tests grün, `tsc` sauber):
+- **Aktionen:** `matter.update|set_status|assign|create_from_previous`, `review.accept|discard` (einzeln oder gesammelt, ein Rückgängig für alles), `task.update|complete|reopen|assign`, `person.update`, `org.update`, `entry.unlink|relink` (Korrekturen, Entscheidung 7), `area.update`, `instruction.update|delete`, `hint.resolve`, dazu `answerHint` (Knopf ausführen + Hinweis erledigen, ein Rückgängig).
+- **Undo kann jetzt auch Gelöschtes wiederherstellen** (Umkehrung `insert`).
+- **Abfragen `lib/views/`:** Heute (Meins/Team), Bereichsliste mit Filtern und „ungeprüft · N“, Detail (Felder, nächster Schritt, Zusagen wir/sie mit Herkunft „aus Julias Mail“, Verlauf mit Platzhaltern und Zahl der Systemschritte, Notizen, Dateien inkl. lesbarer Anhänge, Bezüge), Beratungsakte (Org), Person, Kontakte, Aufgaben, Einstellungen.
+- **Login:** Auth.js mit Sitzung und Dev-Login (nur `NODE_ENV=development`).
+
+Offen in Stufe 2:
+- Layout, Navigation und alle Seiten nach dem neuen Design-Export.
+- Schriften selbst ausliefern.
+- Abnahme von Hand. Auf Aktionsebene ist sie schon durch Tests abgedeckt.
 
 ## Entscheidungen (mit Andreas, 01.10.2026)
 
@@ -36,6 +49,9 @@
 7. **Systemschritte werden korrigiert, nicht rückgängig gemacht** (für Stufe 2): Nutzer verwenden `entry.unlink`/`relink`, `review.discard` (mit Grund), `task.update`. Diese Aktionen sind selbst umkehrbar und werden zu Korrekturbeispielen (§7.4). `undoAction` bleibt auf eigene Aktionen beschränkt.
 8. **Konfiguration:** Die Team-Domain steht in `TEAM_DOMAIN` (`.env`). Die Freemail-Liste ist die Datei `config/freemail.json` (überschreibbar per `FREEMAIL_FILE`, für die Testdaten `fixtures/freemail.json`). Die Seed-Daten (Team, Postfächer, Bereiche) bleiben in `fixtures/config.json`.
 9. **Zuständig für Vorgänge des Systems ist, wer die Quelle persönlich hat:** eigenes Postfach (bei mehreren: wer in „An“ steht), eigener Kalender (nicht die Eingeladenen), Bearbeiter der Datei. Team-Quellen bleiben ohne Zuständigen. Es gibt einen Zuständigen pro Vorgang, wechselbar per `matter.assign`/`handover`. In `expected.json` sind solaro_exist und greenbyte_first deshalb `owner: null`, passend zu m10.
+10. **Oberfläche erst mit dem neuen Design-Export.** `design/` ist der Stand vom 30.09.; Andreas liefert den aktuellen Export.
+11. **Login:** Dev-Login jetzt, Magic-Link per Mail erst, wenn der Mailversand steht (Stufe 4/5).
+12. **Schriften** (IBM Plex) liefert die App selbst aus (npm `@fontsource/*`), nicht über Google Fonts (DSGVO).
 
 ## Befunde aus dem Bau
 
@@ -62,6 +78,22 @@
 - **Docker** ist hier nicht gelaufen, weil die Umgebung keinen Daemon hat. `docker compose config` ist gültig. Seed, Worker (Import, 8 Zeitpläne) und App (`next start`) habe ich lokal mit denselben Befehlen gefahren.
 - **`npm audit`** meldet 4 Fälle „moderate“ in `drizzle-kit` (esbuild-Dev-Server). Das betrifft nur die Entwicklung.
 
+### Befunde Stufe 2
+
+- **RLS lässt UPDATE/DELETE auf lesbare, aber nicht änderbare Zeilen still durchlaufen.** Ein Beispiel ist der Link zu einer Mail, die man nicht sehen darf: Das Ergebnis sind 0 Zeilen, aber kein Fehler. Ein Test hat das gefunden. Die Aktionen prüfen jetzt die betroffenen Zeilen und lehnen sonst ab.
+- **Berechnete Zustände** müssen alles zählen, was das Team hat, nicht nur das, was der Fragende lesen darf. Sonst gälte eine Mail für Julia als unbeantwortet, obwohl Andreas aus seinem Postfach geantwortet hat. Dafür gibt es `SECURITY DEFINER`-Funktionen (`waiting_on_us`, `matter_last_activity`, `org_last_activity`, `entry_owner_names`, Migration `0002_views.sql`). Sie liefern nur IDs, Zeitpunkte und Namen, keine Inhalte.
+- **„KI-Vermutung“ bei Feldern:** Ist ein Vorgang vom System angelegt und ungeprüft, gelten alle seine Felder als Vermutung, bis er übernommen wird. Eine Herkunft pro Feld nach der Übernahme (E32) ist nicht gespeichert. Das System setzt derzeit keine Felder an bestehenden Vorgängen, das Schema §7.2.4 sieht es nicht vor.
+- **„hängt“** nutzt N = 21 Tage fest. N aus Anweisungen des Bereichs kommt mit Stufe 3.
+- **„Heute“ zeigt Serientermine nur an ihrem ersten Tag** (e6, RRULE). Das Auflösen von Serien gehört zu Stufe 6.
+- **Gründungsteams-Liste:** Ob ein Team „offen“ oder „erledigt“ ist, wird aus seinen Themen abgeleitet: offen, solange ein Thema offen ist oder es noch keins gibt.
+- **E23 („alles, was der Chat kann, geht auch von Hand“) widerspricht §11** („keine eigenen Felder für … neue Anweisung“). Es gilt die Bauvorlage: Anweisungen entstehen per Chat (Stufe 3), die Einstellungen können sie ändern und löschen.
+- **Auth.js v5** ist weiterhin Beta. Die Version ist exakt gepinnt (`next-auth@5.0.0-beta.32`). Der Magic-Link wird Tabellen für Verifizierungs-Tokens brauchen, die nicht in §4 stehen.
+- **`next dev` schreibt** in CLAUDE.md einen eigenen Regelblock, sobald es einen KI-Agenten erkennt. Ich habe ihn zurückgenommen und nicht committet; für Rauchtests nutze ich `next start`.
+- **Noch nicht gebaut**, weil es zu späteren Stufen gehört bzw. nicht in der Abnahme steht:
+  - `matter.handover` (der Hinweis gehört zu Stufe 8),
+  - `person.merge` und `org.merge`,
+  - Notizen anlegen (läuft per Chat, Stufe 3).
+
 ## Offene Fragen an Andreas
 
 - Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
@@ -72,6 +104,8 @@
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
 - e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
+- „Aus Vorjahr“ (`matter.create_from_previous`): Übernommen werden jetzt Bereich, Org und der Verweis auf den Vorgänger, keine Feldwerte. Welche Felder sollen mitkommen (z. B. Ort, Plätze ja, Datum und Anmeldungen nein)?
+- Zusammenführen von Personen und Organisationen (Kontakte): noch in Stufe 2 oder später?
 - Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (ab Stufe 3)
 
 ## Verbrauch
