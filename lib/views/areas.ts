@@ -3,7 +3,7 @@
 // their topics are matters with org_id.
 import { sql } from 'drizzle-orm';
 import { withUser, type Tx } from '@/lib/db/client';
-import { timeline, type EntryRef, type TimelineItem } from './timeline';
+import { timeline, type EntryRef, type NoteRef, type TimelineItem } from './timeline';
 
 /** "hängt" after N days without entry (§8.2). TODO stage 3: N from the area's instruction. */
 export const STALE_DAYS = 21;
@@ -154,6 +154,8 @@ export interface MatterDetail {
   status: 'open' | 'done';
   phase: string | null;
   owner: { id: string; name: string } | null;
+  /** pending handover (E45) */
+  handoverTo: { id: string; name: string } | null;
   fields: Record<string, unknown>;
   /** field keys whose value the system set and nobody confirmed yet ("KI-Vermutung") */
   estimated: string[];
@@ -167,7 +169,7 @@ export interface MatterDetail {
   commitments: { ours: Commitment[]; theirs: Commitment[] };
   timeline: TimelineItem[];
   systemSteps: number;
-  notes: EntryRef[];
+  notes: NoteRef[];
   files: EntryRef[];
   references: { type: 'org' | 'matter' | 'person'; id: string; title: string; relation: string }[];
 }
@@ -220,9 +222,10 @@ export async function commitmentsOf(tx: Tx, where: 'matter' | 'org', id: string,
 export async function matterDetail(userId: string, matterId: string, now = new Date()): Promise<MatterDetail | null> {
   return withUser(userId, async (tx) => {
     const r = await tx.execute<Record<string, unknown>>(sql`
-      SELECT m.*, a.key AS area_key, u.name AS owner_name, act.last_at
+      SELECT m.*, a.key AS area_key, u.name AS owner_name, h.name AS handover_name, act.last_at
       FROM matters m JOIN areas a ON a.id = m.area_id
       LEFT JOIN users u ON u.id = m.owner_user_id
+      LEFT JOIN users h ON h.id = m.handover_to
       JOIN matter_last_activity() act ON act.matter_id = m.id
       WHERE m.id = ${matterId}`);
     const m = r.rows[0];
@@ -255,6 +258,7 @@ export async function matterDetail(userId: string, matterId: string, now = new D
       status,
       phase: (m.phase as string) ?? null,
       owner: m.owner_user_id ? { id: m.owner_user_id as string, name: m.owner_name as string } : null,
+      handoverTo: m.handover_to ? { id: m.handover_to as string, name: m.handover_name as string } : null,
       fields,
       // values set by the system count as KI-Vermutung until the matter is taken over (E5, E32)
       estimated: unreviewed && m.created_by_type === 'system' ? Object.keys(fields) : [],

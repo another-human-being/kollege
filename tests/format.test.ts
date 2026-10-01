@@ -26,3 +26,15 @@ describe('dates in the interface', () => {
     expect(monat('2026-09-21T10:12:00+02:00')).toBe('September 2026');
   });
 });
+
+import { payloadFor } from '@/lib/ziel';
+
+describe('field changes as data', () => {
+  it('puts the value at its path, converts numbers, empty means null', () => {
+    expect(payloadFor({ type: 'matter.update', base: { id: 'm' }, key: 'fields.capacity', als: 'zahl' }, '60')).toEqual({ id: 'm', fields: { capacity: 60 } });
+    expect(payloadFor({ type: 'matter.update', base: { id: 'm' }, key: 'title' }, 'Neu')).toEqual({ id: 'm', title: 'Neu' });
+    const base = { id: 'o', fields: { next_step: 'alt', x: 1 } };
+    expect(payloadFor({ type: 'org.update', base, key: 'fields.next_step' }, '')).toEqual({ id: 'o', fields: { next_step: null, x: 1 } });
+    expect(base.fields.next_step).toBe('alt'); // base untouched
+  });
+});

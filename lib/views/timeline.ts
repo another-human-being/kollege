@@ -17,6 +17,18 @@ export type TimelineItem =
     }
   | { type: 'stub'; kind: string; at: string; owners: string[] };
 
+export interface NoteRef {
+  id: string;
+  at: string;
+  title: string | null;
+  body: string;
+  author: string | null;
+  mine: boolean;
+  private: boolean;
+  /** conversation (E50): kind and participants */
+  conversation: { art: string; mit: string } | null;
+}
+
 export interface EntryRef {
   id: string;
   kind: string;
@@ -31,7 +43,7 @@ const iso = (v: unknown) => new Date(v as string).toISOString();
 export async function timeline(
   tx: Tx,
   targets: { type: 'matter' | 'person' | 'org'; id: string }[],
-): Promise<{ items: TimelineItem[]; notes: EntryRef[]; files: EntryRef[]; systemSteps: number }> {
+): Promise<{ items: TimelineItem[]; notes: NoteRef[]; files: EntryRef[]; systemSteps: number }> {
   if (!targets.length) return { items: [], notes: [], files: [], systemSteps: 0 };
   const match: SQL = sql.join(
     targets.map((t) => sql`(l.target_type = ${t.type} AND l.target_id = ${t.id})`),
@@ -39,7 +51,8 @@ export async function timeline(
   );
 
   const visible = await tx.execute<Record<string, unknown>>(sql`
-    SELECT DISTINCT e.id, e.kind, e.occurred_at, e.title, e.summary,
+    SELECT DISTINCT e.id, e.kind, e.occurred_at, e.title, e.summary, e.body_text,
+           e.meta->'conversation' AS conversation, e.author_user_id = app_user_id() AS mine,
            (e.visibility = 'restricted' AND cardinality(e.visible_to) = 1) AS private,
            coalesce(u.name, p.name, e.meta->'from'->>'name') AS author
     FROM links l JOIN entries e ON e.id = l.entry_id
@@ -86,7 +99,19 @@ export async function timeline(
 
   return {
     items: [...items, ...stubs].sort((a, b) => a.at.localeCompare(b.at)),
-    notes: visible.rows.filter((e) => e.kind === 'note').map(ref),
+    notes: visible.rows
+      .filter((e) => e.kind === 'note')
+      .map((e) => ({
+        id: e.id as string,
+        at: iso(e.occurred_at),
+        title: (e.title as string) ?? null,
+        body: (e.body_text as string) ?? '',
+        author: (e.author as string) ?? null,
+        mine: e.mine === true,
+        private: e.private === true,
+        conversation: (e.conversation as NoteRef['conversation']) ?? null,
+      }))
+      .sort((a, b) => b.at.localeCompare(a.at)),
     files: [...visible.rows.filter((e) => e.kind === 'file').map(ref), ...attachments.rows.map(ref)],
     systemSteps: steps.rows[0]!.n,
   };

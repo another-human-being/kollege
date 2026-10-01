@@ -3,7 +3,7 @@
 import { sql } from 'drizzle-orm';
 import { withUser } from '@/lib/db/client';
 import { commitmentsOf, type Commitment, type TaskStatus } from './areas';
-import { timeline, type EntryRef, type TimelineItem } from './timeline';
+import { timeline, type EntryRef, type NoteRef, type TimelineItem } from './timeline';
 
 export interface ContactRow {
   type: 'person' | 'org';
@@ -100,25 +100,31 @@ export interface OrgDetail {
   phase: string | null;
   fields: Record<string, unknown>;
   owner: { id: string; name: string } | null;
+  handoverTo: { id: string; name: string } | null;
   unreviewed: boolean;
-  people: { id: string; name: string; emails: string[] }[];
+  /** newest conversation or entry ("letzter Kontakt", E50) */
+  lastContact: string | null;
+  people: { id: string; name: string; role: string; emails: string[] }[];
   /** topics (matters with this org) */
   matters: { id: string; title: string; area: string; status: string; unreviewed: boolean }[];
   commitments: { ours: Commitment[]; theirs: Commitment[] };
   timeline: TimelineItem[];
   systemSteps: number;
-  notes: EntryRef[];
+  notes: NoteRef[];
   files: EntryRef[];
 }
 
 export async function orgDetail(userId: string, orgId: string, now = new Date()): Promise<OrgDetail | null> {
   return withUser(userId, async (tx) => {
     const r = await tx.execute<Record<string, unknown>>(sql`
-      SELECT o.*, u.name AS owner_name FROM orgs o LEFT JOIN users u ON u.id = o.owner_user_id WHERE o.id = ${orgId}`);
+      SELECT o.*, u.name AS owner_name, h.name AS handover_name, act.last_at FROM orgs o
+      LEFT JOIN users u ON u.id = o.owner_user_id LEFT JOIN users h ON h.id = o.handover_to
+      JOIN org_last_activity() act ON act.org_id = o.id
+      WHERE o.id = ${orgId}`);
     const o = r.rows[0];
     if (!o) return null;
     const ppl = await tx.execute<Record<string, unknown>>(sql`
-      SELECT p.id, p.name, ARRAY(SELECT pe.email FROM person_emails pe WHERE pe.person_id = p.id ORDER BY pe.email) AS emails
+      SELECT p.id, p.name, p.role, ARRAY(SELECT pe.email FROM person_emails pe WHERE pe.person_id = p.id ORDER BY pe.email) AS emails
       FROM people p WHERE p.org_id = ${orgId} AND p.review_state <> 'discarded' AND p.merged_into_id IS NULL ORDER BY p.name`);
     const matters = await tx.execute<Record<string, unknown>>(sql`
       SELECT m.id, m.title, a.name_singular AS area, m.status, m.review_state = 'unreviewed' AS unreviewed
@@ -137,7 +143,9 @@ export async function orgDetail(userId: string, orgId: string, now = new Date())
       phase: (o.phase as string) ?? null,
       fields: o.fields as Record<string, unknown>,
       owner: o.owner_user_id ? { id: o.owner_user_id as string, name: o.owner_name as string } : null,
+      handoverTo: o.handover_to ? { id: o.handover_to as string, name: o.handover_name as string } : null,
       unreviewed: o.review_state === 'unreviewed',
+      lastContact: o.last_at ? new Date(o.last_at as string).toISOString() : null,
       people: ppl.rows as unknown as OrgDetail['people'],
       matters: matters.rows as unknown as OrgDetail['matters'],
       commitments: await commitmentsOf(tx, 'org', orgId, now),

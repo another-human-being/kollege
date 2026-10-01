@@ -13,5 +13,5 @@ export default async function MatterLink({ params }: { params: Promise<{ id: str
   );
   const m = r.rows[0];
   if (!m) notFound();
-  redirect(m.matter_kind === 'org_based' && m.org_id ? `/b/${m.key}?id=${m.org_id}` : `/b/${m.key}?id=${id}`);
+  redirect(m.matter_kind === 'org_based' && m.org_id ? `/b/${m.key}?id=${m.org_id}&thema=${id}` : `/b/${m.key}?id=${id}`);
 }
