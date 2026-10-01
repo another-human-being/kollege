@@ -55,6 +55,16 @@ Offen in Stufe 2:
 13. **„Aus Vorjahr“ übernimmt Ort und Plätze**, nicht Datum und Anmeldungen. Umgesetzt als Feld-Eigenschaft `carry_over` in der Bereichskonfiguration; derzeit nur bei Events gesetzt, in den Einstellungen änderbar.
 14. **Personen und Organisationen zusammenführen** kommt später, nicht in Stufe 2.
 
+Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas, 01.10.2026):
+
+15. **Design E42–E50 werden übernommen.** Keine verletzt eine harte Regel, alle schließen Lücken, die echte Fehlerfälle sind. Im Einzelnen:
+    - **Aufgaben** bekommen den Status „In Arbeit“ (nur `ours`), über ein eigenes Enum `task_status`. „Wartet“ bleibt aus der Richtung berechnet (E44).
+    - **Übergabe wartet auf Annahme** (E45): Spalte `matters.handover_to`. Bis zur Annahme bleibt die bisherige Person zuständig, Zurückziehen ist möglich. Zuständigkeit ist kein frei wählbares Feld; frei Übernehmen geht nur bei „niemand zuständig“.
+    - **Gründungsteams** bekommen die Phase „ruht“ (E50).
+    - **Mail-Versandverzögerung** (E43) kommt in Stufe 5, **Teilnahme je Person** (E48) in Stufe 6.
+16. **Heute nach E39** (ohne Umschalter Meins/Team, darunter „Im Team“: „Neu, niemand zuständig“ und „Hängt bei anderen“). Das widerspricht §8.1 nur in der Darstellung, die Abfragen bleiben dieselben. Für Darstellung ist das Design maßgeblich.
+17. **Seitenleiste nur mit Navigation und „+ Neuer Chat“** (E40). Punkte späterer Stufen erscheinen erst, wenn sie gebaut sind; es gibt keine toten Links.
+
 ## Befunde aus dem Bau
 
 - **§7.2.1 weicht ab** (Entscheidung 5). Die Bauvorlage sollte „Rein intern (nur Mails)“ sagen.
@@ -98,12 +108,6 @@ Offen in Stufe 2:
 
 ## Offene Fragen an Andreas
 
-- Design-Stand 01.10. (`design/ENTSCHEIDUNGEN.md` E42–E50) geht an einigen Stellen über die Bauvorlage hinaus. Übernehmen in die Bauvorlage? (bis Stufe 2)
-  - Aufgaben: Status „In Arbeit“ für `ours` (Bauvorlage: `open|done`); „wartet“ bleibt berechnet aus `theirs` (E44)
-  - Übergabe wartet auf Annahme, bisherige Person bleibt bis dahin zuständig (E45; passt zu Hinweis `handover`)
-  - Mail: Versand 10 s verzögert und so lange zurückholbar; angefangene Mails automatisch als Entwurf (E43)
-  - Kalender: Teilnahme je Person, „Änderung nicht verschickt“ bis „Änderung senden“, Termine anderer nur lesbar (E48; bis Stufe 6)
-  - Gründungsteams: Phase „ruht“; Gespräche mit Datum, Art, Teilnehmenden (E50)
 - Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
 - EU-Modell für den Betrieb (parallel zum Test)
