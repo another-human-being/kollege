@@ -2,7 +2,7 @@
 // Raw storage, visibility of known mails, cursor and processing state are
 // infrastructure writes outside runAction (decision 2026-10-01, STAND.md):
 // they record what arrived, they do not decide anything.
-import { eq, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { fixtureConnector } from '@/lib/connectors/fixture';
 import type { Connection, Connector, RawItem, SyncError } from '@/lib/connectors/types';
 import { withSystem, type Tx } from '@/lib/db/client';
@@ -68,13 +68,19 @@ export async function syncConnection(connectionId: string, opts: { now?: Date } 
 function visibilityOf(conn: Connection) {
   // a team source (StartHub mailbox, shared drive) is visible to all (§5)
   return conn.user_id === null
-    ? { visibility: 'team' as const, visible_to: [] }
-    : { visibility: 'restricted' as const, visible_to: [conn.user_id] };
+    ? { visibility: 'team' as const, visible_to: [] as string[] }
+    : { visibility: 'restricted' as const, visible_to: [conn.user_id] as string[] };
 }
 
 async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: boolean) {
   const blob = await putBlob(item.raw);
   const vis = visibilityOf(conn);
+  if (item.kind === 'event' && vis.visibility === 'restricted') {
+    // invited team members see the event too (decision 2026-10-01)
+    const invited = [item.meta.organizer as string, ...((item.meta.attendees as string[]) ?? [])];
+    const team = await tx.select({ id: users.id }).from(users).where(inArray(users.email, invited));
+    vis.visible_to = [...new Set([...vis.visible_to, ...team.map((u) => u.id)])].sort();
+  }
 
   const attachments = [];
   for (const a of item.attachments) {

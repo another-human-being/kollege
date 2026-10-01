@@ -55,6 +55,18 @@ describe('sync', () => {
     expect(m02.visibility).toBe('team');
   });
 
+  it('an event is visible to the calendar owner and invited team members', async () => {
+    const rows = await withSystem((tx) =>
+      tx.select().from(entries).where(sql`${entries.meta}->>'fixture_key' IN ('e1', 'e5')`),
+    );
+    const viewers = (k: string) =>
+      [...rows.find((r) => (r.meta as { fixture_key: string }).fixture_key === k)!.visible_to].sort();
+    // e5: Julia's calendar, Andreas and Mehmet invited
+    expect(viewers('e5')).toEqual([s.users.andreas, s.users.julia, s.users.mehmet].sort());
+    // e1: Andreas' calendar, only external guests
+    expect(viewers('e1')).toEqual([s.users.andreas]);
+  });
+
   it('threads replies onto the first mail', async () => {
     const rows = await withSystem((tx) =>
       tx.select().from(entries).where(sql`${entries.meta}->>'fixture_key' IN ('m01', 'm02', 'm03', 'm04')`),

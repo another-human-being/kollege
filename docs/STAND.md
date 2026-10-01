@@ -31,6 +31,7 @@
 2. **Klärungsknöpfe** leitet die Pipeline ab, das Schema bleibt. Beispiel: Absender unbekannt + genau ein Kandidat mit gleichem Vornamen → „Ja, das ist X“ (`person.add_email`), dazu immer „Nein/Verwerfen“.
 3. **`actions` sieht die App-Rolle nur für eigene Aktionen.** `reason` kann aus eingeschränkten Mails zitieren.
 4. **app-Container** in Stufe 1 nur als Gerüst.
+6. **Termine sehen Kalenderbesitzer, Organisator und eingeladene Teammitglieder** (`visible_to`).
 5. **Filter „rein intern“ gilt nur für Mails.** Interne Termine bewertet das Modell (e3 → `relevant:false`, Grund `irrelevant`). `expected.json` ist entsprechend angepasst. Grund: Bei Terminen sind die Eingeladenen nicht das Publikum (Gründungsnacht).
 
 ## Befunde aus dem Bau
@@ -56,7 +57,6 @@
   - Verschlüsselung von `connections.config` mit `APP_SECRET`: Fixture-Quellen haben keine Geheimnisse, das kommt mit Stufe 4.
   - Tabelle `model_calls` (§9): kommt mit dem echten Modell.
   - Ausschluss-Anweisungen im Filter: Anweisungen gibt es erst ab Stufe 3.
-- **Termine** sieht nur, wem der Kalender gehört. Das ist die restriktive Wahl, siehe Fragen.
 - **Docker** ist hier nicht gelaufen, weil die Umgebung keinen Daemon hat. `docker compose config` ist gültig. Seed, Worker (Import, 8 Zeitpläne) und App (`next start`) habe ich lokal mit denselben Befehlen gefahren.
 - **`npm audit`** meldet 4 Fälle „moderate“ in `drizzle-kit` (esbuild-Dev-Server). Das betrifft nur die Entwicklung.
 
@@ -65,15 +65,14 @@
 - Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
 - EU-Modell für den Betrieb (parallel zum Test)
-- Wo liegt die Team-Konfiguration (Team-Domain, Freemail-Liste) im Betrieb? Stufe 1 liest `fixtures/config.json`.
-- Termine: nur für den Kalenderbesitzer sichtbar (jetzt) oder auch für eingeladene Teammitglieder?
+- Team-Domain und Freemail-Liste (Backend, für den Filter und die feste Zuordnung): Wo liegen sie im Betrieb? Vorschlag: `TEAM_DOMAIN` in `.env`, die Freemail-Liste als Datei im Repo. Stufe 1 liest `fixtures/config.json`.
 - Klärungshinweis zu einer eingeschränkten Mail mit mehreren Berechtigten: Wer bekommt ihn? Jetzt geht er an die erste Person in `visible_to`.
-- Zuständige für Vorgänge, die das System anlegt: leer lassen (jetzt, wie m10) oder Besitzer des Postfachs?
+- Zuständige: Andreas hat entschieden „zuständig bin ich, später können weitere dazukommen“. Zu klären: (a) gilt das für alle vom System angelegten Vorgänge oder nur für Gründungsteams? (b) „weitere zusätzlich“ braucht mehrere Zuständige pro Vorgang, das Schema §4.6 hat nur `owner_user_id`. (c) Fest „Andreas“ oder „Admin“ bzw. ein konfigurierter Standard-Zuständiger? m10 erwartet derzeit „niemand zuständig“.
 - Rolle neuer Personen (founder/partner/…) aus der Rolle der Org ableiten?
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
 - e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
-- Rückgängig von Systemschritten durch Nutzer (Stufe 2): über eine geprüfte `SECURITY DEFINER`-Funktion?
+- Rückgängig von Systemschritten (Stufe 2): Vorschlag ist, statt Undo Korrekturaktionen zu verwenden (`entry.unlink`/`relink`, `review.discard`, `task.update`). Diese sind selbst umkehrbar und werden zu Korrekturbeispielen (§7.4). Wartet auf Bestätigung.
 - Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (ab Stufe 3)
 
 ## Verbrauch
