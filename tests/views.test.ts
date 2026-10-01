@@ -7,7 +7,7 @@ import { areaList, matterDetail } from '@/lib/views/areas';
 import { contactList, orgDetail, personDetail } from '@/lib/views/contacts';
 import { settings } from '@/lib/views/settings';
 import { taskList } from '@/lib/views/tasks';
-import { today } from '@/lib/views/today';
+import { today, todayPage } from '@/lib/views/today';
 import { matters, orgs, people } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { importFixtures, NOW } from './helpers';
@@ -196,5 +196,30 @@ describe('Kontakte, Aufgaben, Einstellungen', () => {
       'Kalender Andreas', 'Netzlaufwerk', 'Postfach andreas@gruendung.uni-augsburg.example', 'Postfach starthub@gruendung.uni-augsburg.example',
     ]);
     expect(s.instructions).toEqual([]);
+  });
+});
+
+describe('Heute nach E39', () => {
+  it('Andreas: own sections, the team part only with unowned and stuck items', async () => {
+    const p = await todayPage(fx.users.andreas!, NOW);
+    expect(p.clarify).toHaveLength(2);
+    expect(p.today.map((i) => i.title)).toEqual([
+      'Raum mit Beamer für Sitzung 3 buchen (40 Personen)', 'Feedback zum Finanzplan an Tom Kraus', 'Erstberatung Greenbyte',
+    ]);
+    expect(p.review.map((h) => h.title)).toEqual(['20 ungeprüft – prüfen']);
+    // StartHub mailbox: nobody responsible
+    expect(p.team.unowned.map((m) => m.title).sort()).toEqual(['EXIST-Antrag', 'Erstberatung']);
+    // Julia's Gründungsnacht 2025: last entry 28.11.2025
+    expect(p.team.stuckAtOthers.map((m) => [m.title, m.owner])).toEqual([['Gründungsnacht 2025', 'Julia']]);
+  });
+
+  it('Julia: her stale event under "Hängt"; the area filter narrows every section', async () => {
+    const p = await todayPage(fx.users.julia!, NOW);
+    expect(p.stale.map((m) => m.title)).toEqual(['Gründungsnacht 2025']);
+    expect(p.stale[0]!.reason).toMatch(/^seit \d+ Tagen nichts passiert$/);
+    const ev = await todayPage(fx.users.julia!, NOW, 'events');
+    expect(ev.waitingOnUs).toEqual([]); // m15 (founding teams) and m09 (teaching) are filtered out
+    expect(ev.weWaitFor.map((w) => w.title)).toEqual(['Rückmeldung zur Jury-Anfrage', 'Zusage zum Pitch-Abend']);
+    expect(ev.team.unowned).toEqual([]);
   });
 });
