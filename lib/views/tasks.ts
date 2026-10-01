@@ -1,9 +1,11 @@
 // Aufgaben: ours and theirs (Zusagen), filterable. Private tasks only for their owner (RLS).
 import { sql } from 'drizzle-orm';
 import { withUser } from '@/lib/db/client';
+import type { TaskStatus } from './areas';
 
 export interface TaskFilter {
   direction?: 'ours' | 'theirs';
+  /** open = not done (incl. "In Arbeit") */
   status?: 'open' | 'done';
   /** mine = ours owned by me, or theirs in matters I am responsible for */
   scope?: 'mine' | 'team';
@@ -13,7 +15,7 @@ export interface TaskRow {
   id: string;
   title: string;
   direction: 'ours' | 'theirs';
-  status: 'open' | 'done';
+  status: TaskStatus;
   owner: string | null;
   due_at: string | null;
   overdue: boolean;
@@ -34,7 +36,7 @@ export async function taskList(userId: string, filter: TaskFilter = {}, now = ne
       LEFT JOIN orgs o ON o.id = t.org_id
       LEFT JOIN matters m ON m.id = t.matter_id
       LEFT JOIN areas a ON a.id = m.area_id
-      WHERE t.status = ${status}
+      WHERE (CASE WHEN t.status = 'done' THEN 'done' ELSE 'open' END) = ${status}
         AND (${filter.direction ?? null}::task_direction IS NULL OR t.direction = ${filter.direction ?? null}::task_direction)
         AND (${filter.scope !== 'mine'}
              OR (t.direction = 'ours' AND t.owner_user_id = app_user_id())
@@ -44,10 +46,10 @@ export async function taskList(userId: string, filter: TaskFilter = {}, now = ne
       id: t.id as string,
       title: t.title as string,
       direction: t.direction as 'ours' | 'theirs',
-      status: t.status as 'open' | 'done',
+      status: t.status as TaskStatus,
       owner: (t.owner as string) ?? null,
       due_at: t.due_at ? new Date(t.due_at as string).toISOString() : null,
-      overdue: t.status === 'open' && t.due_at !== null && new Date(t.due_at as string) < now,
+      overdue: t.status !== 'done' && t.due_at !== null && new Date(t.due_at as string) < now,
       private: t.private === true,
       matter: t.matter_id ? { id: t.matter_id as string, title: t.matter_title as string, area: t.area as string } : null,
     }));

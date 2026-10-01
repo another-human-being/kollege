@@ -15,11 +15,11 @@
       "key": "founding_teams", "name_singular": "Gründungsteam", "name_plural": "Gründungsteams", "matter_kind": "org_based",
       "description": "Beratung und Betreuung von Gründungsteams und Gründungsinteressierten: Erstberatungen, Förderanträge (z. B. EXIST), Finanzpläne, Pitchdecks, Folgetermine.",
       "fields": [
-        { "key": "phase", "label": "Phase", "type": "select", "options": ["Idee", "Vorgründung", "gegründet"] },
+        { "key": "phase", "label": "Phase", "type": "select", "options": ["Idee", "Vorgründung", "gegründet", "ruht"] },
         { "key": "owner", "label": "betreut von", "type": "person" },
         { "key": "next_step", "label": "nächster Schritt", "type": "text" }
       ],
-      "phases": ["Idee", "Vorgründung", "gegründet"],
+      "phases": ["Idee", "Vorgründung", "gegründet", "ruht"],
       "actions": ["new"]
     },
     {

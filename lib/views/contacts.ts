@@ -2,7 +2,7 @@
 // also the "Beratungsakte" of the founding teams area (E30): its topics, commitments, history.
 import { sql } from 'drizzle-orm';
 import { withUser } from '@/lib/db/client';
-import { commitmentsOf, type Commitment } from './areas';
+import { commitmentsOf, type Commitment, type TaskStatus } from './areas';
 import { timeline, type EntryRef, type TimelineItem } from './timeline';
 
 export interface ContactRow {
@@ -81,8 +81,8 @@ export async function personDetail(userId: string, personId: string, now = new D
         title: t.title as string,
         owner: p.name as string,
         due_at: t.due_at ? new Date(t.due_at as string).toISOString() : null,
-        status: t.status as 'open' | 'done',
-        overdue: t.status === 'open' && t.due_at !== null && new Date(t.due_at as string) < now,
+        status: t.status as TaskStatus,
+        overdue: t.status !== 'done' && t.due_at !== null && new Date(t.due_at as string) < now,
         source: null,
       })),
       timeline: tl.items,

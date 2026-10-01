@@ -69,6 +69,20 @@ export const taskComplete = defineAction({
   },
 });
 
+/** "In Arbeit" – only for what we owe (E44) */
+export const taskStart = defineAction({
+  type: 'task.start',
+  schema: z.object({ id: z.uuid() }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { id }) {
+    const [t] = await tx.select({ direction: tasks.direction }).from(tasks).where(eq(tasks.id, id));
+    if (!t) throw new ActionError(`task ${id} not found`);
+    if (t.direction !== 'ours') throw new ActionError('only our own tasks can be "in progress"');
+    return { result: { id }, inverse: [await updateWithInverse(tx, tasks, 'tasks', id, { status: 'in_progress', done_at: null })] };
+  },
+});
+
 export const taskReopen = defineAction({
   type: 'task.reopen',
   schema: z.object({ id: z.uuid() }),

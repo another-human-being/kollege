@@ -81,8 +81,8 @@ export async function areaList(
                       OR NOT EXISTS (SELECT 1 FROM matters m WHERE m.org_id = o.id AND m.review_state <> 'discarded')
                     THEN 'open' ELSE 'done' END AS status,
                EXISTS (SELECT 1 FROM matters m WHERE m.org_id = o.id AND m.status = 'open'
-                         AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status = 'open' AND t.direction = 'ours')
-                         AND EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status = 'open' AND t.direction = 'theirs')) AS waiting
+                         AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status <> 'done' AND t.direction = 'ours')
+                         AND EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status <> 'done' AND t.direction = 'theirs')) AS waiting
         FROM orgs o
         LEFT JOIN users u ON u.id = o.owner_user_id
         JOIN org_last_activity() act ON act.org_id = o.id
@@ -109,8 +109,8 @@ export async function areaList(
       SELECT m.id, m.title, m.phase, m.owner_user_id AS owner_id, u.name AS owner, m.status, m.fields,
              m.review_state = 'unreviewed' AS unreviewed, act.last_at,
              (m.status = 'open'
-               AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status = 'open' AND t.direction = 'ours')
-               AND EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status = 'open' AND t.direction = 'theirs')) AS waiting
+               AND NOT EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status <> 'done' AND t.direction = 'ours')
+               AND EXISTS (SELECT 1 FROM tasks t WHERE t.matter_id = m.id AND t.status <> 'done' AND t.direction = 'theirs')) AS waiting
       FROM matters m
       JOIN areas a ON a.id = m.area_id
       LEFT JOIN users u ON u.id = m.owner_user_id
@@ -172,12 +172,14 @@ export interface MatterDetail {
   references: { type: 'org' | 'matter' | 'person'; id: string; title: string; relation: string }[];
 }
 
+export type TaskStatus = 'open' | 'in_progress' | 'done';
+
 export interface Commitment {
   id: string;
   title: string;
   owner: string | null;
   due_at: string | null;
-  status: 'open' | 'done';
+  status: TaskStatus;
   overdue: boolean;
   /** placeholder text when the source entry is not readable, e.g. "aus Julias Mail" (E13) */
   source: { entry_id: string; readable: boolean; owners: string[] } | null;
@@ -202,8 +204,8 @@ export async function commitmentsOf(tx: Tx, where: 'matter' | 'org', id: string,
       title: t.title as string,
       owner: (t.owner as string) ?? null,
       due_at: t.due_at ? iso(t.due_at) : null,
-      status: t.status as 'open' | 'done',
-      overdue: t.status === 'open' && t.due_at !== null && new Date(t.due_at as string) < now,
+      status: t.status as TaskStatus,
+      overdue: t.status !== 'done' && t.due_at !== null && new Date(t.due_at as string) < now,
       source: t.source_entry_id
         ? { entry_id: t.source_entry_id as string, readable: t.readable === true, owners: (t.owners as string[]) ?? [] }
         : null,
@@ -241,7 +243,7 @@ export async function matterDetail(userId: string, matterId: string, now = new D
           WHERE lp.target_type = 'person' AND lm.target_type = 'matter' AND lm.target_id = ${matterId}
           UNION SELECT t.owner_person_id FROM tasks t WHERE t.matter_id = ${matterId})`);
 
-    const open = commitments.ours.filter((c) => c.status === 'open');
+    const open = commitments.ours.filter((c) => c.status !== 'done');
     const next = open.find((c) => c.due_at) ?? open[0] ?? null;
     const status = m.status as 'open' | 'done';
     const fields = m.fields as Record<string, unknown>;
@@ -257,7 +259,7 @@ export async function matterDetail(userId: string, matterId: string, now = new D
       // values set by the system count as KI-Vermutung until the matter is taken over (E5, E32)
       estimated: unreviewed && m.created_by_type === 'system' ? Object.keys(fields) : [],
       unreviewed,
-      waiting: status === 'open' && open.length === 0 && commitments.theirs.some((c) => c.status === 'open'),
+      waiting: status === 'open' && open.length === 0 && commitments.theirs.some((c) => c.status !== 'done'),
       stale: status === 'open' && new Date(m.last_at as string) < new Date(now.getTime() - STALE_DAYS * 86_400_000),
       date_start: m.date_start ? iso(m.date_start) : null,
       date_end: m.date_end ? iso(m.date_end) : null,

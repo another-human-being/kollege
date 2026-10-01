@@ -56,7 +56,7 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
     const due = await tx.execute<Record<string, unknown>>(sql`
       SELECT t.id, t.title, t.due_at, t.matter_id, t.source_entry_id AS entry_id, m.title AS matter_title, ${AREA_OF_MATTER} AS area
       FROM tasks t LEFT JOIN matters m ON m.id = t.matter_id
-      WHERE t.direction = 'ours' AND t.status = 'open' AND t.due_at < ${endOfDay}
+      WHERE t.direction = 'ours' AND t.status <> 'done' AND t.due_at < ${endOfDay}
         AND (${!mine} OR t.owner_user_id = app_user_id())
       ORDER BY t.due_at`);
 
@@ -76,7 +76,7 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
       LEFT JOIN matters m ON m.id = t.matter_id
       LEFT JOIN people p ON p.id = t.owner_person_id
       LEFT JOIN orgs o ON o.id = t.org_id
-      WHERE t.direction = 'theirs' AND t.status = 'open'
+      WHERE t.direction = 'theirs' AND t.status <> 'done'
         AND (${!mine} OR m.owner_user_id = app_user_id() OR o.owner_user_id = app_user_id())
       ORDER BY t.due_at NULLS LAST`);
 

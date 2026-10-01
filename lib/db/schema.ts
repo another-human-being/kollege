@@ -34,6 +34,8 @@ export const orgRole = pgEnum('org_role', ['founding_team', 'partner', 'universi
 export const personRole = pgEnum('person_role', ['founder', 'mentor', 'partner', 'speaker', 'university', 'other']);
 export const emailSource = pgEnum('email_source', ['mail', 'calendar', 'manual']);
 export const openDone = pgEnum('open_done', ['open', 'done']);
+/** tasks: "In Arbeit" only for ours (E44); "wartet" is computed from the direction */
+export const taskStatus = pgEnum('task_status', ['open', 'in_progress', 'done']);
 export const createdByType = pgEnum('created_by_type', ['user', 'system']);
 export const entryKind = pgEnum('entry_kind', ['mail', 'event', 'file', 'note', 'instruction', 'system']);
 export const entryVisibility = pgEnum('entry_visibility', ['team', 'restricted']);
@@ -146,6 +148,8 @@ export const matters = pgTable('matters', {
   discard_reason: text('discard_reason'),
   created_by_type: createdByType('created_by_type').notNull().default('user'),
   outcome_note: text('outcome_note'),
+  /** pending handover: stays with owner_user_id until the recipient accepts (E45) */
+  handover_to: uuid('handover_to').references(() => users.id),
 });
 
 // 4.7
@@ -237,7 +241,7 @@ export const tasks = pgTable('tasks', {
   owner_user_id: uuid('owner_user_id').references(() => users.id),
   owner_person_id: uuid('owner_person_id').references(() => people.id),
   due_at: ts('due_at'),
-  status: openDone('status').notNull().default('open'),
+  status: taskStatus('status').notNull().default('open'),
   done_at: ts('done_at'),
   matter_id: uuid('matter_id').references(() => matters.id),
   org_id: uuid('org_id').references(() => orgs.id),

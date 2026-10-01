@@ -7,6 +7,7 @@ import './hint';
 import './instruction';
 import './link';
 import './matter';
+import './note';
 import './review';
 import './task';
 

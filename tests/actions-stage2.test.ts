@@ -46,14 +46,32 @@ describe('areas: create an event, change a field, undo', () => {
     await expectRejects(runAction(as('julia'), 'matter.update', { id: gn.id, phase: 'Idee' }), /no phase/);
   });
 
-  it('sets status and owner, each undoable', async () => {
+  it('sets the status, undoable', async () => {
     const eb = await matterByTitle('Entrepreneurship Basics WS 26/27');
     const s = await runAction(as('andreas'), 'matter.set_status', { id: eb.id, status: 'done' });
-    const a = await runAction(as('andreas'), 'matter.assign', { id: eb.id, owner_user_id: fx.users.mehmet });
-    expect(await reload(eb.id)).toMatchObject({ status: 'done', owner_user_id: fx.users.mehmet });
-    await undoAction(a.actionId, fx.users.andreas!);
+    expect(await reload(eb.id)).toMatchObject({ status: 'done' });
     await undoAction(s.actionId, fx.users.andreas!);
-    expect(await reload(eb.id)).toMatchObject({ status: 'open', owner_user_id: fx.users.andreas });
+    expect(await reload(eb.id)).toMatchObject({ status: 'open' });
+  });
+
+  it('responsibility: take over what nobody owns, otherwise hand over and wait for acceptance (E45)', async () => {
+    const eb = await matterByTitle('Entrepreneurship Basics WS 26/27'); // Andreas
+    await expectRejects(runAction(as('julia'), 'matter.assign', { id: eb.id, owner_user_id: fx.users.julia }), /hand over instead/);
+    await expectRejects(runAction(as('julia'), 'matter.handover', { id: eb.id, to_user_id: fx.users.mehmet }), /only the person responsible/);
+
+    await runAction(as('andreas'), 'matter.handover', { id: eb.id, to_user_id: fx.users.mehmet });
+    expect(await reload(eb.id)).toMatchObject({ owner_user_id: fx.users.andreas, handover_to: fx.users.mehmet });
+    await expectRejects(runAction(as('julia'), 'matter.handover_accept', { id: eb.id }), /no handover to you/);
+    const acc = await runAction(as('mehmet'), 'matter.handover_accept', { id: eb.id });
+    expect(await reload(eb.id)).toMatchObject({ owner_user_id: fx.users.mehmet, handover_to: null });
+    await undoAction(acc.actionId, fx.users.mehmet!);
+    expect(await reload(eb.id)).toMatchObject({ owner_user_id: fx.users.andreas, handover_to: fx.users.mehmet });
+    await runAction(as('mehmet'), 'matter.handover_withdraw', { id: eb.id }); // declined
+    expect(await reload(eb.id)).toMatchObject({ owner_user_id: fx.users.andreas, handover_to: null });
+
+    const solaro = await matterByTitle('EXIST-Antrag'); // StartHub mailbox: nobody
+    await runAction(as('julia'), 'matter.assign', { id: solaro.id, owner_user_id: fx.users.julia });
+    expect((await reload(solaro.id)).owner_user_id).toBe(fx.users.julia);
   });
 
   it('creates from the previous year where the area offers it, copying place and seats only', async () => {
@@ -83,6 +101,16 @@ describe('tasks', () => {
     expect(done.done_at).toBeInstanceOf(Date);
     await undoAction(actionId, fx.users.andreas!);
     expect((await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.id, t!.id))))[0]).toMatchObject({ status: 'open', done_at: null });
+  });
+
+  it('"In Arbeit" only for our own tasks', async () => {
+    const [ours] = await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.title, 'Raum mit Beamer für Sitzung 3 buchen (40 Personen)')));
+    const [theirs] = await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.title, 'Folien für Sitzung 3 schicken')));
+    const { actionId } = await runAction(as('andreas'), 'task.start', { id: ours!.id });
+    expect((await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.id, ours!.id))))[0]!.status).toBe('in_progress');
+    await expectRejects(runAction(as('andreas'), 'task.start', { id: theirs!.id }), /only our own/);
+    await undoAction(actionId, fx.users.andreas!);
+    expect((await withSystem((tx) => tx.select().from(tasks).where(eq(tasks.id, ours!.id))))[0]!.status).toBe('open');
   });
 
   it('assigns ours to users and theirs to people only', async () => {
@@ -153,6 +181,28 @@ describe('corrections instead of undoing system steps (decision 7)', () => {
     const m05 = await entryOf('m05');
     const [l] = await withSystem((tx) => tx.select().from(links).where(eq(links.entry_id, m05.id)));
     await expectRejects(runAction(as('julia'), 'entry.unlink', { link_id: l!.id }), /not found/);
+  });
+});
+
+describe('notes and conversations', () => {
+  it('writes a conversation into the file of a founding team; private notes stay private; undo removes it', async () => {
+    const [solaro] = await withSystem((tx) => tx.select().from(orgs).where(eq(orgs.name, 'Solaro')));
+    const { actionId, result } = await runAction<{ id: string }>(as('andreas'), 'note.create', {
+      target_type: 'org', target_id: solaro!.id, body_text: 'Finanzplan durchgesprochen, Personalplanung zu optimistisch.',
+      occurred_at: '2026-10-01T10:00:00+02:00', conversation: { art: 'Beratung', mit: 'Lisa Meier, Tom Kraus' },
+    });
+    const [n] = await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)));
+    expect(n).toMatchObject({ kind: 'note', title: 'Beratung', visibility: 'team', author_user_id: fx.users.andreas });
+    await runAction(as('andreas'), 'note.update', { id: result.id, body_text: 'Finanzplan durchgesprochen.' });
+    await undoAction(actionId, fx.users.andreas!);
+    expect(await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)))).toEqual([]);
+
+    const priv = await runAction<{ id: string }>(as('julia'), 'note.create', {
+      target_type: 'org', target_id: solaro!.id, body_text: 'Nur für mich.', private: true,
+    });
+    const { withUser } = await import('@/lib/db/client');
+    expect(await withUser(fx.users.andreas!, (tx) => tx.select().from(entries).where(eq(entries.id, priv.result.id)))).toEqual([]);
+    await expectRejects(runAction({ type: 'system' }, 'note.create', { target_type: 'org', target_id: solaro!.id, body_text: 'x' }), /actor system may not/);
   });
 });
 
