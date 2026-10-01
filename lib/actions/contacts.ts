@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { isFreemailDomain, teamDomain } from '@/lib/config';
 import { orgs, people, personEmails } from '@/lib/db/schema';
+import { assertUnowned } from './handover';
 import { ALL_ACTORS, defined, reviewStateFor, updateWithInverse } from './helpers';
 import { defineAction } from './registry';
 import { ActionError } from './types';
@@ -102,6 +103,7 @@ export const orgUpdate = defineAction({
   allowedActors: ALL_ACTORS,
   async apply(tx, { id, ...p }) {
     for (const d of p.domains ?? []) checkOrgDomain(d);
+    if (p.owner_user_id !== undefined) await assertUnowned(tx, 'org', id); // "betreut von" only via handover (E45)
     const set = defined(p);
     if (!Object.keys(set).length) throw new ActionError('nothing to change');
     return { result: { id }, inverse: [await updateWithInverse(tx, orgs, 'orgs', id, set)] };

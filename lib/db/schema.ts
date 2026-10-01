@@ -105,6 +105,8 @@ export const orgs = pgTable('orgs', {
   review_state: reviewState('review_state').notNull().default('accepted'),
   discard_reason: text('discard_reason'),
   merged_into_id: uuid('merged_into_id').references((): AnyPgColumn => orgs.id),
+  /** pending handover of "betreut von" (E45), like matters.handover_to */
+  handover_to: uuid('handover_to').references(() => users.id),
 });
 
 // 4.5

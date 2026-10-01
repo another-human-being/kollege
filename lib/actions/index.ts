@@ -3,6 +3,7 @@
 // the remaining V1 actions follow with the stage that uses them.
 import './area';
 import './contacts';
+import './handover';
 import './hint';
 import './instruction';
 import './link';

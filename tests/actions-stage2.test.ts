@@ -74,6 +74,16 @@ describe('areas: create an event, change a field, undo', () => {
     expect((await reload(solaro.id)).owner_user_id).toBe(fx.users.julia);
   });
 
+  it('"betreut von" of a founding team follows the same handover rule', async () => {
+    const [solaro] = await withSystem((tx) => tx.select().from(orgs).where(eq(orgs.name, 'Solaro')));
+    await runAction(as('andreas'), 'org.update', { id: solaro!.id, owner_user_id: fx.users.andreas });
+    await expectRejects(runAction(as('julia'), 'org.update', { id: solaro!.id, owner_user_id: fx.users.julia }), /hand over instead/);
+    await runAction(as('andreas'), 'org.handover', { id: solaro!.id, to_user_id: fx.users.julia });
+    await runAction(as('julia'), 'org.handover_accept', { id: solaro!.id });
+    const [after] = await withSystem((tx) => tx.select().from(orgs).where(eq(orgs.id, solaro!.id)));
+    expect(after).toMatchObject({ owner_user_id: fx.users.julia, handover_to: null });
+  });
+
   it('creates from the previous year where the area offers it, copying place and seats only', async () => {
     const gn25 = await matterByTitle('Gründungsnacht 2025');
     await runAction(as('julia'), 'matter.update', {

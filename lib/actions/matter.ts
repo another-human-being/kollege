@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { areas, matters } from '@/lib/db/schema';
 import type { Tx } from '@/lib/db/client';
+import { assertUnowned } from './handover';
 import { ALL_ACTORS, defined, reviewStateFor, updateWithInverse } from './helpers';
 import { defineAction } from './registry';
 import { ActionError } from './types';
@@ -113,57 +114,8 @@ export const matterAssign = defineAction({
   allowedActors: ALL_ACTORS,
   async apply(tx, { id, owner_user_id }) {
     // responsibility is not a free field (E45): directly assignable only while nobody is responsible
-    const [m] = await tx.select({ owner: matters.owner_user_id }).from(matters).where(eq(matters.id, id));
-    if (!m) throw new ActionError(`matter ${id} not found`);
-    if (m.owner !== null) throw new ActionError('someone is responsible already – hand over instead');
+    await assertUnowned(tx, 'matter', id);
     return { result: { id }, inverse: [await updateWithInverse(tx, matters, 'matters', id, { owner_user_id })] };
-  },
-});
-
-/** "Übergeben an" (E45): stays with the current owner until the recipient accepts. */
-export const matterHandover = defineAction({
-  type: 'matter.handover',
-  schema: z.object({ id: z.uuid(), to_user_id: z.uuid() }),
-  external: false,
-  allowedActors: ['user', 'model'],
-  async apply(tx, { id, to_user_id }, ctx) {
-    const [m] = await tx.select().from(matters).where(eq(matters.id, id));
-    if (!m) throw new ActionError(`matter ${id} not found`);
-    const me = ctx.actor.type === 'system' ? null : ctx.actor.userId;
-    if (m.owner_user_id !== me) throw new ActionError('only the person responsible can hand over');
-    if (to_user_id === me) throw new ActionError('cannot hand over to yourself');
-    return { result: { id }, inverse: [await updateWithInverse(tx, matters, 'matters', id, { handover_to: to_user_id })] };
-  },
-});
-
-export const matterHandoverAccept = defineAction({
-  type: 'matter.handover_accept',
-  schema: z.object({ id: z.uuid() }),
-  external: false,
-  allowedActors: ['user'],
-  async apply(tx, { id }, ctx) {
-    const [m] = await tx.select().from(matters).where(eq(matters.id, id));
-    const me = ctx.actor.type === 'user' ? ctx.actor.userId : null;
-    if (!m || m.handover_to !== me) throw new ActionError('no handover to you pending');
-    return {
-      result: { id },
-      inverse: [await updateWithInverse(tx, matters, 'matters', id, { owner_user_id: me, handover_to: null })],
-    };
-  },
-});
-
-/** withdrawn by the person handing over, or declined by the recipient */
-export const matterHandoverWithdraw = defineAction({
-  type: 'matter.handover_withdraw',
-  schema: z.object({ id: z.uuid() }),
-  external: false,
-  allowedActors: ['user'],
-  async apply(tx, { id }, ctx) {
-    const [m] = await tx.select().from(matters).where(eq(matters.id, id));
-    const me = ctx.actor.type === 'user' ? ctx.actor.userId : null;
-    if (!m || m.handover_to === null) throw new ActionError('no handover pending');
-    if (me !== m.owner_user_id && me !== m.handover_to) throw new ActionError('not your handover');
-    return { result: { id }, inverse: [await updateWithInverse(tx, matters, 'matters', id, { handover_to: null })] };
   },
 });
 

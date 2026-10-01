@@ -1,0 +1,2 @@
+ALTER TABLE "orgs" ADD COLUMN "handover_to" uuid;--> statement-breakpoint
+ALTER TABLE "orgs" ADD CONSTRAINT "orgs_handover_to_users_id_fk" FOREIGN KEY ("handover_to") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
