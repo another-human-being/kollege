@@ -11,6 +11,8 @@ export const AreaField = z.object({
   label: z.string().min(1),
   type: z.enum(['text', 'date', 'person', 'number', 'select']),
   options: z.array(z.string()).optional(),
+  /** value is copied by "aus Vorjahr" (matter.create_from_previous) */
+  carry_over: z.boolean().optional(),
 });
 
 export const AreaConfig = z.object({

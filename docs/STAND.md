@@ -52,6 +52,8 @@ Offen in Stufe 2:
 10. **Oberfläche erst mit dem neuen Design-Export.** `design/` ist der Stand vom 30.09.; Andreas liefert den aktuellen Export.
 11. **Login:** Dev-Login jetzt, Magic-Link per Mail erst, wenn der Mailversand steht (Stufe 4/5).
 12. **Schriften** (IBM Plex) liefert die App selbst aus (npm `@fontsource/*`), nicht über Google Fonts (DSGVO).
+13. **„Aus Vorjahr“ übernimmt Ort und Plätze**, nicht Datum und Anmeldungen. Umgesetzt als Feld-Eigenschaft `carry_over` in der Bereichskonfiguration; derzeit nur bei Events gesetzt, in den Einstellungen änderbar.
+14. **Personen und Organisationen zusammenführen** kommt später, nicht in Stufe 2.
 
 ## Befunde aus dem Bau
 
@@ -91,7 +93,7 @@ Offen in Stufe 2:
 - **`next dev` schreibt** in CLAUDE.md einen eigenen Regelblock, sobald es einen KI-Agenten erkennt. Ich habe ihn zurückgenommen und nicht committet; für Rauchtests nutze ich `next start`.
 - **Noch nicht gebaut**, weil es zu späteren Stufen gehört bzw. nicht in der Abnahme steht:
   - `matter.handover` (der Hinweis gehört zu Stufe 8),
-  - `person.merge` und `org.merge`,
+  - `person.merge` und `org.merge` (später, Entscheidung 14),
   - Notizen anlegen (läuft per Chat, Stufe 3).
 
 ## Offene Fragen an Andreas
@@ -104,8 +106,6 @@ Offen in Stufe 2:
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
 - e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
-- „Aus Vorjahr“ (`matter.create_from_previous`): Übernommen werden jetzt Bereich, Org und der Verweis auf den Vorgänger, keine Feldwerte. Welche Felder sollen mitkommen (z. B. Ort, Plätze ja, Datum und Anmeldungen nein)?
-- Zusammenführen von Personen und Organisationen (Kontakte): noch in Stufe 2 oder später?
 - Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (ab Stufe 3)
 
 ## Verbrauch

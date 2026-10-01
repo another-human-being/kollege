@@ -27,8 +27,8 @@
       "description": "Veranstaltungen des StartHub: Gründungsnacht, Pitch-Abende, Workshops. Raum, Referierende, Jury, Einladung, Catering, Nachbereitung.",
       "fields": [
         { "key": "date", "label": "Datum", "type": "date" },
-        { "key": "location", "label": "Ort", "type": "text" },
-        { "key": "capacity", "label": "Plätze", "type": "number" },
+        { "key": "location", "label": "Ort", "type": "text", "carry_over": true },
+        { "key": "capacity", "label": "Plätze", "type": "number", "carry_over": true },
         { "key": "registrations", "label": "Anmeldungen", "type": "number" }
       ],
       "phases": ["Planung", "Einladung raus", "vorbei"],

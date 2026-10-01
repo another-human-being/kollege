@@ -116,7 +116,7 @@ export const matterAssign = defineAction({
   },
 });
 
-/** "Aus Vorjahr": new matter in the same area and org, pointing to its predecessor. */
+/** "Aus Vorjahr": new matter in the same area and org, pointing to its predecessor, with the carry_over fields. */
 export const matterCreateFromPrevious = defineAction({
   type: 'matter.create_from_previous',
   schema: z.object({ previous_id: z.uuid(), title: z.string().min(1) }),
@@ -128,12 +128,16 @@ export const matterCreateFromPrevious = defineAction({
       throw new ActionError(`area ${area.key} does not offer "from previous"`);
     }
     const [prev] = await tx.select().from(matters).where(eq(matters.id, previous_id));
+    // only fields marked carry_over (events: place and seats – not date or registrations)
+    const carry = new Set((area.fields as { key: string; carry_over?: boolean }[]).filter((f) => f.carry_over).map((f) => f.key));
+    const fields = Object.fromEntries(Object.entries(prev!.fields as Record<string, unknown>).filter(([k]) => carry.has(k)));
     const [row] = await tx
       .insert(matters)
       .values({
         area_id: area.id,
         title,
         org_id: prev!.org_id,
+        fields,
         predecessor_id: previous_id,
         owner_user_id: ctx.actor.type === 'system' ? prev!.owner_user_id : ctx.actor.userId,
         review_state: reviewStateFor(ctx.actor),

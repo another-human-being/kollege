@@ -56,12 +56,18 @@ describe('areas: create an event, change a field, undo', () => {
     expect(await reload(eb.id)).toMatchObject({ status: 'open', owner_user_id: fx.users.andreas });
   });
 
-  it('creates from the previous year where the area offers it', async () => {
+  it('creates from the previous year where the area offers it, copying place and seats only', async () => {
     const gn25 = await matterByTitle('Gründungsnacht 2025');
+    await runAction(as('julia'), 'matter.update', {
+      id: gn25.id, fields: { date: '2025-11-21', location: 'Hörsaalzentrum', capacity: 60, registrations: 18 },
+    });
     const { result } = await runAction<{ id: string }>(as('julia'), 'matter.create_from_previous', {
       previous_id: gn25.id, title: 'Gründungsnacht 2027',
     });
-    expect(await reload(result.id)).toMatchObject({ predecessor_id: gn25.id, owner_user_id: fx.users.julia, review_state: 'accepted' });
+    expect(await reload(result.id)).toMatchObject({
+      predecessor_id: gn25.id, owner_user_id: fx.users.julia, review_state: 'accepted',
+      fields: { location: 'Hörsaalzentrum', capacity: 60 },
+    });
     // founding teams only offer "new"
     const solaro = await matterByTitle('EXIST-Antrag');
     await expectRejects(runAction(as('andreas'), 'matter.create_from_previous', { previous_id: solaro.id, title: 'X' }), /does not offer/);
