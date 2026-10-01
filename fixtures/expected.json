@@ -18,8 +18,8 @@
     { "key": "hartmann", "name": "Prof. Dr. Martin Hartmann", "emails": ["hartmann@wiwi.uni-augsburg.example"], "org": "uni", "role": "university" }
   ],
   "matters": [
-    { "key": "solaro_exist", "area": "founding_teams", "title": "EXIST-Antrag", "org": "solaro", "owner": "andreas" },
-    { "key": "greenbyte_first", "area": "founding_teams", "title": "Erstberatung", "org": "greenbyte", "owner": "andreas" },
+    { "key": "solaro_exist", "area": "founding_teams", "title": "EXIST-Antrag", "org": "solaro", "owner": null },
+    { "key": "greenbyte_first", "area": "founding_teams", "title": "Erstberatung", "org": "greenbyte", "owner": null },
     { "key": "kitchenloop_mensa", "area": "founding_teams", "title": "Mensa-Kooperation", "org": "kitchenloop", "owner": "julia" },
     { "key": "pitch_abend", "area": "events", "title": "Pitch-Abend 19.11.", "owner": "julia", "fields": { "date": "2026-11-19" } },
     { "key": "gn_2026", "area": "events", "title": "Gründungsnacht 2026", "owner": "julia", "predecessor": "gn_2025", "fields": { "date": "2026-11-20", "location": "Hörsaalzentrum", "capacity": 60 } },

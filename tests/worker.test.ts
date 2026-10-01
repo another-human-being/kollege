@@ -39,8 +39,9 @@ describe('worker', () => {
     );
     expect(Object.fromEntries(states.map((s) => [s.state, s.n]))).toEqual({ done: 24 + 3, skipped: 4 }) // 3 attachment entries; m11, m12, m14, e3;
     expect(states.find((s) => s.state === 'pending' || s.state === 'error')).toBeUndefined();
+    // the import job schedules the syncs right after it has written the review hint
+    await until(async () => (await boss.getSchedules('sync')).length === 8);
     const schedules = await boss.getSchedules('sync');
-    expect(schedules).toHaveLength(8);
 
     // a scheduled sync finds nothing new: the cursor holds
     const jobId = await boss.send('sync', { connectionId: (schedules[0]!.data as { connectionId: string }).connectionId });

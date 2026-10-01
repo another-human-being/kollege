@@ -23,7 +23,7 @@
 - Aktionsschicht `lib/actions/`: Registry, `runAction`, `undoAction` (Kinder zuerst, jüngste zuerst). `model` kann keine externe Aktion ausführen; das ist im Code erzwungen. Gebaut sind nur die Aktionen, die Stufe 1 braucht: `area.create`, `org.create`, `person.create`, `person.add_email`, `matter.create`, `entry.link`, `task.create`, `hint.create`, `hint.dismiss`.
 - Seed aus `fixtures/config.json` (`npm run db:seed`): 3 Teammitglieder, 4 Bereiche, 8 Fixture-Quellen.
 - Eingangsweg `lib/pipeline/`: Rohspeicherung (Blob + `entries`, Upsert über `dedupe_key`), Filter, feste Zuordnung, Kandidaten, Modell `fast` (Stufe 1: Orakel, `MODEL_FAST=oracle`), Schranke, Anhänge, Import mit `review_batch`. Der Worker führt die pg-boss-Jobs `import`, `sync` und `process` aus.
-- Tests (59, `npm test`, brauchen ein lokales Postgres 16, siehe README): alle Abnahmen aus §13, alle `rls_checks` und alle `assert`-Einträge aus `expected.json`, die zu Stufe 1 gehören. Ein Test schlägt fehl, wenn `expected.json` einen Prüfschlüssel bekommt, der weder geprüft noch ausdrücklich zurückgestellt ist. `tsc --noEmit` ist sauber.
+- Tests (63, `npm test`, brauchen ein lokales Postgres 16, siehe README): alle Abnahmen aus §13, alle `rls_checks` und alle `assert`-Einträge aus `expected.json`, die zu Stufe 1 gehören. Ein Test schlägt fehl, wenn `expected.json` einen Prüfschlüssel bekommt, der weder geprüft noch ausdrücklich zurückgestellt ist. `tsc --noEmit` ist sauber.
 
 ## Entscheidungen (mit Andreas, 01.10.2026)
 
@@ -35,6 +35,7 @@
 6. **Termine sehen Kalenderbesitzer, Organisator und eingeladene Teammitglieder** (`visible_to`).
 7. **Systemschritte werden korrigiert, nicht rückgängig gemacht** (für Stufe 2): Nutzer verwenden `entry.unlink`/`relink`, `review.discard` (mit Grund), `task.update`. Diese Aktionen sind selbst umkehrbar und werden zu Korrekturbeispielen (§7.4). `undoAction` bleibt auf eigene Aktionen beschränkt.
 8. **Konfiguration:** Die Team-Domain steht in `TEAM_DOMAIN` (`.env`). Die Freemail-Liste ist die Datei `config/freemail.json` (überschreibbar per `FREEMAIL_FILE`, für die Testdaten `fixtures/freemail.json`). Die Seed-Daten (Team, Postfächer, Bereiche) bleiben in `fixtures/config.json`.
+9. **Zuständig für Vorgänge des Systems ist, wer die Quelle persönlich hat:** eigenes Postfach (bei mehreren: wer in „An“ steht), eigener Kalender (nicht die Eingeladenen), Bearbeiter der Datei. Team-Quellen bleiben ohne Zuständigen. Es gibt einen Zuständigen pro Vorgang, wechselbar per `matter.assign`/`handover`. In `expected.json` sind solaro_exist und greenbyte_first deshalb `owner: null`, passend zu m10.
 
 ## Befunde aus dem Bau
 
@@ -42,10 +43,9 @@
 - **`relevant:false`** führt zu `skipped` (Grund `irrelevant`) ohne Verknüpfung. Das betrifft m11 und e3.
 - **Reihenfolge beim Import:** f3 (Datei, 29.09.) verweist auf die Gründungsnacht 2026, die erst e5 (Termin am 20.11.) anlegt. Der Import verarbeitet deshalb erst Mails, dann Termine, dann Dateien, jeweils chronologisch. Mit echtem Modell würde die Datei in umgekehrter Reihenfolge einen neuen Vorgang vorschlagen, und es entstünde ein Duplikat. Merge-Fälle sind also zu erwarten.
 - **Kandidatensuche:** `plainto_tsquery` verlangt alle Wörter des Titels. Bei f3 fehlte deshalb „Gründungsnacht 2026“ unter den Kandidaten, weil „20.11.2026“ nicht als „2026“ zählt. Das Orakel stört das nicht, für Stufe 4 ist es aber wichtig. Die Pipeline meldet solche Fälle als `notInCandidates`.
-- **Soll-Endzustand in `expected.json`:** Der Teil `matters`/`people` ist nicht vollständig aus dem Eingangsweg ableitbar. Zuständige, Personenrollen (founder/partner/…), Felder (Datum, Plätze), `status=done` (gn_2025) und Vorgänger liefert weder das Schema §7.2.4 noch eine Regel. Stand jetzt:
-  - Vorgänge des Systems haben keinen Zuständigen. Das passt zu m10 („niemand zuständig“), widerspricht aber `matters[].owner`.
+- **Soll-Endzustand in `expected.json`:** Der Teil `matters`/`people` ist nicht vollständig aus dem Eingangsweg ableitbar. Personenrollen (founder/partner/…), Felder (Datum, Plätze), `status=done` (gn_2025) und Vorgänger liefert weder das Schema §7.2.4 noch eine Regel. Stand jetzt:
   - Personen haben die Rolle `other`.
-  - Die Tests prüfen Namen, Bereiche, Org-Zuordnung, Domains und E-Mails, nicht aber die übrigen Angaben.
+  - Die Tests prüfen Namen, Bereiche, Org-Zuordnung, Zuständige, Domains und E-Mails, nicht aber die übrigen Angaben.
 - **„medium → als ungeprüft markieren“:** `links` haben keinen `review_state`. Neue Objekte sind ohnehin ungeprüft. Wird mit `medium` einem bestehenden Vorgang zugeordnet, steht nur `confidence=medium` am Link.
 - **Anhänge:** Ein Link Anhang→Mail ist in `links` nicht vorgesehen (nur matter/person/org), er steht deshalb in `meta.mail_entry_id`. Eine Zusammenfassung gibt es nicht, weil das Orakel keine liefert.
 - **Org-Domains** werden aus den Adressen der neuen Personen derselben Org abgeleitet (ohne Freemail, ohne Team). Das ist nötig für die feste Zuordnung, steht aber nicht ausdrücklich in §7.
@@ -68,7 +68,6 @@
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
 - EU-Modell für den Betrieb (parallel zum Test)
 - Klärungshinweis zu einer eingeschränkten Mail mit mehreren Berechtigten: Wer bekommt ihn? Jetzt geht er an die erste Person in `visible_to`.
-- Zuständige für Vorgänge, die das System anlegt: Vorschlag liegt bei Andreas. Wer die Quelle persönlich hat, wird zuständig (eigenes Postfach, Adressat, eigener Kalender, Bearbeiter der Datei). Team-Quellen (StartHub-Postfach, Laufwerk ohne Bearbeiter) bleiben ohne Zuständigen. Es gibt einen Zuständigen pro Vorgang, wechselbar über `matter.assign`/`handover`.
 - Rolle neuer Personen (founder/partner/…) aus der Rolle der Org ableiten?
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
 - e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?

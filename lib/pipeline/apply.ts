@@ -7,7 +7,7 @@ import { runAction } from '@/lib/actions';
 import type { HintOption } from '@/lib/actions/hint';
 import { emailDomain, isFreemailDomain, isTeamAddress } from '@/lib/config';
 import type { Tx } from '@/lib/db/client';
-import { areas, entries, orgs, people, personEmails, users } from '@/lib/db/schema';
+import { areas, connections, entries, orgs, people, personEmails, users } from '@/lib/db/schema';
 import type { FastOutput } from '@/lib/model/schemas';
 import { berlinEndOfDay } from '@/lib/time';
 import type { Fixed } from './assign';
@@ -128,6 +128,7 @@ export async function applyAssignment(
         fields: out.matter.new.fields,
         // topics of founding teams belong to the org (§4.3)
         org_id: area?.matter_kind === 'org_based' ? orgId : undefined,
+        owner_user_id: await ownerOf(tx, entry),
       },
       { tx, reason: out.summary },
     );
@@ -158,6 +159,39 @@ export async function applyAssignment(
     );
   }
   return report;
+}
+
+/**
+ * Who is responsible for a matter the system creates (decision 2026-10-01):
+ * whoever has the source personally. Team sources (StartHub mailbox, drive
+ * without editor) stay without owner – someone takes them over in the team view.
+ */
+async function ownerOf(tx: Tx, entry: Entry): Promise<string | undefined> {
+  if (entry.kind === 'event') {
+    // the calendar it came from, not the invited
+    const [c] = entry.connection_id
+      ? await tx.select({ user_id: connections.user_id }).from(connections).where(eq(connections.id, entry.connection_id))
+      : [];
+    return c?.user_id ?? undefined;
+  }
+  if (entry.kind === 'file') {
+    const by = (entry.meta as { modified_by?: string | null }).modified_by;
+    if (!by) return undefined;
+    const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, by));
+    return u?.id;
+  }
+  if (entry.kind === 'mail') {
+    // visible_to = the team members who have the mail in their own mailbox
+    const holders = entry.visible_to;
+    if (holders.length <= 1) return holders[0];
+    const to = ((entry.meta as { to?: { email: string }[] }).to ?? []).map((a) => a.email.toLowerCase());
+    const addressed = holders.length
+      ? await tx.select({ id: users.id, email: users.email }).from(users).where(inArray(users.id, holders))
+      : [];
+    const inTo = addressed.filter((u) => to.includes(u.email.toLowerCase()));
+    return inTo.length === 1 ? inTo[0]!.id : undefined;
+  }
+  return undefined;
 }
 
 async function resolveOwner(

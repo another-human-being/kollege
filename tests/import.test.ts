@@ -6,13 +6,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runAction } from '@/lib/actions';
 import { fixturesDir } from '@/lib/config';
 import { closeDb, withSystem, withUser } from '@/lib/db/client';
-import { actions, areas, entries, hints, links, matters, orgs, people, personEmails, tasks } from '@/lib/db/schema';
+import { actions, areas, entries, hints, links, matters, orgs, people, personEmails, tasks, users } from '@/lib/db/schema';
 import { importFixtures } from './helpers';
 
 interface Expected {
   orgs: { key: string; name: string; role: string; domains: string[] }[];
   people: { key: string; name: string; emails: string[]; org: string }[];
-  matters: { key: string; area: string; title: string; org?: string }[];
+  matters: { key: string; area: string; title: string; org?: string; owner: string | null }[];
   items: Record<string, { model: unknown; assert: Record<string, unknown> }>;
   rls_checks: ({ as: string; expect: string } & ({ entry: string } | { task_from: string }))[];
 }
@@ -114,12 +114,15 @@ describe('intake', () => {
   it('creates the expected matters in their areas, founding-team topics with their org', async () => {
     const rows = await withSystem((tx) =>
       tx
-        .select({ title: matters.title, area: areas.key, org: orgs.name, review: matters.review_state, by: matters.created_by_type })
+        .select({ title: matters.title, area: areas.key, org: orgs.name, review: matters.review_state, by: matters.created_by_type, owner: users.name })
         .from(matters)
         .innerJoin(areas, eq(areas.id, matters.area_id))
-        .leftJoin(orgs, eq(orgs.id, matters.org_id)),
+        .leftJoin(orgs, eq(orgs.id, matters.org_id))
+        .leftJoin(users, eq(users.id, matters.owner_user_id)),
     );
+    // owner: whoever has the source personally; StartHub mailbox → nobody
     const want = expected.matters.map((m) => ({
+      owner: m.owner ? m.owner[0]!.toUpperCase() + m.owner.slice(1) : null,
       title: m.title,
       area: m.area,
       org: m.org ? expected.orgs.find((o) => o.key === m.org)!.name : null,
