@@ -1,9 +1,12 @@
 // Model roles (§9): which model stands behind "fast" and "think" is configuration only.
-// MODEL_FAST / MODEL_THINK = "<provider>:<model id>", provider anthropic or openai-compatible
-// (MODEL_BASE_URL, MODEL_API_KEY – e.g. an EU provider or vLLM).
+// MODEL_FAST / MODEL_THINK = "<provider>:<model id>", provider
+//  - mistral (MISTRAL_API_KEY; EU endpoint unless MISTRAL_BASE_URL says otherwise),
+//  - anthropic (ANTHROPIC_API_KEY),
+//  - openai-compatible (MODEL_BASE_URL, MODEL_API_KEY – e.g. an EU host or vLLM).
 // "skript" is the deterministic stand-in for tests and development without an API key
 // (like the oracle for "fast" in stage 1); never in production.
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createMistral } from '@ai-sdk/mistral';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
 import { withUser } from '@/lib/db/client';
@@ -11,6 +14,8 @@ import { modelCalls } from '@/lib/db/schema';
 import { skriptModell } from './skript';
 
 export type Role = 'fast' | 'think';
+
+export const MISTRAL_EU = 'https://api.eu.mistral.ai/v1';
 
 export function modelSpec(role: Role): string {
   const spec = process.env[role === 'fast' ? 'MODEL_FAST' : 'MODEL_THINK'];
@@ -28,6 +33,8 @@ export function getModel(role: Role): LanguageModel {
   const provider = spec.slice(0, i);
   const id = spec.slice(i + 1);
   if (i < 1 || !id) throw new Error(`model spec "${spec}": expected <provider>:<model>`);
+  // inference pinned to the EU by default (regional endpoint, Mistral docs "Regional Inference")
+  if (provider === 'mistral') return createMistral({ baseURL: process.env.MISTRAL_BASE_URL || MISTRAL_EU })(id);
   if (provider === 'anthropic') return createAnthropic()(id);
   if (provider === 'openai-compatible') {
     const baseURL = process.env.MODEL_BASE_URL;

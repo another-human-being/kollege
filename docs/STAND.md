@@ -91,6 +91,15 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 21. **Stand-in `skript`** für die Rolle `think`, analog zum Orakel. Es ist deterministisch, nutzt nur die Werkzeuge und ist in Produktion gesperrt.
 22. **Eine begonnene Antwort läuft zu Ende,** auch wenn der Browser die Verbindung trennt. Begonnene Schritte werden fertig, und die Antwort wird gespeichert, damit keine halben Karten entstehen.
 23. **`task.create` nimmt eine Frist als Tag** (`due_date`, Ende des Tages in Berlin), wie `task.update`. Das Modell rechnet so keine Zeitzonen.
+24. **Testphase mit Mistral** (Andreas, 02.10.2026). Mistral ist ein französisches Unternehmen, die Verarbeitung läuft in der EU. Selbst betriebene offene Modelle bleiben die spätere Option; der Wechsel ist nur Konfiguration.
+    - **Anbieter:** `MODEL_THINK=mistral:<modell>` über das eigene Paket `@ai-sdk/mistral` statt `openai-compatible`. Grund: Mistral weicht bei Werkzeugaufrufen und Denkschritten vom OpenAI-Format ab, und das Paket fängt das ab. Es ist eine Abweichung von der Anbieterliste in §3, nicht vom Prinzip „Modell ist Konfiguration“.
+    - **Standard ist der EU-Endpunkt** `api.eu.mistral.ai` (Regional Inference: Verarbeitung nur in der EU, laut Mistral ca. 10 % Aufschlag). Ein Test sichert das ab. Abweichen geht nur ausdrücklich über `MISTRAL_BASE_URL`.
+    - `fast` bleibt bis Stufe 4 beim Orakel.
+    - **Zu prüfen beim Einrichten:**
+      - Bezahltarif: Im kostenlosen „Experiment“-Tarif nutzt Mistral API-Daten laut eigener Hilfe standardmäßig fürs Training.
+      - AVV/DPA abschließen.
+      - Modell-IDs mit `npm run modell:liste` gegen das Konto prüfen und auf eine feste Version setzen.
+      - `npm run eval:chat` fährt die Abnahme aus §13 mit dem echten Modell und prüft den Datenbestand und die Quellen, nicht den Wortlaut.
 
 ## Befunde aus dem Bau
 
@@ -171,7 +180,7 @@ Eigene Fehler, durch Tests gefunden:
 
 - Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
-- EU-Modell für den Betrieb (parallel zum Test)
+- EU-Modell für den Betrieb: Testphase mit Mistral (Entscheidung 24). Ob danach ein offenes Modell bei GWDG/STACKIT oder selbst betrieben folgt, entscheiden die Zahlen aus `npm run eval:chat` und die Vorgabe des Datenschutzbeauftragten (EU-Standort oder EU-Unternehmen).
 - Klärungshinweis zu einer eingeschränkten Mail mit mehreren Berechtigten: Wer bekommt ihn? Jetzt geht er an die erste Person in `visible_to`.
 - Rolle neuer Personen (founder/partner/…) aus der Rolle der Org ableiten?
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
