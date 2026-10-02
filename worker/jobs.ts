@@ -8,6 +8,8 @@ import { withSystem } from '@/lib/db/client';
 import { connections } from '@/lib/db/schema';
 import { runImport } from '@/lib/pipeline/import';
 import { syncConnection } from '@/lib/pipeline/ingest';
+import { rueckschreiben } from '@/lib/mail/rueckschreiben';
+import { sendeEntwurf } from '@/lib/mail/senden';
 import { processEntry } from '@/lib/pipeline/process';
 
 type Connection = typeof connections.$inferSelect;
@@ -26,7 +28,7 @@ async function scheduleSync(boss: PgBoss, conns: Connection[]) {
 }
 
 export async function startJobs(boss: PgBoss): Promise<void> {
-  for (const q of ['import', 'sync', 'process']) await boss.createQueue(q);
+  for (const q of ['import', 'sync', 'process', 'senden']) await boss.createQueue(q);
 
   await boss.work<{ connectionIds: string[] }>('import', async ([job]) => {
     const r = await runImport(job!.data.connectionIds);
@@ -36,9 +38,19 @@ export async function startJobs(boss: PgBoss): Promise<void> {
   });
 
   await boss.work<{ connectionId: string }>('sync', async ([job]) => {
+    // first what Kollege changed (read, archived), then what is new in the mailbox
+    const zurueck = await rueckschreiben(job!.data.connectionId);
+    if (zurueck.fehler.length) console.error('[rueckschreiben]', zurueck.fehler);
     const r = await syncConnection(job!.data.connectionId);
     for (const entryId of r.newEntryIds) await boss.send('process', { entryId });
     return { new: r.newEntryIds.length, errors: r.errors.length };
+  });
+
+  // E43: queued by the app 10 s after "Senden"; recalled mails are skipped under the action lock
+  await boss.work<{ actionId: string }>('senden', async ([job]) => {
+    const r = await sendeEntwurf(job!.data.actionId);
+    if (r.ergebnis === 'gesendet' && r.entryId) await boss.send('process', { entryId: r.entryId });
+    return r;
   });
 
   await boss.work<{ entryId: string }>('process', async ([job]) => {

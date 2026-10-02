@@ -7,7 +7,7 @@ import { fixtureConnector } from '@/lib/connectors/fixture';
 import { imapConnector } from '@/lib/connectors/imap';
 import type { Connection, Connector, RawItem, SyncError } from '@/lib/connectors/types';
 import { withSystem, type Tx } from '@/lib/db/client';
-import { connections, entries, users } from '@/lib/db/schema';
+import { connections, entries, mailCopies, users } from '@/lib/db/schema';
 import { putBlob } from './blobs';
 
 const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector, imap: imapConnector };
@@ -79,6 +79,13 @@ function visibilityOf(conn: Connection) {
     : { visibility: 'restricted' as const, visible_to: [conn.user_id] as string[] };
 }
 
+interface Ort {
+  folder: string;
+  uid: number;
+  uidValidity: string;
+  seen: boolean;
+}
+
 async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: boolean) {
   const blob = await putBlob(item.raw);
   const vis = visibilityOf(conn);
@@ -93,6 +100,9 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
   for (const a of item.attachments) {
     attachments.push({ filename: a.filename, mime: a.mime, text: a.text, blob_path: await putBlob(a.content) });
   }
+
+  // where this copy lies (mail via IMAP): stored in mail_copies, not in meta
+  const { ort, ...meta } = item.meta as { ort?: Ort } & Record<string, unknown>;
 
   const authorEmail =
     item.kind === 'mail' ? (item.meta.from as { email: string }).email
@@ -115,7 +125,7 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
       title: item.title,
       body_text: item.bodyText,
       blob_path: blob,
-      meta: attachments.length ? { ...item.meta, attachments } : item.meta,
+      meta: attachments.length ? { ...meta, attachments } : meta,
       ...vis,
       historical,
       processing_state: 'pending',
@@ -130,6 +140,22 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
       },
     })
     .returning({ id: entries.id, inserted: sql<boolean>`(xmax = 0)`, visibility: entries.visibility, visible_to: entries.visible_to });
+
+  if (ort) {
+    await tx
+      .insert(mailCopies)
+      .values({ entry_id: row!.id, connection_id: conn.id, folder: ort.folder, uid: ort.uid, uid_validity: ort.uidValidity, seen: ort.seen })
+      .onConflictDoUpdate({
+        target: [mailCopies.entry_id, mailCopies.connection_id, mailCopies.folder],
+        // the mailbox is the truth for place and read state – unless Kollege still has to write back
+        set: {
+          uid: ort.uid,
+          uid_validity: ort.uidValidity,
+          seen: sql`CASE WHEN ${mailCopies.pending} THEN ${mailCopies.seen} ELSE excluded.seen END`,
+          updated_at: sql`now()`,
+        },
+      });
+  }
 
   if (!row!.inserted) {
     // attachment entries share the visibility of their mail

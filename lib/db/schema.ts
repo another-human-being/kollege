@@ -37,7 +37,7 @@ export const openDone = pgEnum('open_done', ['open', 'done']);
 /** tasks: "In Arbeit" only for ours (E44); "wartet" is computed from the direction */
 export const taskStatus = pgEnum('task_status', ['open', 'in_progress', 'done']);
 export const createdByType = pgEnum('created_by_type', ['user', 'system']);
-export const entryKind = pgEnum('entry_kind', ['mail', 'event', 'file', 'note', 'instruction', 'system']);
+export const entryKind = pgEnum('entry_kind', ['mail', 'event', 'file', 'note', 'instruction', 'system', 'draft']);
 export const entryVisibility = pgEnum('entry_visibility', ['team', 'restricted']);
 export const processingState = pgEnum('processing_state', ['pending', 'done', 'error', 'skipped']);
 export const linkTargetType = pgEnum('link_target_type', ['matter', 'person', 'org']);
@@ -283,3 +283,24 @@ export const modelCalls = pgTable('model_calls', {
   duration_ms: integer('duration_ms').notNull(),
   error: text('error'),
 });
+
+// Stage 5: where a mail lies – one row per mailbox (connection) and folder. Read state and
+// folder are per mailbox, not per mail: Andreas reading a mail does not mark Julia's copy.
+// pending = Kollege changed seen/target_folder; the worker writes it back to the mailbox.
+export const mailCopies = pgTable(
+  'mail_copies',
+  {
+    id: id(),
+    ...stamps(),
+    entry_id: uuid('entry_id').notNull().references(() => entries.id, { onDelete: 'cascade' }),
+    connection_id: uuid('connection_id').notNull().references(() => connections.id),
+    folder: text('folder').notNull(),
+    uid: integer('uid').notNull(),
+    uid_validity: text('uid_validity').notNull(),
+    seen: boolean('seen').notNull().default(false),
+    /** move requested (archive / back to the inbox) */
+    target_folder: text('target_folder'),
+    pending: boolean('pending').notNull().default(false),
+  },
+  (t) => [unique('mail_copies_place').on(t.entry_id, t.connection_id, t.folder)],
+);

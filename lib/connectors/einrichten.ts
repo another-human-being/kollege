@@ -24,6 +24,9 @@ export interface NeuesPostfach {
   /** default: today − 12 months (§4.2) */
   importSince?: string;
   folders?: string[];
+  /** sender address; default: the owner's team address (personal mailbox) */
+  address?: string;
+  smtp?: { host: string; port: number; secure: boolean };
 }
 
 /** login and folder list – no content is read */
@@ -38,7 +41,9 @@ export async function pruefeZugang(cfg: ImapConfig): Promise<string[]> {
 }
 
 export async function postfachVerbinden(p: NeuesPostfach): Promise<{ id: string; folders: string[] }> {
-  const config = ImapConfig.parse({ host: p.host, port: p.port, secure: p.secure, user: p.user, password: encrypt(p.password), folders: p.folders });
+  const address = p.address ?? p.ownerEmail ?? undefined;
+  if (!address) throw new Error('Absenderadresse fehlt (--adresse)');
+  const config = ImapConfig.parse({ host: p.host, port: p.port, secure: p.secure, user: p.user, password: encrypt(p.password), folders: p.folders, address: address.toLowerCase(), smtp: p.smtp });
   const folders = await pruefeZugang(config);
   return withSystem(async (tx) => {
     let userId: string | null = null;
@@ -76,15 +81,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       besitzer: { type: 'string' }, team: { type: 'boolean' }, benutzer: { type: 'string' },
       host: { type: 'string', default: 'imap.uni-augsburg.de' }, port: { type: 'string', default: '993' },
       unverschluesselt: { type: 'boolean' }, label: { type: 'string' }, seit: { type: 'string' }, ordner: { type: 'string', multiple: true },
+      adresse: { type: 'string' }, 'smtp-host': { type: 'string', default: 'smtp.uni-augsburg.de' }, 'smtp-port': { type: 'string', default: '465' },
     },
   });
   if (!a.benutzer || (!a.besitzer && !a.team)) {
-    console.error('Aufruf: npm run quelle:imap -- --benutzer <Kennung> (--besitzer <mail> | --team) [--host …] [--port …] [--seit JJJJ-MM-TT] [--ordner INBOX …]');
+    console.error('Aufruf: npm run quelle:imap -- --benutzer <Kennung> (--besitzer <mail> | --team --adresse <mail>) [--host …] [--port …] [--smtp-host …] [--smtp-port …] [--seit JJJJ-MM-TT] [--ordner INBOX …]');
     process.exit(1);
   }
   postfachVerbinden({
     host: a.host!, port: Number(a.port), secure: !a.unverschluesselt, user: a.benutzer, password: await passwort(),
-    ownerEmail: a.team ? null : a.besitzer!, label: a.label, importSince: a.seit, folders: a.ordner,
+    ownerEmail: a.team ? null : a.besitzer!, label: a.label, importSince: a.seit, folders: a.ordner, address: a.adresse,
+    smtp: { host: a['smtp-host']!, port: Number(a['smtp-port']), secure: !a.unverschluesselt },
   })
     .then((r) => console.log(`Verbunden (${r.id}). Ordner: ${r.folders.join(', ')}. Der Import startet mit dem nächsten Start des Workers.`))
     .catch((e: unknown) => { console.error(`Nicht verbunden: ${e instanceof Error ? e.message : String(e)}`); process.exitCode = 1; })

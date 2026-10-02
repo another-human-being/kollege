@@ -14,3 +14,11 @@ export async function putBlob(content: string | Buffer): Promise<string> {
   });
   return hash;
 }
+
+export async function getBlob(hash: string): Promise<Buffer> {
+  const dir = process.env.BLOB_DIR;
+  if (!dir) throw new Error('BLOB_DIR is not set');
+  if (!/^[0-9a-f]{64}$/.test(hash)) throw new Error('invalid blob reference');
+  const { readFile } = await import('node:fs/promises');
+  return readFile(join(dir, hash));
+}

@@ -23,6 +23,10 @@ export const ImapConfig = z.object({
   password: z.string().startsWith('enc:v1:'),
   /** default: all folders except junk, trash and drafts */
   folders: z.array(z.string()).optional(),
+  /** sender address of this mailbox (stage 5) */
+  address: z.email().optional(),
+  /** outgoing mail (stage 5); same login as IMAP */
+  smtp: z.object({ host: z.string().min(1), port: z.number().int().default(465), secure: z.boolean().default(true) }).optional(),
 });
 export type ImapConfig = z.infer<typeof ImapConfig>;
 
@@ -95,7 +99,11 @@ export async function toRawItem(source: Buffer, ctx: { folder: string; uid: numb
     messageId: m.messageId,
     inReplyTo: m.inReplyTo,
     references: asList(m.references),
-    meta: { from, to: addresses(m.to), cc: addresses(m.cc), headers, folder: ctx.folder, seen: ctx.seen },
+    meta: {
+      from, to: addresses(m.to), cc: addresses(m.cc), headers, folder: ctx.folder,
+      // where this copy lies – the intake keeps one per mailbox and folder (stage 5 writes back there)
+      ort: { folder: ctx.folder, uid: ctx.uid, uidValidity: ctx.uidValidity, seen: ctx.seen },
+    },
     raw: source,
     attachments,
   };
@@ -160,4 +168,77 @@ async function syncImap(conn: Connection, rawCursor: unknown, batch: number): Pr
     await client.logout().catch(() => client.close());
   }
   return { items, errors, cursor, more };
+}
+
+// --- writing back (stage 5): read state, moves, the sent copy ----------------------------
+
+export interface Kopie {
+  id: string;
+  folder: string;
+  uid: number;
+  uid_validity: string;
+  seen: boolean;
+  /** '\\Archive', '\\Inbox' or a folder path */
+  target_folder: string | null;
+}
+
+export type Zurueckgeschrieben = { id: string; ok: true; folder: string; uid: number; uidValidity: string } | { id: string; ok: false; error: string };
+
+async function specialFolder(client: ImapFlow, use: '\\Archive' | '\\Sent' | '\\Inbox'): Promise<string> {
+  if (use === '\\Inbox') return 'INBOX';
+  const list = await client.list();
+  const found = list.find((f) => f.specialUse === use);
+  if (found) return found.path;
+  const name = use === '\\Archive' ? 'Archive' : 'Sent';
+  if (!list.some((f) => f.path === name)) await client.mailboxCreate(name);
+  return name;
+}
+
+/** apply Kollege's changes to the mailbox; each copy on its own (one failure does not stop the rest) */
+export async function zurueckschreiben(conn: Connection, kopien: Kopie[]): Promise<Zurueckgeschrieben[]> {
+  if (!kopien.length) return [];
+  const client = imapClient(ImapConfig.parse(conn.config));
+  await client.connect();
+  const out: Zurueckgeschrieben[] = [];
+  try {
+    for (const k of kopien) {
+      const lock = await client.getMailboxLock(k.folder);
+      try {
+        // a changed UIDVALIDITY means the UID points elsewhere now: do not touch anything
+        if (String(client.mailbox && client.mailbox.uidValidity) !== k.uid_validity) throw new Error('UIDVALIDITY geändert');
+        if (k.seen) await client.messageFlagsAdd(String(k.uid), ['\\Seen'], { uid: true });
+        else await client.messageFlagsRemove(String(k.uid), ['\\Seen'], { uid: true });
+        let place = { folder: k.folder, uid: k.uid, uidValidity: k.uid_validity };
+        const target = k.target_folder?.startsWith('\\') ? await specialFolder(client, k.target_folder as '\\Archive' | '\\Inbox') : k.target_folder;
+        if (target && target !== k.folder) {
+          const moved = await client.messageMove(String(k.uid), target, { uid: true });
+          if (!moved) throw new Error('Verschieben fehlgeschlagen');
+          // without UIDPLUS the new UID is unknown (0): the next sync of the target folder fills it in
+          const uid = moved.uidMap?.get(k.uid) ?? 0;
+          place = { folder: target, uid, uidValidity: moved.uidValidity !== undefined ? String(moved.uidValidity) : '' };
+        }
+        out.push({ id: k.id, ok: true, ...place });
+      } catch (e) {
+        out.push({ id: k.id, ok: false, error: e instanceof Error ? e.message : String(e) });
+      } finally {
+        lock.release();
+      }
+    }
+  } finally {
+    await client.logout().catch(() => client.close());
+  }
+  return out;
+}
+
+/** the sent mail into the sent folder (SMTP does not do that); returns where it lies */
+export async function inGesendetAblegen(conn: Connection, raw: Buffer): Promise<{ folder: string; uid?: number; uidValidity?: string }> {
+  const client = imapClient(ImapConfig.parse(conn.config));
+  await client.connect();
+  try {
+    const folder = await specialFolder(client, '\\Sent');
+    const r = await client.append(folder, raw, ['\\Seen']);
+    return { folder, uid: r ? r.uid : undefined, uidValidity: r && r.uidValidity !== undefined ? String(r.uidValidity) : undefined };
+  } finally {
+    await client.logout().catch(() => client.close());
+  }
 }

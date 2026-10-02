@@ -8,6 +8,7 @@ import './handover';
 import './hint';
 import './instruction';
 import './link';
+import './mail';
 import './matter';
 import './note';
 import './review';

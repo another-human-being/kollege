@@ -225,6 +225,8 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
 - Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (Stufe 4)
 - Chats löschen (Design: ChatListe „Löschen“)? Steht nicht in der Bauvorlage. Die Karten verweisen auf ihren Chat; ich würde „Archivieren“ statt Löschen vorschlagen.
+- Entscheidungsmodelle wie Jev (Analyse 02.10.2026): jetzt nicht. Jev läuft nur in den USA und würde keinen Modellaufruf ersetzen, sondern einen hinzufügen. Später bewerten, ob es eine Open-Source-Variante gibt, die in der EU oder lokal läuft; Prüfgrundlage wäre `npm run eval:zuordnung` (Relevanz, Bereich, Kandidatenwahl) auf den erfundenen Fixtures.
+- Ist die selbst eingeschätzte Sicherheit des Modells (high/medium/low) verlässlich? Vorschlag: die Korrekturquote je Stufe aus dem Aktionsprotokoll messen (SQL) und die Schwellen der Schranke danach setzen. Steht nicht in der Bauvorlage.
 - „Alles rückgängig“ für eine Antwort mit mehreren Karten (aus dem Design der Quittung)?
 - Was das Modell im Chat auf ausdrücklichen Wunsch anlegt („leg ein Event X an“), ist nach §6 trotzdem ungeprüft. So lassen oder bei Akteur `model` im Chat gleich übernehmen?
 

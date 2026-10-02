@@ -78,7 +78,8 @@ export async function undoAction(actionId: string, userId: string): Promise<void
 }
 
 async function undoInTx(tx: Tx, actionId: string, userId: string): Promise<void> {
-  const [action] = await tx.select().from(actions).where(eq(actions.id, actionId));
+  // locked: a concurrent step on the same action (the send job, E43) waits for the undo or the other way round
+  const [action] = await tx.select().from(actions).where(eq(actions.id, actionId)).for('update');
   if (!action) throw new ActionError(`action ${actionId} not found`);
   if (action.undone_at) throw new ActionError(`action ${actionId} already undone`);
   if (!action.inverse) throw new ActionError(`action ${action.type} cannot be undone`);
