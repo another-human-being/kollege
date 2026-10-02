@@ -21,6 +21,7 @@ const BESCHREIBUNG: Record<string, string> = {
   'entry.link': 'Einen Eintrag (Mail, Termin, Datei, Notiz) einem Eintrag, einer Organisation oder Person zuordnen.',
   'review.accept': 'Vom System angelegte, ungeprüfte Einträge übernehmen.',
   'review.discard': 'Ungeprüfte Einträge verwerfen, mit Grund.',
+  'mail.draft': 'Mail-Entwurf schreiben (connection_id: dein Postfach aus dem Kontext; Antwort: art antwort und bezug_entry_id der Mail). Senden kannst du nicht – das entscheidet der Mensch per Klick.',
 };
 
 const toolName = (type: string) => type.replace('.', '_');

@@ -47,6 +47,9 @@ export async function kontext(userId: string, now: Date, bezug?: ChatBezug | nul
       ORDER BY (e.instruction_user_id IS NOT NULL) DESC, (e.instruction_area_id IS NOT NULL) DESC, e.occurred_at`)).rows
       .map((a): Anweisung => ({ id: a.id, text: a.text, scope: a.personal ? 'personal' : a.area ? 'area' : 'team', area: a.area }));
 
+    const postfaecher = (await tx.execute<{ id: string; user_id: string | null; address: string | null }>(sql`
+      SELECT id, user_id, config->>'address' AS address FROM connections
+      WHERE kind = 'mail' AND status <> 'disabled' AND (user_id = ${userId} OR user_id IS NULL) ORDER BY user_id IS NULL`)).rows;
     const b = bezug ? await bezugName(tx, bezug) : null;
     const seite = b ? `${b.art} „${b.name}“ (type ${bezug!.type}, ID ${bezug!.id})` : null;
 
@@ -56,6 +59,9 @@ export async function kontext(userId: string, now: Date, bezug?: ChatBezug | nul
       `Heute: ${wochentag}, ${berlinDate(now)} (Europe/Berlin).`,
       `Du schreibst mit: ${me?.name ?? '?'} (ID ${userId}).`,
       `Team: ${team.map((u) => `${u.name} (ID ${u.id})`).join(', ')}.`,
+      postfaecher.length
+        ? `Postfächer für Mail-Entwürfe: ${postfaecher.map((p) => `${p.user_id ? 'deins' : 'StartHub'} ${p.address ?? ''} (connection_id ${p.id})`).join(', ')}.`
+        : 'Kein Postfach verbunden – Mail-Entwürfe gehen noch nicht.',
       'Bereiche:',
       ...areas.map((a) => `- ${a.name_plural}: key ${a.key}, ID ${a.id}${a.matter_kind === 'org_based' ? ', Liste der Gründungsteams (Organisationen), Themen als Einträge mit org_id' : ''}${a.phases.length ? `, Phasen ${a.phases.join(' / ')}` : ''}${a.fields.length ? `, Felder ${a.fields.map((f) => `${f.key} (${f.label}, ${f.type})`).join(', ')}` : ''}`),
       anweisungen.length ? 'Anweisungen (persönlich vor Bereich vor Team):' : 'Anweisungen: keine.',

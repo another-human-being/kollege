@@ -140,6 +140,11 @@ export const fixtureConnector: Connector = {
       if (cfg.source === 'calendar' && holders.calendar !== owner) continue;
       try {
         const item = toItem(cfg.source, el);
+        if (item.kind === 'mail') {
+          // a copy in this mailbox like IMAP has (stage 5); nothing is written back for fixtures
+          const folder = String(item.meta.folder ?? 'Inbox');
+          item.meta.ort = { folder: /^inbox$/i.test(folder) ? 'INBOX' : folder, uid: i + 1, uidValidity: 'fixture', seen: false };
+        }
         if (item.occurredAt >= since) items.push(item);
       } catch (e) {
         errors.push({ ref: key, message: e instanceof z.ZodError ? z.prettifyError(e) : String(e) });

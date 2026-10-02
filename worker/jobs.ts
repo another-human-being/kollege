@@ -9,7 +9,7 @@ import { connections } from '@/lib/db/schema';
 import { runImport } from '@/lib/pipeline/import';
 import { syncConnection } from '@/lib/pipeline/ingest';
 import { rueckschreiben } from '@/lib/mail/rueckschreiben';
-import { sendeEntwurf } from '@/lib/mail/senden';
+import { sendeEntwurf, wartendeSendungen } from '@/lib/mail/senden';
 import { processEntry } from '@/lib/pipeline/process';
 
 type Connection = typeof connections.$inferSelect;
@@ -28,7 +28,7 @@ async function scheduleSync(boss: PgBoss, conns: Connection[]) {
 }
 
 export async function startJobs(boss: PgBoss): Promise<void> {
-  for (const q of ['import', 'sync', 'process', 'senden']) await boss.createQueue(q);
+  for (const q of ['import', 'sync', 'process', 'senden', 'senden-nachholen']) await boss.createQueue(q);
 
   await boss.work<{ connectionIds: string[] }>('import', async ([job]) => {
     const r = await runImport(job!.data.connectionIds);
@@ -52,6 +52,17 @@ export async function startJobs(boss: PgBoss): Promise<void> {
     if (r.ergebnis === 'gesendet' && r.entryId) await boss.send('process', { entryId: r.entryId });
     return r;
   });
+
+  // safety net: whatever still waits past its 10 s is sent now (the send job under the lock decides)
+  await boss.work('senden-nachholen', async () => {
+    const ids = await wartendeSendungen();
+    for (const actionId of ids) {
+      const r = await sendeEntwurf(actionId);
+      if (r.ergebnis === 'gesendet' && r.entryId) await boss.send('process', { entryId: r.entryId });
+    }
+    return { nachgeholt: ids.length };
+  });
+  await boss.schedule('senden-nachholen', '* * * * *', {}, { tz: 'Europe/Berlin' });
 
   await boss.work<{ entryId: string }>('process', async ([job]) => {
     const r = await processEntry(job!.data.entryId);

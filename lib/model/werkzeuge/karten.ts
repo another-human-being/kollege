@@ -17,6 +17,8 @@ export interface Karte {
   /** "entfernt auch 1 Aufgabe" */
   folgen?: string;
   undoable: boolean;
+  /** a mail draft (design: Entwurf) – sending is a click of the person, never the model */
+  entwurf?: { id: string; an: string; betreff: string; auszug: string };
 }
 
 type P = Record<string, unknown>;
@@ -158,6 +160,19 @@ export async function karteFuer(tx: Tx, type: string, p: P, result: P, now: Date
     case 'instruction.update':
     case 'instruction.delete':
       return quittung(type === 'instruction.update' ? 'Anweisung geändert' : 'Anweisung gelöscht', { text: 'Anweisungen', href: '/einstellungen?reiter=Anweisungen' });
+    case 'mail.draft': {
+      const an = [...((p.to as string[]) ?? []), ...((p.cc as string[]) ?? [])].join(', ') || '(noch ohne Empfänger)';
+      return {
+        ...quittung(`Mail-Entwurf an ${an}`, { text: 'Entwurf öffnen', href: `/mail?entwurf=${id}` }),
+        entwurf: { id, an, betreff: s(p.subject), auszug: kurz(s(p.body).replace(/\s+/g, ' '), 160) },
+      };
+    }
+    case 'mail.draft_delete':
+      return quittung('Entwurf verworfen');
+    case 'mail.mark_read':
+      return quittung(p.seen === false ? 'Als ungelesen markiert' : 'Als gelesen markiert');
+    case 'mail.archive':
+      return quittung('Archiviert', { text: 'Mail', href: '/mail' });
     case 'hint.dismiss':
     case 'hint.resolve':
       return quittung(type === 'hint.dismiss' ? 'Hinweis ausgeblendet' : 'Hinweis erledigt');

@@ -8,12 +8,12 @@
 - [x] 2 Oberfläche: Heute, Bereiche, Aufgaben, Kontakte, Einstellungen
 - [x] 3 Eingabe & Chat
 - [x] 4 Mail-Eingang (Abnahme gegen lokalen IMAP-Server; am echten Uni-Postfach noch offen)
-- [ ] 5 Mail-Client
+- [x] 5 Mail-Client (Abnahme gegen lokale IMAP- und SMTP-Server; am echten Postfach offen)
 - [ ] 6 Kalender
 - [ ] 7 Laufwerk
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 4 gebaut (02.10.2026). Offen ist der Test am echten Postfach (Schritte unten). Als Nächstes Stufe 5.
+**Aktuell:** Stufe 5 gebaut (02.10.2026). Offen sind die Tests am echten Postfach (Stufe 4 und 5). Als Nächstes Stufe 6.
 
 ## Stufe 1 – erledigt
 
@@ -79,6 +79,29 @@
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
 
+## Stufe 5 – gebaut
+
+- **Mail-Ansicht `/mail`** (E26, E38):
+  - Threads mit Umschalter Mein Postfach / StartHub / Alle.
+  - Ordner Eingang, Gesendet, Archiv, Entwürfe; Filter Ungelesen, Mit Anhang, Ohne Zuordnung; Suche.
+  - Thread mit Platzhaltern für fremde Mails (E13, Funktion `thread_stubs`).
+  - Anhänge zum Herunterladen: nur über einen Eintrag, den man lesen darf, und nie im Browser angezeigt.
+  - „Gehört zu“ änderbar.
+  - Antworten, Allen antworten, Weiterleiten, Archivieren, Als ungelesen. Beim Öffnen gilt die Mail als gelesen.
+- **Schreibfeld** (E43):
+  - Der Entwurf speichert sich beim Tippen. Senden geht nur per Knopf, nie per Enter.
+  - Ohne Empfänger erscheint ein Fehler am Feld, ohne Betreff oder Text eine Rückfrage.
+  - Anhänge bis 20 MB. „Über mein Postfach senden“; danach „Wird gesendet an … – 10 s zurückholbar“. Zurückholen öffnet das Schreibfeld wieder.
+- **Senden:** `mail.send` reiht nur ein. Der Job sendet nach 10 s per SMTP, unter der Sperre der Aktionszeile:
+  - Er legt die Mail im Gesendet-Ordner ab und macht aus dem Entwurf die gesendete Mail. Ihre Message-ID ist der Schlüssel, deshalb erkennt der nächste Sync sie wieder.
+  - Erst dann entfernt er das Rückgängig.
+  - Sicherheitsnetz: Der Worker holt jede Minute nach, was über die 10 s hinaus wartet.
+- **Zurückschreiben:** Gelesen und Archiv gelten pro Postfach-Kopie (`mail_copies`). Vor jedem Sync schreibt der Worker sie ins Postfach zurück, Rückgängig ebenso.
+- **Im Chat:** Das Modell darf Entwürfe schreiben. Die Karte zeigt sie als „Entwurf“ mit „Ansehen“ und „Über mein Postfach senden“. Senden ist immer ein Klick des Menschen; das Modell kann es nicht, im Code erzwungen und getestet.
+- **Tests:** 168 Vitest und 10 Playwright.
+  - Die Abnahme aus §13 läuft gegen Dovecot und einen mitschreibenden SMTP-Server: Gesendete Mail erscheint nach dem Sync nicht doppelt.
+  - Dazu: Zurückholen, kein Rückgängig mehr nach dem Senden, Bcc nur im Umschlag, Antwort im Thread, Zurückschreiben samt Rückgängig, fremde Kopien unantastbar, SMTP-Fehler und das Sicherheitsnetz.
+
 ## Entscheidungen (mit Andreas, 01.10.2026)
 
 1. **Infrastruktur-Ausnahme:** Diese Schreibvorgänge laufen direkt, nicht über `runAction`: Rohspeicherung, `visible_to` erweitern, Verarbeitungsstand (`processing_state`, `summary`, `author_person_id`, `meta.skip_reason`), Cursor, Seed von `users`/`connections`. Alles mit Bedeutung läuft über Aktionen.
@@ -129,6 +152,16 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 26. **Ausschluss-Anweisungen im Filter** (§7.2.1) wendet das `fast`-Modell an. Anweisungen in Alltagssprache lassen sich ohne Modell nicht prüfen. Die Team-Anweisungen gehen deshalb in jeden `fast`-Aufruf; schließt eine aus, ist die Antwort `relevant: false`, und der Eintrag wird übersprungen (Grund `irrelevant`).
     - Preis: Auch ausgeschlossene Mails kosten einen Aufruf. Feste Regeln (Absender oder Domain) wären billiger, stehen aber nicht in der Bauvorlage.
 27. **Kein `xlsx`-Paket.** Auf npm liegt nur 0.18.5 mit bekannten Sicherheitslücken; neuere Versionen gibt es nur über das CDN von SheetJS, das von hier gesperrt ist. Fremde Anhänge damit zu parsen ist ein Risiko. XLSX ist ein ZIP mit XML: Für den Textauszug liest `lib/pipeline/extract.ts` Zelltexte und Zahlen selbst, mit `jszip`, das `mammoth` ohnehin mitbringt.
+28. **Postfach-Kopien in eigener Tabelle `mail_copies`** statt in `entries.meta`: eine Zeile je Postfach und Ordner mit UID, Gelesen-Status und gewünschter Verschiebung.
+    - Grund: Gelesen und Archiv gelten pro Postfach, nicht pro Mail. Und Rückgängig ändert so genau eine Zeile. In einer JSON-Spalte hätte es alles überschrieben, was der Sync inzwischen eingetragen hat.
+    - Die Tabelle steht nicht in §4, ist aber die Darstellung dessen, was §6 und §7 verlangen („zurück ins Postfach“).
+29. **Entwürfe sind Einträge der Art `draft`**, nicht Mails mit Merker. So muss keine der vielen Mail-Abfragen (Heute, Verlauf, Suche, Statistik) Entwürfe gesondert ausschließen. Beim Senden wird der Entwurf zur Mail.
+30. **`mail.send` ist extern und nur für Menschen,** aber bis zum tatsächlichen Versand umkehrbar (E43): Der Sende-Job entfernt das Rückgängig erst, wenn die Mail raus ist. Rückgängig sperrt dazu die Aktionszeile, damit Zurückholen und Senden sich nicht kreuzen.
+31. **Ordner werden abgeleitet, nicht über Ordnernamen bestimmt** (die heißen je nach Server „Sent“, „Gesendet“ oder „Sent Items“):
+    - Gesendet ist, was von der Adresse des Postfachs kommt.
+    - Archiv ist, was empfangen wurde und nicht mehr im Eingang liegt.
+    - Archivieren verschiebt in den Archiv-Ordner des Servers (Sonderordner `\Archive`) oder legt „Archive“ an.
+32. **`nodemailer` 8 statt 10:** Das ist die Version, die `next-auth` für den späteren Magic-Link erwartet. Die Prüfung der Abhängigkeiten habe ich nicht umgangen.
 
 ## Befunde aus dem Bau
 
@@ -205,6 +238,13 @@ Eigene Fehler, durch Tests gefunden:
 - `model_calls` protokollierte das Modell aus `.env` statt des tatsächlich benutzten. Der Fehler wurde still verschluckt.
 - React führt Effekte im Entwicklungsmodus doppelt aus und bricht dabei den ersten Versand ab. Dadurch kam die erste Eingabe von Heute nie an. Gelöst mit einem Timer, den das Aufräumen storniert.
 
+### Befunde Stufe 5
+
+- **Eigener Konstruktionsfehler, vor dem Commit bemerkt:** Ich hatte den Gelesen-Status zuerst in `entries.meta` gelegt. Rückgängig hätte dann neue Postfach-Kopien gelöscht, die der Sync zwischenzeitlich eingetragen hat, und der Cursor holt sie nie wieder. Ersetzt durch `mail_copies` (Entscheidung 28).
+- **Senden und Zurückholen konnten sich kreuzen:** Rückgängig las die Aktion ohne Sperre. Lief parallel der Sende-Job, stand die Mail danach wieder als Entwurf da, obwohl sie verschickt war. Jetzt sperrt Rückgängig die Aktionszeile.
+- **pg-boss nimmt keine Jobs für eine Warteschlange an, die der Worker noch nicht angelegt hat.** Die Aktion „Senden“ war schon gespeichert, der Job nicht, und die Mail hätte für immer gewartet. Jetzt legt die App die Warteschlange bei Bedarf an, und der Worker holt Wartendes jede Minute nach.
+- **Design, nicht gebaut** (steht nicht in der Bauvorlage; Frage unten): Löschen, Markieren (Fähnchen), Sortierung, „Entwurf mit Kollege“ und „Kollege weiß dazu“ im Schreibfeld.
+
 ### Befunde Stufe 4
 
 Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
@@ -227,6 +267,7 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 - Chats löschen (Design: ChatListe „Löschen“)? Steht nicht in der Bauvorlage. Die Karten verweisen auf ihren Chat; ich würde „Archivieren“ statt Löschen vorschlagen.
 - Entscheidungsmodelle wie Jev (Analyse 02.10.2026): jetzt nicht. Jev läuft nur in den USA und würde keinen Modellaufruf ersetzen, sondern einen hinzufügen. Später bewerten, ob es eine Open-Source-Variante gibt, die in der EU oder lokal läuft; Prüfgrundlage wäre `npm run eval:zuordnung` (Relevanz, Bereich, Kandidatenwahl) auf den erfundenen Fixtures.
 - Ist die selbst eingeschätzte Sicherheit des Modells (high/medium/low) verlässlich? Vorschlag: die Korrekturquote je Stufe aus dem Aktionsprotokoll messen (SQL) und die Schwellen der Schranke danach setzen. Steht nicht in der Bauvorlage.
+- Mail (Design E26/E38, nicht in der Bauvorlage): Sollen Löschen, Markieren (Fähnchen), Sortierung, „Entwurf mit Kollege“ und „Kollege weiß dazu“ (Zusagen zum Bezug beim Schreiben) dazukommen?
 - „Alles rückgängig“ für eine Antwort mit mehreren Karten (aus dem Design der Quittung)?
 - Was das Modell im Chat auf ausdrücklichen Wunsch anlegt („leg ein Event X an“), ist nach §6 trotzdem ungeprüft. So lassen oder bei Akteur `model` im Chat gleich übernehmen?
 

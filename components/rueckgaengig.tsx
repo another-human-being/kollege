@@ -5,15 +5,15 @@ import { createContext, useCallback, useContext, useRef, useState, type ReactNod
 import { perform, undo, type Result } from '@/app/actions';
 
 type Toast =
-  | { kind: 'done'; text: string; actionId: string; redo: () => Promise<Result> }
+  | { kind: 'done'; text: string; actionId: string; redo: () => Promise<Result>; nachher?: () => void }
   | { kind: 'undone'; text: string; redo: () => Promise<Result> }
   | { kind: 'error'; text: string };
 
 interface Ctx {
   /** run an action; `text` is what the toast says on success */
   run(type: string, payload: unknown, text?: string): Promise<Result>;
-  /** show the toast for a result produced elsewhere (e.g. answering a hint) */
-  show(result: Result, text: string, redo: () => Promise<Result>): void;
+  /** show the toast for a result produced elsewhere (e.g. answering a hint); `nachher` runs after a successful undo */
+  show(result: Result, text: string, redo: () => Promise<Result>, opts?: { nachher?: () => void; ms?: number }): void;
 }
 
 const RueckgaengigCtx = createContext<Ctx | null>(null);
@@ -35,8 +35,8 @@ export function RueckgaengigProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const show = useCallback(
-    (r: Result, text: string, redo: () => Promise<Result>) => {
-      if (r.ok) zeige({ kind: 'done', text, actionId: r.actionId, redo }, 9000);
+    (r: Result, text: string, redo: () => Promise<Result>, opts?: { nachher?: () => void; ms?: number }) => {
+      if (r.ok) zeige({ kind: 'done', text, actionId: r.actionId, redo, nachher: opts?.nachher }, opts?.ms ?? 9000);
       else zeige({ kind: 'error', text: r.error }, 9000);
     },
     [zeige],
@@ -54,7 +54,10 @@ export function RueckgaengigProvider({ children }: { children: ReactNode }) {
 
   async function zurueck(t: Extract<Toast, { kind: 'done' }>) {
     const r = await undo(t.actionId);
-    if (r.ok) zeige({ kind: 'undone', text: 'Rückgängig gemacht', redo: t.redo }, 10000);
+    if (r.ok) {
+      zeige({ kind: 'undone', text: 'Rückgängig gemacht', redo: t.redo }, 10000);
+      t.nachher?.();
+    }
     else zeige({ kind: 'error', text: r.error }, 9000);
   }
 

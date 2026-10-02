@@ -5,7 +5,7 @@
 // Read state and archive change the actor's own copies (mail_copies); the worker writes
 // them back to the mailbox.
 import { randomUUID } from 'node:crypto';
-import { and, eq, isNull, or } from 'drizzle-orm';
+import { and, eq, inArray, isNull, or } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Tx } from '@/lib/db/client';
 import { connections, entries, mailCopies } from '@/lib/db/schema';
@@ -142,48 +142,49 @@ export const mailSend = defineAction({
   },
 });
 
-/** the actor's copies of a mail: in their own or the team mailbox */
-async function ownCopies(tx: Tx, entryId: string, userId: string) {
+/** the actor's copies of mails (a thread): in their own or the team mailbox */
+async function ownCopies(tx: Tx, entryIds: string[], userId: string) {
   const rows = await tx
     .select({ copy: mailCopies })
     .from(mailCopies)
     .innerJoin(connections, eq(connections.id, mailCopies.connection_id))
-    .where(and(eq(mailCopies.entry_id, entryId), or(eq(connections.user_id, userId), isNull(connections.user_id))));
+    .where(and(inArray(mailCopies.entry_id, entryIds), or(eq(connections.user_id, userId), isNull(connections.user_id))));
   if (!rows.length) throw new ActionError('no copy of this mail in your mailbox');
   return rows.map((r) => r.copy);
 }
 
 export const mailMarkRead = defineAction({
   type: 'mail.mark_read',
-  schema: z.object({ entry_id: z.uuid(), seen: z.boolean().default(true) }),
+  // a whole thread at once: one action, one undo
+  schema: z.object({ entry_ids: z.array(z.uuid()).min(1), seen: z.boolean().default(true) }),
   external: false,
   allowedActors: ['user', 'model'],
-  async apply(tx, { entry_id, seen }, ctx) {
-    const copies = (await ownCopies(tx, entry_id, userOf(ctx))).filter((c) => c.seen !== seen);
+  async apply(tx, { entry_ids, seen }, ctx) {
+    const copies = (await ownCopies(tx, entry_ids, userOf(ctx))).filter((c) => c.seen !== seen);
     const inverse: InverseOp[] = [];
     for (const c of copies) {
       await updateWithInverse(tx, mailCopies, 'mail_copies', c.id, { seen, pending: true });
       // undo must reach the mailbox as well: back to the old state, again pending
       inverse.push({ op: 'update', table: 'mail_copies', id: c.id, set: { seen: c.seen, pending: true } });
     }
-    return { result: { id: entry_id, changed: copies.length }, inverse };
+    return { result: { changed: copies.length }, inverse };
   },
 });
 
 export const mailArchive = defineAction({
   type: 'mail.archive',
-  schema: z.object({ entry_id: z.uuid() }),
+  schema: z.object({ entry_ids: z.array(z.uuid()).min(1) }),
   external: false,
   allowedActors: ['user', 'model'],
-  async apply(tx, { entry_id }, ctx) {
-    // archiving takes the mail out of the inbox; copies in other folders stay where they are
-    const copies = (await ownCopies(tx, entry_id, userOf(ctx))).filter((c) => c.folder.toUpperCase() === 'INBOX' && !c.target_folder);
+  async apply(tx, { entry_ids }, ctx) {
+    // archiving takes the mails out of the inbox; copies in other folders stay where they are
+    const copies = (await ownCopies(tx, entry_ids, userOf(ctx))).filter((c) => c.folder.toUpperCase() === 'INBOX' && !c.target_folder);
     if (!copies.length) throw new ActionError('not in your inbox');
     const inverse: InverseOp[] = [];
     for (const c of copies) {
       await updateWithInverse(tx, mailCopies, 'mail_copies', c.id, { target_folder: '\\Archive', pending: true });
       inverse.push({ op: 'update', table: 'mail_copies', id: c.id, set: { target_folder: '\\Inbox', pending: true } });
     }
-    return { result: { id: entry_id, changed: copies.length }, inverse };
+    return { result: { changed: copies.length }, inverse };
   },
 });

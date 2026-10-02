@@ -8,8 +8,9 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { chatAnlegen, perform, undo } from '@/app/actions';
+import { chatAnlegen, mailSenden, perform, undo } from '@/app/actions';
 import { Aktion, Aussage, Etikett, Laden, Privat, Quelle } from '@/components/kg';
+import { useAktion } from '@/components/rueckgaengig';
 import type { Karte } from '@/lib/model/werkzeuge/karten';
 import type { Quelle as QuelleT } from '@/lib/model/werkzeuge/quellen';
 import { zeitpunkt } from '@/lib/format';
@@ -117,6 +118,7 @@ function KarteAnsicht({ k, stand }: { k: Karte; stand?: { undone: boolean; folge
       </div>
       <ul className="kg-karte-punkte">{k.punkte.map((p, i) => <li key={i}>{p}</li>)}</ul>
       {k.anweisung ? <div className="kg-karte-anweisung">nach Anweisung: „{k.anweisung}“</div> : null}
+      {k.entwurf && !zurueck ? <EntwurfBlock e={k.entwurf} /> : null}
       <div className="kg-karte-fuss">
         {k.link ? <a className="kg-bezug" href={k.link.href}>{k.link.text}</a> : null}
         {zurueck ? (
@@ -129,6 +131,28 @@ function KarteAnsicht({ k, stand }: { k: Karte; stand?: { undone: boolean; folge
         ) : null}
         {fehler ? <span role="alert" className="kg-karte-folgen">{fehler}</span> : null}
       </div>
+    </div>
+  );
+}
+
+/** design: Entwurf – leaves the organisation only by the person's click (E6, E43) */
+function EntwurfBlock({ e }: { e: NonNullable<Karte['entwurf']> }) {
+  const { show } = useAktion();
+  const [gesendet, setGesendet] = useState(false);
+  return (
+    <div className="kg-entwurf">
+      <div className="mono">Mail an {e.an}</div>
+      <div><strong>{e.betreff || '(ohne Betreff)'}</strong></div>
+      <div style={{ color: 'var(--ink-muted)', fontSize: 14 }}>{e.auszug}</div>
+      <div className="kg-aktionen">
+        <a className="kg-aktion kg-aktion--sekundaer" href={`/mail?entwurf=${e.id}`}>Ansehen</a>
+        <Aktion variante="primaer" disabled={gesendet} onClick={async () => {
+          const r = await mailSenden(e.id);
+          if (r.ok) setGesendet(true);
+          show(r, `Wird gesendet an ${e.an} – 10 s zurückholbar`, () => mailSenden(e.id), { ms: 10_000, nachher: () => setGesendet(false) });
+        }}>Über mein Postfach senden</Aktion>
+      </div>
+      <div className="mono" style={{ color: 'var(--ink-muted)' }}>geht über dein Postfach und liegt danach im Gesendet-Ordner</div>
     </div>
   );
 }

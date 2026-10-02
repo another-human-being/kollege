@@ -5,6 +5,10 @@ import { refresh } from 'next/cache';
 import { ZodError } from 'zod';
 import { currentUserId } from '@/auth';
 import { ActionError, answerHint, runAction, undoAction } from '@/lib/actions';
+import { ZURUECKHOLBAR_S } from '@/lib/actions/mail';
+import { einreihen } from '@/lib/jobs/queue';
+import { entwurfVorlage } from '@/lib/mail/vorlage';
+import { putBlob } from '@/lib/pipeline/blobs';
 import { chatTitel } from '@/lib/views/chats';
 
 export type Result = { ok: true; actionId: string; result?: unknown } | { ok: false; error: string };
@@ -19,6 +23,11 @@ const MESSAGES: [RegExp, string][] = [
   [/freemail|team domain/, 'Diese Domain kann zu keiner Organisation gehören.'],
   [/only our own/, '„In Arbeit“ gibt es nur für eigene Aufgaben.'],
   [/nothing to change/, 'Nichts geändert.'],
+  [/no recipient/, 'Empfänger fehlt – an wen soll die Mail gehen?'],
+  [/mail is being sent/, 'Die Mail wird gerade gesendet.'],
+  [/mailbox not found or not yours/, 'Aus diesem Postfach kannst du nicht senden.'],
+  [/no copy of this mail in your mailbox/, 'Diese Mail liegt nicht in deinem Postfach.'],
+  [/not in your inbox/, 'Liegt nicht mehr im Eingang.'],
 ];
 
 function message(e: unknown): string {
@@ -63,4 +72,46 @@ export async function answer(hintId: string, optionIndex: number): Promise<Resul
 /** a new chat from the first input; the page then sends that input as first message */
 export async function chatAnlegen(text: string, bezug?: { type: 'matter' | 'org' | 'person'; id: string }): Promise<Result> {
   return perform('chat.create', { title: chatTitel(text), ...(bezug ? { context_type: bezug.type, context_id: bezug.id } : {}) });
+}
+
+// --- Mail (stage 5) ------------------------------------------------------------------------
+
+/** send: queue the mail, it goes out after ZURUECKHOLBAR_S unless undone (E43) */
+export async function mailSenden(draftId: string): Promise<Result> {
+  try {
+    const userId = await currentUserId();
+    const { actionId, result } = await runAction<{ send_after: string }>({ type: 'user', userId }, 'mail.send', { id: draftId });
+    // fast path; if it fails the worker picks the mail up within a minute (senden-nachholen)
+    await einreihen('senden', { actionId }, { startAfter: ZURUECKHOLBAR_S }).catch((e: unknown) => console.error('[senden einreihen]', e));
+    refresh();
+    return { ok: true, actionId, result };
+  } catch (e) {
+    return { ok: false, error: message(e) };
+  }
+}
+
+/** a new draft, prefilled for a reply, reply to all or forward; returns its id */
+export async function entwurfFuer(art: 'neu' | 'antwort' | 'allen' | 'weiterleitung', bezugId?: string): Promise<Result> {
+  try {
+    const userId = await currentUserId();
+    const payload = await entwurfVorlage(userId, art, bezugId);
+    const { actionId, result } = await runAction({ type: 'user', userId }, 'mail.draft', payload);
+    return { ok: true, actionId, result };
+  } catch (e) {
+    return { ok: false, error: message(e) };
+  }
+}
+
+/** an attachment for a draft: stored like every blob (content-addressed) */
+export async function anhangHochladen(form: FormData): Promise<{ ok: true; anhang: { blob_path: string; filename: string; mime: string } } | { ok: false; error: string }> {
+  try {
+    await currentUserId();
+    const f = form.get('datei');
+    if (!(f instanceof File) || !f.size) return { ok: false, error: 'Keine Datei.' };
+    if (f.size > 20 * 1024 * 1024) return { ok: false, error: 'Die Datei ist größer als 20 MB.' };
+    const blob_path = await putBlob(Buffer.from(await f.arrayBuffer()));
+    return { ok: true, anhang: { blob_path, filename: f.name, mime: f.type || 'application/octet-stream' } };
+  } catch (e) {
+    return { ok: false, error: message(e) };
+  }
 }

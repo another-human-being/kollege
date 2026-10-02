@@ -93,3 +93,29 @@ select.fe { cursor: pointer; }
 .chat-eingabe { position: sticky; bottom: 0; background: var(--paper); padding-block: var(--space-4) var(--space-6); }
 /* the frame shows focus (:focus-within); no second outline on the text field inside */
 .kg-eingabe textarea:focus-visible { outline: none; }
+
+/* mail (E26, E38) */
+.mz { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--space-3); padding: 10px 20px; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; }
+.mz:hover, .mz[aria-current="true"] { background: var(--paper-sunk); }
+.mz-von { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mz--neu .mz-von, .mz--neu .mz-betreff { font-weight: 600; }
+.mz-zeit { font-size: 12px; color: var(--ink-muted); }
+.mz-betreff { grid-column: 1 / -1; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mz-vorschau { grid-column: 1 / -1; font-size: 13px; color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mz-meta { grid-column: 1 / -1; font-size: 11px; color: var(--ink-muted); }
+.mail { display: grid; gap: 6px; padding-block: var(--space-3); border-top: 1px solid var(--rule); }
+.mail-kopf { display: flex; gap: var(--space-3); align-items: baseline; justify-content: space-between; }
+.mail-an { font-size: 12px; color: var(--ink-muted); }
+.mail-text { white-space: pre-wrap; font-size: 15px; line-height: 24px; overflow-wrap: anywhere; }
+.mail--platzhalter { display: flex; gap: var(--space-3); align-items: baseline; color: var(--ink-muted); }
+.anhaenge { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-3); font-size: 13px; }
+.anhaenge li { display: inline-flex; gap: 6px; align-items: baseline; }
+.schreibfeld { display: grid; gap: var(--space-3); }
+.schreibfeld .feld { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; padding: 6px 8px; border: 1px solid var(--line-control); border-radius: var(--radius-1); background: var(--paper); color: var(--ink); }
+.schreibfeld-text { min-height: 240px; line-height: 22px; resize: vertical; }
+
+/* Umschalter as links (works without JavaScript): same look as the bundle's buttons */
+.kg-umschalter { align-self: flex-start; }
+.kg-umschalter a { font-size: 13px; line-height: 20px; padding: 2px 10px; border-radius: 1px; color: var(--ink-muted); text-decoration: none; }
+.kg-umschalter a[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.kg-umschalter a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

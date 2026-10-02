@@ -57,6 +57,13 @@
       "when": 1790923308606,
       "tag": "0007_mail_copies",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790923839433,
+      "tag": "0008_thread_stubs",
+      "breakpoints": true
     }
   ]
 }

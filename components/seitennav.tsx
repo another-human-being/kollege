@@ -16,6 +16,7 @@ export function SeitenNav({ areas }: { areas: { key: string; name_plural: string
       {link('/heute', 'heute')}
       {link('/chat', 'chat')}
       <span className="nav-gruppe">Werkzeuge</span>
+      {link('/mail', 'mail')}
       {link('/aufgaben', 'aufgaben')}
       {link('/kontakte', 'kontakte')}
       <span className="nav-gruppe">Bereiche</span>

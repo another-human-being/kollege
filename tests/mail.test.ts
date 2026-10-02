@@ -1,7 +1,7 @@
 // Stage 5 (§13): mail client – send, recall within 10 s (E43), write back read state and
 // archive, against a real IMAP server (Dovecot) and a local SMTP server that records what
 // arrives. Acceptance: a sent mail does not appear twice after the next sync.
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { MockLanguageModelV4 } from 'ai/test';
 import { ImapFlow } from 'imapflow';
 import { createServer } from 'node:net';
@@ -159,7 +159,7 @@ describe.skipIf(!DOVECOT)('Stufe 5: Mail-Client', () => {
   it('read state goes back to the mailbox – and undo too', async () => {
     const [lisa] = await entryByMid('<lisa-20@solaro.example>');
     expect(await flags('INBOX', '<lisa-20@solaro.example>')).not.toContain('\\Seen');
-    const { actionId } = await runAction(andreas(), 'mail.mark_read', { entry_id: lisa!.id, seen: true });
+    const { actionId } = await runAction(andreas(), 'mail.mark_read', { entry_ids: [lisa!.id], seen: true });
     expect((await rueckschreiben(connId)).fehler).toEqual([]);
     expect(await flags('INBOX', '<lisa-20@solaro.example>')).toContain('\\Seen');
     await undoAction(actionId, fx.users.andreas!);
@@ -169,7 +169,7 @@ describe.skipIf(!DOVECOT)('Stufe 5: Mail-Client', () => {
 
   it('archive moves the mail in the mailbox; the next sync does not duplicate it; undo moves it back', async () => {
     const [m] = await entryByMid('<lisa-21@solaro.example>');
-    const { actionId } = await runAction(andreas(), 'mail.archive', { entry_id: m!.id });
+    const { actionId } = await runAction(andreas(), 'mail.archive', { entry_ids: [m!.id] });
     expect((await rueckschreiben(connId)).fehler).toEqual([]);
     expect(await flags('INBOX', '<lisa-21@solaro.example>')).toBeNull();
     expect(await flags('Archiv', '<lisa-21@solaro.example>')).not.toBeNull();
@@ -187,9 +187,21 @@ describe.skipIf(!DOVECOT)('Stufe 5: Mail-Client', () => {
 
   it("Julia cannot change Andreas' copies", async () => {
     const [m] = await entryByMid('<lisa-20@solaro.example>');
-    await expectRejects(runAction({ type: 'user', userId: fx.users.julia! }, 'mail.mark_read', { entry_id: m!.id }), /not found|no copy/);
+    await expectRejects(runAction({ type: 'user', userId: fx.users.julia! }, 'mail.mark_read', { entry_ids: [m!.id] }), /not found|no copy/);
     const [d] = await withSystem((tx) => tx.select().from(entries).where(and(eq(entries.kind, 'draft'), eq(entries.author_user_id, fx.users.andreas!))));
     if (d) await expectRejects(runAction({ type: 'user', userId: fx.users.julia! }, 'mail.send', { id: d.id }), /not found/);
+  });
+
+  it('safety net: a mail whose job got lost is found and sent by the worker sweep', async () => {
+    const { wartendeSendungen } = await import('@/lib/mail/senden');
+    const id = await entwurf({ subject: 'Job verloren' });
+    const { actionId } = await runAction(andreas(), 'mail.send', { id });
+    expect(await wartendeSendungen()).not.toContain(actionId);
+    // pretend its 10 s ran out long ago without any job
+    await withSystem((tx) => tx.execute(sql`UPDATE entries SET meta = jsonb_set(meta, '{send,send_after}', to_jsonb((now() - interval '1 minute')::text)) WHERE id = ${id}`));
+    expect(await wartendeSendungen()).toContain(actionId);
+    expect(await sendeEntwurf(actionId)).toMatchObject({ ergebnis: 'gesendet' });
+    expect(await wartendeSendungen()).not.toContain(actionId);
   });
 
   it('SMTP refuses: the mail stays a draft with the reason, nothing is lost', async () => {

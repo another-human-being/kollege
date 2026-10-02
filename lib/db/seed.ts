@@ -44,7 +44,7 @@ export async function seed(opts: { now?: Date } = {}): Promise<SeedResult> {
       user_id: m.owner ? userIds[m.owner] : null,
       kind: 'mail' as const,
       label: `Postfach ${m.address}`,
-      config: { source: 'mail', mailbox: m.key },
+      config: { source: 'mail', mailbox: m.key, address: m.address },
     })),
     ...cfg.users.map((u) => ({
       user_id: userIds[u.key],
