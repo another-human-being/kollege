@@ -18,7 +18,9 @@
     "dev:reset": "tsx lib/db/dev-reset.ts",
     "e2e": "playwright test",
     "modell:liste": "tsx --env-file-if-exists=.env lib/model/liste.ts",
-    "eval:chat": "vitest run --config vitest.eval.config.ts"
+    "eval:chat": "vitest run --config vitest.eval.config.ts",
+    "quelle:imap": "tsx --env-file-if-exists=.env lib/connectors/einrichten.ts",
+    "eval:zuordnung": "EVAL=zuordnung vitest run --config vitest.eval.config.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.71",
@@ -30,8 +32,13 @@
     "@fontsource/ibm-plex-serif": "^5.3.0",
     "ai": "^7.0.127",
     "drizzle-orm": "^0.45.3",
+    "imapflow": "^2.2.1",
+    "jszip": "^3.10.2",
+    "mailparser": "^3.9.33",
+    "mammoth": "^1.13.0",
     "next": "^16.3.8",
     "next-auth": "5.0.0-beta.32",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.23.1",
     "pg-boss": "^12.35.1",
     "react": "^19.3.0",
@@ -40,6 +47,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@types/mailparser": "^3.9.0",
     "@types/node": "^26.6.3",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",

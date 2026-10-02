@@ -7,7 +7,7 @@ import { runAction } from '@/lib/actions';
 import type { HintOption } from '@/lib/actions/hint';
 import { emailDomain, isFreemailDomain, isTeamAddress } from '@/lib/config';
 import type { Tx } from '@/lib/db/client';
-import { areas, connections, entries, orgs, people, personEmails, users } from '@/lib/db/schema';
+import { areas, connections, entries, matters, orgs, people, personEmails, users } from '@/lib/db/schema';
 import type { FastOutput } from '@/lib/model/schemas';
 import { berlinEndOfDay } from '@/lib/time';
 import type { Fixed } from './assign';
@@ -18,8 +18,10 @@ type Entry = typeof entries.$inferSelect;
 const SYSTEM = { type: 'system' } as const;
 
 export interface ApplyReport {
-  /** model referenced an existing object that was not among the candidates (finding for stage 4) */
+  /** an existing object that was not among the candidates (the oracle may do that) */
   notInCandidates: string[];
+  /** IDs that do not exist – dropped, never linked (links.target_id has no foreign key) */
+  unknown: string[];
   clarifyHintId?: string;
 }
 
@@ -30,7 +32,7 @@ export async function applyAssignment(
   cands: Candidates,
   out: FastOutput | null,
 ): Promise<ApplyReport> {
-  const report: ApplyReport = { notInCandidates: [] };
+  const report: ApplyReport = { notInCandidates: [], unknown: [] };
   const linked = new Set<string>();
   const link = async (type: 'matter' | 'person' | 'org', id: string, origin: 'rule' | 'model', confidence: 'high' | 'medium') => {
     if (linked.has(`${type}:${id}`)) return; // a fixed match wins over the same model suggestion
@@ -49,16 +51,21 @@ export async function applyAssignment(
   }
   const conf = out.confidence;
   const candidateIds = new Set([...cands.matters, ...cands.people, ...cands.orgs].map((c) => c.id));
-  const checkCandidate = (id: string) => {
-    if (!candidateIds.has(id)) report.notInCandidates.push(id);
+  const TABLE = { org: orgs, person: people, matter: matters } as const;
+  /** usable reference: a candidate, or at least an existing object of that type */
+  const known = async (type: keyof typeof TABLE, id: string): Promise<boolean> => {
+    if (candidateIds.has(id)) return true;
+    const t = TABLE[type];
+    const [row] = await tx.select({ id: t.id }).from(t).where(eq(t.id, id));
+    (row ? report.notInCandidates : report.unknown).push(id);
+    return !!row;
   };
 
   // organisation
   let orgId: string | undefined;
   let orgName: string | undefined;
   if (out.org && 'id' in out.org) {
-    orgId = out.org.id;
-    checkCandidate(orgId);
+    if (await known('org', out.org.id)) orgId = out.org.id;
   } else if (out.org) {
     orgName = out.org.new.name;
     // domains for later fixed assignment: from the new people of this org, never freemail/team
@@ -88,8 +95,8 @@ export async function applyAssignment(
   for (const p of out.people) {
     let id: string;
     if ('id' in p) {
+      if (!(await known('person', p.id))) continue;
       id = p.id;
-      checkCandidate(id);
     } else {
       const email = p.new.email.toLowerCase();
       const [known] = await tx.select({ id: personEmails.person_id }).from(personEmails).where(eq(personEmails.email, email));
@@ -115,8 +122,7 @@ export async function applyAssignment(
   // matter
   let matterId: string | undefined;
   if (out.matter && 'id' in out.matter) {
-    matterId = out.matter.id;
-    checkCandidate(matterId);
+    if (await known('matter', out.matter.id)) matterId = out.matter.id;
   } else if (out.matter) {
     const [area] = await tx.select().from(areas).where(eq(areas.key, out.matter.new.area_key));
     const r = await runAction<{ id: string }>(

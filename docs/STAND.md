@@ -7,13 +7,13 @@
 - [x] 1 Kern: Schema, RLS, Aktionsschicht + Rückgängig, Seed, Fixture-Import
 - [x] 2 Oberfläche: Heute, Bereiche, Aufgaben, Kontakte, Einstellungen
 - [x] 3 Eingabe & Chat
-- [ ] 4 Mail-Eingang
+- [x] 4 Mail-Eingang (Abnahme gegen lokalen IMAP-Server; am echten Uni-Postfach noch offen)
 - [ ] 5 Mail-Client
 - [ ] 6 Kalender
 - [ ] 7 Laufwerk
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 3 abgeschlossen (02.10.2026). Als Nächstes Stufe 4.
+**Aktuell:** Stufe 4 gebaut (02.10.2026). Offen ist der Test am echten Postfach (Schritte unten). Als Nächstes Stufe 5.
 
 ## Stufe 1 – erledigt
 
@@ -53,6 +53,31 @@
 - **Ehrliche Grenze:** Ein echtes Modell lief noch nie. In dieser Umgebung gibt es keinen API-Schlüssel. Die Abnahmen laufen mit dem Stand-in `MODEL_THINK=skript`. Es versteht nur die Abnahmesätze, nutzt aber dieselben Werkzeuge, Rechte, Karten und Quellen.
   - Damit ist die Verdrahtung geprüft, nicht das Urteil des Modells.
   - Zum Prüfen: `.env` mit `ANTHROPIC_API_KEY` und `MODEL_THINK=anthropic:claude-sonnet-5-5`, `npm run dev`, dann die beiden Sätze aus §13 eingeben.
+
+## Stufe 4 – gebaut
+
+- **IMAP-Konnektor** (`lib/connectors/imap.ts`, `imapflow` + `mailparser`). Er liest alle Ordner außer Junk, Papierkorb und Entwürfe und verändert das Postfach nicht.
+  - Import ab `import_since` (Standard: 12 Monate) in Paketen zu 100 Mails; der Cursor wird nach jedem Paket gespeichert.
+  - Danach liest jeder Sync nur neue UIDs. Ändert sich die UIDVALIDITY eines Ordners, wird er neu gelesen; doppelte Mails fängt die Message-ID ab.
+  - Robust: Jede Mail wird einzeln verarbeitet, eine Mail ohne Message-ID wird ein Fehler-Eintrag, und der Sync läuft weiter.
+- **Zugangsdaten** werden mit `APP_SECRET` verschlüsselt (AES-256-GCM, `lib/crypto.ts`).
+  - Einrichten über `npm run quelle:imap`: Das Passwort wird abgefragt, nie als Argument übergeben. Vor dem Speichern prüft das Skript die Anmeldung.
+- **Anhänge:** Text aus PDF, DOCX, XLSX und CSV (`lib/pipeline/extract.ts`). Kaputte Dateien ergeben „kein Text“ statt eines Fehlers.
+- **Echtes `fast`-Modell** (`lib/model/fast.ts`, Prompt `prompts/zuordnung.md`).
+  - Das Antwortschema wird je Aufruf auf die Kandidaten und vorhandenen Bereiche eingeengt.
+  - Mitgegeben werden die letzten 20 Korrekturen des Teams und die Team-Anweisungen.
+  - Jeder Aufruf landet in `model_calls`.
+- **Korrekturbeispiele** (§7.4) werden direkt aus dem Aktionsprotokoll gelesen (Verwerfen mit Grund, Umhängen, Lösen). Datenschutz-Regel: Ein Beispiel geht nur in den Aufruf, wenn alle, die den aktuellen Eintrag lesen dürfen, auch den Beispiel-Eintrag lesen dürfen.
+- **Tests:** 152 Vitest.
+  - Die Abnahme aus §13 läuft gegen einen echten IMAP-Server (Dovecot, `tests/dovecot.ts`; ohne Dovecot werden diese Tests mit Hinweis übersprungen): Newsletter übersprungen, bekannte Absender per Regel zugeordnet, neue Anfrage als ungeprüft.
+  - `npm run eval:zuordnung` lässt die Soll-Prüfungen aus `expected.json` mit dem echten Modell statt dem Orakel laufen. Jeder Fehlschlag ist eine falsche Zuordnung.
+- **Ehrliche Grenze:** Das echte Uni-Postfach und das echte Modell liefen noch nie, beide sind von dieser Umgebung aus gesperrt.
+  - Befund: `imap.uni-augsburg.de` und `smtp.uni-augsburg.de` existieren im Netz der Uni; einen Exchange- oder Autodiscover-Rechner gibt es nicht.
+  - Zum Testen auf deinem Rechner bzw. im Uni-Netz:
+    1. `.env` mit `APP_SECRET`, `MODEL_FAST`, `MISTRAL_API_KEY`.
+    2. `npm run eval:zuordnung`.
+    3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
+    4. Worker starten und Heute bzw. die Prüfansicht ansehen.
 
 ## Entscheidungen (mit Andreas, 01.10.2026)
 
@@ -100,6 +125,10 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
       - AVV/DPA abschließen.
       - Modell-IDs mit `npm run modell:liste` gegen das Konto prüfen und auf eine feste Version setzen.
       - `npm run eval:chat` fährt die Abnahme aus §13 mit dem echten Modell und prüft den Datenbestand und die Quellen, nicht den Wortlaut.
+25. **Mail über IMAP** (Andreas, 02.10.2026): `imap.uni-augsburg.de:993` (TLS) mit RZ-Kennung und Passwort. Versand (Stufe 5) läuft über `smtp.uni-augsburg.de:465`. Microsoft Graph entfällt.
+26. **Ausschluss-Anweisungen im Filter** (§7.2.1) wendet das `fast`-Modell an. Anweisungen in Alltagssprache lassen sich ohne Modell nicht prüfen. Die Team-Anweisungen gehen deshalb in jeden `fast`-Aufruf; schließt eine aus, ist die Antwort `relevant: false`, und der Eintrag wird übersprungen (Grund `irrelevant`).
+    - Preis: Auch ausgeschlossene Mails kosten einen Aufruf. Feste Regeln (Absender oder Domain) wären billiger, stehen aber nicht in der Bauvorlage.
+27. **Kein `xlsx`-Paket.** Auf npm liegt nur 0.18.5 mit bekannten Sicherheitslücken; neuere Versionen gibt es nur über das CDN von SheetJS, das von hier gesperrt ist. Fremde Anhänge damit zu parsen ist ein Risiko. XLSX ist ein ZIP mit XML: Für den Textauszug liest `lib/pipeline/extract.ts` Zelltexte und Zahlen selbst, mit `jszip`, das `mammoth` ohnehin mitbringt.
 
 ## Befunde aus dem Bau
 
@@ -176,9 +205,17 @@ Eigene Fehler, durch Tests gefunden:
 - `model_calls` protokollierte das Modell aus `.env` statt des tatsächlich benutzten. Der Fehler wurde still verschluckt.
 - React führt Effekte im Entwicklungsmodus doppelt aus und bricht dabei den ersten Versand ab. Dadurch kam die erste Eingabe von Heute nie an. Gelöst mit einem Timer, den das Aufräumen storniert.
 
+### Befunde Stufe 4
+
+Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
+- **`SINCE` filtert nach dem Ablagedatum im Postfach, nicht nach dem Datum der Mail.** Eine alte, später abgelegte oder verschobene Mail wäre in den Import gerutscht. Jetzt gilt `SENTSINCE`, zusätzlich eine Prüfung auf Client-Seite.
+- **Die Datumsgrenze ging nach dem ersten Paket verloren** (eigener Entwurfsfehler): Ältere Mails mit höherer UID wären dann doch gekommen. Die Grenze steht jetzt im Cursor, bis der Ordner durch ist.
+- **`mailparser` fasst `List-*`-Kopfzeilen unter `list` zusammen.** Der Newsletter-Filter hätte `List-Unsubscribe` aus echten Postfächern nie gesehen. Die Kopfzeilen werden jetzt roh gelesen.
+- **Erfundene IDs:** Verwies das Modell auf ein Objekt, das es nicht gibt, wäre die Zuordnung ins Leere gelaufen (`links.target_id` hat keinen Fremdschlüssel). Jetzt verhindert es das Schema schon beim Modell, und die Anwendung verwirft unbekannte IDs (`report.unknown`).
+
 ## Offene Fragen an Andreas
 
-- Mailzugang der Uni: IMAP oder Microsoft Graph? (bis Stufe 4)
+- Rechenzentrum: Ist die Passwort-Anmeldung per IMAP für einen Dienst auf einem Server erlaubt (oder gibt es App-Passwörter)? Wie greift Kollege auf das StartHub-Postfach zu (eigene Kennung oder Funktionspostfach)?
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)
 - EU-Modell für den Betrieb: Testphase mit Mistral (Entscheidung 24). Ob danach ein offenes Modell bei GWDG/STACKIT oder selbst betrieben folgt, entscheiden die Zahlen aus `npm run eval:chat` und die Vorgabe des Datenschutzbeauftragten (EU-Standort oder EU-Unternehmen).
 - Klärungshinweis zu einer eingeschränkten Mail mit mehreren Berechtigten: Wer bekommt ihn? Jetzt geht er an die erste Person in `visible_to`.

@@ -6,6 +6,7 @@ import { runAction } from '@/lib/actions';
 import { withSystem } from '@/lib/db/client';
 import { entries, matters, orgs, people } from '@/lib/db/schema';
 import { syncConnection } from './ingest';
+import type { FastOptions } from '@/lib/model/fast';
 import { processEntry, type ProcessResult } from './process';
 
 export async function pendingEntryIds(): Promise<string[]> {
@@ -29,11 +30,11 @@ export interface ImportResult {
   reviewHintId?: string;
 }
 
-export async function runImport(connectionIds: string[], opts: { now?: Date; importId?: string } = {}): Promise<ImportResult> {
+export async function runImport(connectionIds: string[], opts: { now?: Date; importId?: string } & FastOptions = {}): Promise<ImportResult> {
   for (const id of connectionIds) await syncConnection(id, opts);
 
   const results = new Map<string, ProcessResult>();
-  for (const id of await pendingEntryIds()) results.set(id, await processEntry(id));
+  for (const id of await pendingEntryIds()) results.set(id, await processEntry(id, { model: opts.model, now: opts.now }));
 
   const unreviewed = await withSystem(async (tx) => {
     const n = async (t: typeof orgs | typeof people | typeof matters) =>

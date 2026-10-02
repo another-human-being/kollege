@@ -4,12 +4,13 @@
 // they record what arrived, they do not decide anything.
 import { eq, inArray, sql } from 'drizzle-orm';
 import { fixtureConnector } from '@/lib/connectors/fixture';
+import { imapConnector } from '@/lib/connectors/imap';
 import type { Connection, Connector, RawItem, SyncError } from '@/lib/connectors/types';
 import { withSystem, type Tx } from '@/lib/db/client';
 import { connections, entries, users } from '@/lib/db/schema';
 import { putBlob } from './blobs';
 
-const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector };
+const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector, imap: imapConnector };
 
 export interface SyncSummary {
   /** entries stored for the first time – each needs process:<entry> */
@@ -29,39 +30,45 @@ export async function syncConnection(connectionId: string, opts: { now?: Date } 
   const connector = connectors[conn.provider];
   if (!connector) throw new Error(`no connector for provider ${conn.provider} yet`);
 
-  let result;
-  try {
-    result = await connector.sync(conn, conn.cursor);
-  } catch (e) {
-    await withSystem((tx) =>
-      tx.update(connections).set({ status: 'error', last_error: String(e) }).where(eq(connections.id, conn.id)),
-    );
-    throw e;
-  }
-
   const isImport = conn.cursor === null;
-  const summary: SyncSummary = { newEntryIds: [], knownEntryIds: [], errors: [...result.errors], isImport };
-  for (const item of result.items) {
+  const summary: SyncSummary = { newEntryIds: [], knownEntryIds: [], errors: [], isImport };
+  let cursor = conn.cursor;
+  // a large import arrives in batches; the cursor is saved after each one (§12: idempotent)
+  for (;;) {
+    let result;
     try {
-      const { id, inserted } = await withSystem((tx) => storeItem(tx, conn, item, isImport && item.occurredAt < now));
-      (inserted ? summary.newEntryIds : summary.knownEntryIds).push(id);
+      result = await connector.sync(conn, cursor);
     } catch (e) {
-      summary.errors.push({ ref: item.externalId, message: String(e) });
+      await withSystem((tx) =>
+        tx.update(connections).set({ status: 'error', last_error: String(e) }).where(eq(connections.id, conn.id)),
+      );
+      throw e;
     }
+    const errors = [...result.errors];
+    for (const item of result.items) {
+      try {
+        const { id, inserted } = await withSystem((tx) => storeItem(tx, conn, item, isImport && item.occurredAt < now));
+        (inserted ? summary.newEntryIds : summary.knownEntryIds).push(id);
+      } catch (e) {
+        errors.push({ ref: item.externalId, message: String(e) });
+      }
+    }
+    for (const err of errors) await withSystem((tx) => storeError(tx, conn, err, now));
+    summary.errors.push(...errors);
+    cursor = result.cursor;
+    await withSystem((tx) =>
+      tx
+        .update(connections)
+        .set({
+          cursor,
+          last_sync_at: now,
+          status: 'ok',
+          last_error: summary.errors.length ? `${summary.errors.length} Elemente nicht lesbar` : null,
+        })
+        .where(eq(connections.id, conn.id)),
+    );
+    if (!result.more) break;
   }
-  for (const err of summary.errors) await withSystem((tx) => storeError(tx, conn, err, now));
-
-  await withSystem((tx) =>
-    tx
-      .update(connections)
-      .set({
-        cursor: result.cursor,
-        last_sync_at: now,
-        status: 'ok',
-        last_error: summary.errors.length ? `${summary.errors.length} Elemente nicht lesbar` : null,
-      })
-      .where(eq(connections.id, conn.id)),
-  );
   return summary;
 }
 

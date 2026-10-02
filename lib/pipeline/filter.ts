@@ -17,6 +17,7 @@ export function filterReason(entry: typeof entries.$inferSelect): SkipReason | n
   if (sender && NOREPLY.test(sender.email)) return 'noreply';
   // purely internal – only for mails (decision 2026-10-01: events are judged by the model)
   if (participants(entry).every(isTeamAddress)) return 'internal_only';
-  // TODO stage 3: exclusion instructions (instruction entries) – there are none before the chat exists
+  // exclusion instructions ("Newsletter von X ignorieren") are plain language: they cannot be
+  // checked without a model, so they go into the fast call, which answers relevant=false (STAND, decision 26)
   return null;
 }

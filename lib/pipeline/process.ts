@@ -3,7 +3,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { withSystem, type Tx } from '@/lib/db/client';
 import { entries, personEmails } from '@/lib/db/schema';
-import { assignWithFast } from '@/lib/model/fast';
+import { assignWithFast, type FastOptions } from '@/lib/model/fast';
 import { applyAssignment, type ApplyReport } from './apply';
 import { fixedMatches } from './assign';
 import { candidates } from './candidates';
@@ -18,7 +18,7 @@ export type ProcessResult =
   | { state: 'error'; error: string }
   | { state: 'not_pending' };
 
-export async function processEntry(entryId: string): Promise<ProcessResult> {
+export async function processEntry(entryId: string, opts: FastOptions = {}): Promise<ProcessResult> {
   try {
     return await withSystem(async (tx) => {
       const [entry] = await tx.select().from(entries).where(eq(entries.id, entryId)).for('update');
@@ -29,7 +29,7 @@ export async function processEntry(entryId: string): Promise<ProcessResult> {
 
       const fixed = await fixedMatches(tx, entry);
       const cands = await candidates(tx, entry, fixed);
-      const out = await assignWithFast(tx, { entry, candidates: cands });
+      const out = await assignWithFast(tx, { entry, candidates: cands }, opts);
       if (out && !out.relevant) return markSkipped(tx, entry, 'irrelevant', out.summary);
 
       const report = await applyAssignment(tx, entry, fixed, cands, out);

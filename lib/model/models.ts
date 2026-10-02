@@ -9,7 +9,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createMistral } from '@ai-sdk/mistral';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
-import { withUser } from '@/lib/db/client';
+import { withSystem, withUser, type Tx } from '@/lib/db/client';
 import { modelCalls } from '@/lib/db/schema';
 import { skriptModell } from './skript';
 
@@ -50,7 +50,8 @@ export function modelName(m: LanguageModel): string {
 }
 
 export interface CallLog {
-  userId: string;
+  /** absent = the worker (actor system) */
+  userId?: string;
   role: Role;
   model: string;
   purpose: string;
@@ -65,9 +66,10 @@ export interface CallLog {
  * A failing log must not break the answer; it is reported on the console.
  */
 export async function logCall(c: CallLog): Promise<void> {
-  await withUser(c.userId, (tx) =>
+  const run = c.userId ? <T>(fn: (tx: Tx) => Promise<T>) => withUser(c.userId!, fn) : withSystem;
+  await run((tx) =>
     tx.insert(modelCalls).values({
-      user_id: c.userId,
+      user_id: c.userId ?? null,
       role: c.role,
       model: c.model,
       purpose: c.purpose,

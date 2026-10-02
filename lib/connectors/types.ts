@@ -12,7 +12,7 @@ export interface RawAttachment {
   filename: string;
   mime: string;
   /** original bytes (fixtures: the extracted text stands in for the file) */
-  content: string;
+  content: string | Buffer;
   /** extracted text, null = metadata only */
   text: string | null;
 }
@@ -31,8 +31,8 @@ export interface RawItem {
   references?: string[];
   /** Mail: from/to/cc/headers/folder; event: start/end/location/organizer/attendees; file: path/mime */
   meta: Record<string, unknown>;
-  /** original content, stored as blob */
-  raw: string;
+  /** original content, stored as blob (mail: the RFC 822 source) */
+  raw: string | Buffer;
   attachments: RawAttachment[];
 }
 
@@ -46,6 +46,8 @@ export interface SyncResult {
   items: RawItem[];
   errors: SyncError[];
   cursor: unknown;
+  /** more is waiting (large import): store this batch, save the cursor, call again */
+  more?: boolean;
 }
 
 export interface Connector {
