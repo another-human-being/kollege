@@ -57,7 +57,7 @@ body { font-family: var(--font-sans); font-size: 15px; line-height: 24px; }
 .fe:focus { outline: none; border-color: var(--accent); background: var(--paper); }
 textarea.fe { resize: vertical; line-height: 22px; }
 select.fe { cursor: pointer; }
-.fe-titel { font-size: 24px; line-height: 32px; font-weight: 500; width: 100%; }
+.fe-titel { font-size: 24px; line-height: 32px; font-weight: 500; width: 100%; resize: none; overflow: hidden; field-sizing: content; }
 .felder { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 6px 16px; align-items: baseline; }
 .felder > label, .felder > .fl { font-size: 12px; line-height: 28px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
 .feldzeile { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; min-width: 0; }
@@ -154,3 +154,24 @@ select.fe { cursor: pointer; }
 .baum a[aria-current="true"] { background: var(--paper-sunk); color: var(--ink); }
 .baum a:focus-visible { outline: 2px solid var(--accent); }
 .pfad { font-family: var(--font-mono); font-size: 12px; line-height: 18px; color: var(--ink-muted); word-break: break-all; }
+
+/* Phone (design-system README "Mobil"): sidebar behind a menu, one column, list or detail,
+   the input of Heute at the bottom above the keyboard, page margin space-4 */
+.mobil-kopf { display: none; }
+/* desktop: the input keeps close to the date and the filter below it */
+.heute-eingabe { margin-bottom: calc(var(--space-4) - 44px); }
+@media (max-width: 760px) {
+  .app { flex-direction: column; }
+  .mobil-kopf { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; height: 48px; padding: 0 var(--space-2); border-bottom: 1px solid var(--rule); }
+  .seite { display: none; }
+  .app[data-menue] .seite { display: flex; position: fixed; inset: 48px 0 0 0; width: auto; z-index: 30; background: var(--paper); }
+  .inhalt { flex: 1; min-height: 0; }
+  .spalte { padding: var(--space-4) var(--space-4) var(--space-6); gap: var(--space-5); }
+  .heute-eingabe { order: 99; position: sticky; bottom: 0; z-index: 5; margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-6)); padding: var(--space-2) var(--space-4); background: var(--paper); border-top: 1px solid var(--rule); }
+  .ld { flex-direction: column; }
+  .ld-liste, .ld-liste--breit { width: auto; flex: 1; border-right: 0; }
+  .ld:not(.ld--zu) .ld-liste, .ld:not(.ld--zu) .baum-spalte { display: none; }
+  .baum-spalte { width: auto; border-right: 0; border-bottom: 1px solid var(--rule); padding: var(--space-3) var(--space-4); max-height: 160px; }
+  .ld-detail { padding: var(--space-4) var(--space-4) var(--space-6); }
+  .ld-zu { margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0; top: calc(-1 * var(--space-4)); }
+}

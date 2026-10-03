@@ -27,7 +27,7 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
   const [p, nav] = await Promise.all([todayPage(userId, now, bereich), navigation(userId)]);
 
   const chips = [{ key: '', label: 'Alle' }, ...nav.areas.map((a) => ({ key: a.key, label: a.name_plural }))];
-  const termin = (i: TodayItem) => i.entry_id === i.id; // events carry their entry as id
+  const termin = (i: TodayItem) => i.termin === true;
 
   const zeile = (i: TodayItem, gruende: Parameters<typeof Hinweis>[0]['gruende'], extra?: React.ReactNode) => (
     <Hinweis key={i.id} zeit={termin(i) ? uhrzeit(i.at!) : i.at ? tag(i.at, now) : ''} titel={<strong>{i.title}</strong>}
@@ -48,10 +48,10 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
 
   return (
     <main className="spalte">
+      <h1 className="kg-sr">Heute</h1>
+      {/* design Eingabe: on the overview at the top, above everything else; on a phone at the bottom (design "Mobil") */}
+      <div className="heute-eingabe"><EingabeStart /></div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <h1 className="kg-sr">Heute</h1>
-        {/* design Eingabe: on the overview at the top, above everything else */}
-        <EingabeStart />
         <div className="mono">{new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }).format(now)}</div>
         <div className="filterzeile" role="group" aria-label="Nach Bereich filtern">
           <span className="mono">Bereich</span>
@@ -63,7 +63,12 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
 
       {p.handoversToMe.length ? (
         <Abschnitt id="h-uebergabe" titel="Übergabe an dich" anzahl={p.handoversToMe.length}>
-          {p.handoversToMe.map((m) => matterZeile({ ...m, reason: `${m.from ?? 'Jemand'} übergibt dir das – wartet auf deine Annahme` }, <Uebergabe matterId={m.id} />))}
+          {p.handoversToMe.map((m) => (
+            <Hinweis key={m.id} zeit={tag(m.last_activity, now)} titel={<><strong>{m.from ?? 'Jemand'}</strong> übergibt dir <strong>{m.title}</strong>.</>}
+              kontext={<><Etikett>{m.area}</Etikett><a className="kg-bezug" href={`/m/${m.id}`}>öffnen</a></>}
+              gruende={[{ art: 'berechnet', text: m.reason }, { art: 'berechnet', text: 'wartet auf deine Annahme' }]}
+              aktionen={<><Uebergabe matterId={m.id} />{m.hintId ? <Spaeter hintId={m.hintId} /> : null}</>} />
+          ))}
         </Abschnitt>
       ) : null}
 
@@ -73,7 +78,10 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
             <div key={h.id} className="kg-klaerung">
               <div className="kg-klaerung-frage">{h.title}</div>
               {h.reason ? <Aussage art="einschaetzung" quelle={h.source ? `${QUELLE[h.source.kind] ?? 'Eintrag'} ${tag(h.source.at, now)}` : undefined}>{h.reason}</Aussage> : null}
-              <HinweisAntworten hintId={h.id} optionen={h.options.map((o) => o.label)} />
+              <div className="kg-aktionen">
+                <HinweisAntworten hintId={h.id} optionen={h.options.map((o) => o.label)} />
+                {h.href ? <a className="kg-aktion kg-aktion--text" href={h.href}>{h.source?.kind === 'mail' || h.source?.kind === 'file' ? 'Öffnen und zuordnen' : 'Öffnen'}</a> : null}
+              </div>
             </div>
           ))}
         </Abschnitt>

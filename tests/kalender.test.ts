@@ -17,6 +17,7 @@ import { syncConnection } from '@/lib/pipeline/ingest';
 import { expectRejects, importFixtures, NOW } from './helpers';
 import { RADICALE, startRadicale, type Testkalender } from './radicale';
 import { smtpServer } from './smtp';
+import { termine } from '@/lib/views/kalender';
 
 process.env.APP_SECRET ??= 'test-app-secret-0123456789abcdef0123';
 
@@ -119,6 +120,18 @@ describe.skipIf(!RADICALE)('Stufe 6: Termine schreiben und einladen', () => {
     // a draft that was never sent the model may discard
     await runAction(model(), 'event.cancel', { id: result.id });
     expect(await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)))).toHaveLength(0);
+  });
+
+  it('a discarded draft comes back with undo – also in the calendar view', async () => {
+    const { result } = await termin({ title: 'Verworfen und zurück', teilnahme: [{ email: 'lisa@solaro.example' }] });
+    const { actionId } = await runAction(andreas(), 'event.cancel', { id: result.id });
+    expect(await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)))).toHaveLength(0);
+    await undoAction(actionId, fx.users.andreas!);
+    const [e] = await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)));
+    expect(e).toBeDefined();
+    const m = e!.meta as { start: string; end: string };
+    const sicht = await termine(fx.users.andreas!, new Date(new Date(m.start).getTime() - 86_400_000), new Date(new Date(m.end).getTime() + 86_400_000));
+    expect(sicht.map((t) => t.title)).toContain('Verworfen und zurück');
   });
 
   it('"Einladung senden": into the calendar with attendees, invitation mail with METHOD:REQUEST, no undo afterwards', async () => {

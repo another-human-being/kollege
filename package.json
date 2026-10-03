@@ -22,7 +22,9 @@
     "quelle:imap": "tsx --env-file-if-exists=.env lib/connectors/einrichten.ts",
     "eval:zuordnung": "EVAL=zuordnung vitest run --config vitest.eval.config.ts",
     "quelle:kalender": "tsx --env-file-if-exists=.env lib/connectors/kalender-einrichten.ts",
-    "quelle:laufwerk": "tsx --env-file-if-exists=.env lib/connectors/laufwerk-einrichten.ts"
+    "quelle:laufwerk": "tsx --env-file-if-exists=.env lib/connectors/laufwerk-einrichten.ts",
+    "hinweise": "tsx --env-file-if-exists=.env lib/hinweise/cli.ts",
+    "simulation": "playwright test --config playwright.simulation.config.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.71",

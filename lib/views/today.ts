@@ -6,6 +6,7 @@ import { vorkommen } from '@/lib/connectors/ical';
 import { withUser } from '@/lib/db/client';
 import { berlinDate } from '@/lib/time';
 import { HinweisRegel } from '@/lib/actions/instruction';
+import { kurzstand } from '@/lib/hinweise/kurzstand';
 import { schluessel } from '@/lib/hinweise/schluessel';
 import { STALE_DAYS } from './areas';
 
@@ -28,10 +29,12 @@ export interface TodayItem {
   overdue: boolean;
   /** the hint behind this item (stage 8) – for "Später" */
   hintId?: string;
+  /** an event of today (time column shows the clock time; everything else its day) */
+  termin?: boolean;
 }
 
 export interface Today {
-  hints: (TodayItem & { kind: string; options: { label: string }[]; source: { kind: string; at: string } | null })[];
+  hints: (TodayItem & { kind: string; options: { label: string }[]; source: { kind: string; at: string } | null; href: string | null })[];
   due: TodayItem[];
   waitingOnUs: TodayItem[];
   weWaitFor: TodayItem[];
@@ -55,6 +58,7 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
       SELECT h.id, h.kind, h.text AS title, h.reason, h.options, h.target_type, h.target_id, h.created_at,
              (SELECT e.occurred_at FROM entries e WHERE h.target_type = 'entry' AND e.id = h.target_id) AS source_at,
              (SELECT e.kind FROM entries e WHERE h.target_type = 'entry' AND e.id = h.target_id) AS source_kind,
+             (SELECT e.thread_key FROM entries e WHERE h.target_type = 'entry' AND e.id = h.target_id) AS source_thread,
              a.name_singular AS area, a.key AS area_key,
              CASE WHEN h.target_type = 'matter' THEN h.target_id END AS matter_id,
              CASE WHEN h.target_type = 'entry' THEN h.target_id END AS entry_id
@@ -120,6 +124,11 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
         options: ((h.options as { label: string }[]) ?? []).map((o) => ({ label: o.label })),
         // the evidence is the entry, not the moment the hint was created
         source: h.source_at ? { kind: h.source_kind as string, at: iso(h.source_at)! } : null,
+        // where the question can be answered when no button fits ("Gehört zu", a new topic)
+        href: h.target_type === 'matter' ? `/m/${h.target_id as string}`
+          : h.source_kind === 'mail' && h.source_thread ? `/mail?t=${encodeURIComponent(h.source_thread as string)}`
+          : h.source_kind === 'file' ? `/dateien?d=${h.target_id as string}`
+          : h.source_kind === 'event' ? `/kalender?t=${h.target_id as string}` : null,
       })),
       due: due.rows.map((t) => ({
         id: t.id as string,
@@ -172,6 +181,7 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
         entry_id: e.entry_id as string,
         at: iso(e.occurred_at),
         overdue: false,
+        termin: true,
       })),
     };
   });
@@ -264,9 +274,11 @@ export async function todayPage(userId: string, now = new Date(), areaKey?: stri
   // the hint rows are the memory of the live items (decision 40): put off ("Später") or done by
   // hand, an item stays out of sight; otherwise it carries its hint for "Später"
   const stale = rows.filter((m) => m.owner_id === userId && m.last < staleBefore).map((m) => item(m, quiet(m)));
-  const handovers = rows.filter((m) => m.handover_to === userId).map((m) => ({ ...item(m, 'Übergabe an dich – wartet auf Annahme'), from: m.owner }));
+  // the state of things comes with the handover (Denkweise 7), the same text as the hint's
+  const handovers = await Promise.all(rows.filter((m) => m.handover_to === userId).map(async (m) => ({
+    ...item(m, await withUser(userId, (tx) => kurzstand(tx, m.id, userId))), from: m.owner })));
   const keys = new Map<object, string[]>();
-  for (const i of today_) if (i.overdue && i.at && i.id !== i.entry_id) keys.set(i, [schluessel.overdue(i.id, new Date(i.at))]);
+  for (const i of today_) if (i.overdue && i.at && !i.termin) keys.set(i, [schluessel.overdue(i.id, new Date(i.at))]);
   for (const i of t.waitingOnUs) keys.set(i, [schluessel.mail(i.id, userId), schluessel.mail(i.id, null)]);
   for (const i of t.weWaitFor) if (i.overdue && i.at) keys.set(i, [schluessel.zusage(i.id, new Date(i.at))]);
   for (const m of stale) keys.set(m, [schluessel.stale(m.id, new Date(m.last_activity))]);
@@ -296,7 +308,7 @@ export async function todayPage(userId: string, now = new Date(), areaKey?: stri
     reviewCounts,
     clarify: inArea(hinweisArt(t.hints.filter((h) => h.kind === 'clarify'))),
     // only overdue tasks are hints; what is due today and today's events always show
-    today: inArea(zeigen('overdue', sichtbar(today_), (i) => i.overdue && i.id !== i.entry_id)),
+    today: inArea(zeigen('overdue', sichtbar(today_), (i) => i.overdue && !i.termin)),
     waitingOnUs: inArea(zeigen('waiting', sichtbar(t.waitingOnUs))),
     weWaitFor: inArea(zeigen('waiting', sichtbar(t.weWaitFor))),
     stale: inArea(zeigen('stale', sichtbar(stale))),

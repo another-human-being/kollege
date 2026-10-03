@@ -103,7 +103,15 @@ function schritt(prompt: LanguageModelV4Prompt): Schritt {
   const anweisung = /^ab jetzt[:,]?\s*(.+)$/i.exec(user);
   if (anweisung) {
     if (!ergebnisse.instruction_create) {
-      return { calls: [{ name: 'instruction_create', input: { payload: { body_text: anweisung[1]!, scope: /\bmir\b|\bich\b|\bmich\b/i.test(anweisung[1]!) ? 'personal' : 'team' } } }] };
+      const text = anweisung[1]!;
+      const persoenlich = /\bmir\b|\bich\b|\bmich\b/i.test(text);
+      // "<Bereich>-Hinweise … nur <Wochentag>s" → the hint rule a real model would fill (decision 42)
+      const tag = /nur (montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)s?\b/i.exec(text);
+      const bereich = /social[- ]media/i.test(text) ? 'social' : /event/i.test(text) ? 'events' : /lehre/i.test(text) ? 'teaching' : /gründungsteam/i.test(text) ? 'founding_teams' : null;
+      const hinweise = persoenlich && tag && /hinweis/i.test(text)
+        ? { ...(bereich ? { bereiche: [bereich] } : {}), wochentage: [((WOCHENTAGE.indexOf(tag[1]!.toLowerCase()) + 6) % 7) + 1] }
+        : undefined;
+      return { calls: [{ name: 'instruction_create', input: { payload: { body_text: text, scope: persoenlich ? 'personal' : 'team', ...(hinweise ? { hinweise } : {}) } } }] };
     }
     return { text: 'Gemerkt.' };
   }

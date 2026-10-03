@@ -33,6 +33,10 @@ export function Feld({
     onChange: (e: { target: { value: string } }) => setV(e.target.value),
     onBlur: fertig,
   };
+  if (gross) {
+    // a long title wraps instead of being cut off; Enter ends the edit (titles have no line breaks)
+    return <textarea {...props} rows={1} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); } }} />;
+  }
   return mehrzeilig ? (
     <textarea {...props} rows={2} style={{ width: '100%', fontSize: 16 }} />
   ) : (
@@ -81,7 +85,8 @@ export function Erledigen({ id, offen, titel }: { id: string; offen: boolean; ti
   const { run } = useAktion();
   const [frage, setFrage] = useState(false);
   const [text, setText] = useState('');
-  if (!offen) return <Tu type="matter.set_status" payload={{ id, status: 'open' }} text="Wieder offen" variante="text">Wieder öffnen</Tu>;
+  // the question comes first: after "erledigt" the page reloads as done, the question must stay (E15)
+  if (!offen && !frage) return <Tu type="matter.set_status" payload={{ id, status: 'open' }} text="Wieder offen" variante="text">Wieder öffnen</Tu>;
   if (!frage) {
     return <Aktion onClick={async () => { const r = await run('matter.set_status', { id, status: 'done' }, 'Erledigt'); if (r.ok) setFrage(true); }}>Als erledigt markieren</Aktion>;
   }

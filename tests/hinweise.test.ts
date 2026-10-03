@@ -92,11 +92,17 @@ describe('Stufe 8: Hinweise & Rat', () => {
   describe('Momente', () => {
     it('handover: the recipient gets the state of things; accepted it closes', async () => {
       const id = await matterId('Pitch-Abend 19.11.');
+      // the newest entry of the topic is a private mail of Julia's: its subject must not reach Andreas
+      const privat = await createEntry({ kind: 'mail', title: 'Vertraulich: Honorar Jury', visibility: 'restricted', visible_to: [julia], occurred_at: NOW });
+      await withSystem((tx) => tx.insert(links).values({ entry_id: privat, target_type: 'matter', target_id: id, origin: 'rule', confidence: 'high' }));
       await runAction(user(julia), 'matter.handover', { id, to_user_id: andreas });
       await regelnAnwenden(NOW);
       const [h] = await hint(sql`${hints.kind} = 'handover' AND ${hints.target_id} = ${id}`);
       expect(h).toMatchObject({ user_id: andreas, text: 'Julia übergibt dir „Pitch-Abend 19.11.“.', status: 'open' });
       expect(h!.reason).toMatch(/^Nächster Schritt: .* · offene Zusagen: \d+/);
+      expect(h!.reason).not.toContain('Vertraulich');
+      // Heute says the same as the hint
+      expect((await todayPage(andreas, NOW)).handoversToMe.find((m) => m.id === id)!.reason).toBe(h!.reason);
       await runAction(user(andreas), 'matter.handover_accept', { id });
       await regelnAnwenden(NOW);
       expect((await hint(sql`${hints.id} = ${h!.id}`))[0]!.status).toBe('done');

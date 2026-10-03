@@ -2,7 +2,7 @@
 // Own database kollege_e2e, rebuilt from the fixtures before every run.
 import { defineConfig } from '@playwright/test';
 
-const env = {
+export const e2eEnv = {
   DATABASE_URL: process.env.E2E_DATABASE_URL ?? 'postgres://kollege:kollege@localhost:5432/kollege_e2e',
   BLOB_DIR: '/tmp/kollege-e2e-blobs',
   MODEL_FAST: 'oracle',
@@ -30,6 +30,6 @@ export default defineConfig({
     url: 'http://localhost:3100/anmelden',
     timeout: 180_000,
     reuseExistingServer: false,
-    env,
+    env: e2eEnv,
   },
 });

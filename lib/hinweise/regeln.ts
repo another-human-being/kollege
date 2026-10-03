@@ -9,6 +9,7 @@ import type { HintOption } from '@/lib/actions/hint';
 import { isTeamAddress } from '@/lib/config';
 import { withSystem } from '@/lib/db/client';
 import { STALE_DAYS } from '@/lib/views/areas';
+import { kurzstand } from './kurzstand';
 import { schluessel } from './schluessel';
 
 const SYSTEM = { type: 'system' } as const;
@@ -89,22 +90,13 @@ export async function ursachen(now: Date): Promise<Ursache[]> {
     }
 
     // handover: to the recipient, with the state of things (Denkweise 7)
-    const ueb = await tx.execute<{ id: string; title: string; area_id: string; to: string; von: string | null; schritt: string | null; offen: number; zuletzt: string | null; zuletzt_at: string | null }>(sql`
-      SELECT m.id, m.title, m.area_id, m.handover_to AS to, u.name AS von,
-             (SELECT t.title FROM tasks t WHERE t.matter_id = m.id AND t.direction = 'ours' AND t.status <> 'done' ORDER BY t.due_at NULLS LAST LIMIT 1) AS schritt,
-             (SELECT count(*)::int FROM tasks t WHERE t.matter_id = m.id AND t.status <> 'done') AS offen,
-             (SELECT e.title FROM links l JOIN entries e ON e.id = l.entry_id WHERE l.target_type = 'matter' AND l.target_id = m.id ORDER BY e.occurred_at DESC LIMIT 1) AS zuletzt,
-             (SELECT e.occurred_at FROM links l JOIN entries e ON e.id = l.entry_id WHERE l.target_type = 'matter' AND l.target_id = m.id ORDER BY e.occurred_at DESC LIMIT 1) AS zuletzt_at
+    const ueb = await tx.execute<{ id: string; title: string; area_id: string; to: string; von: string | null }>(sql`
+      SELECT m.id, m.title, m.area_id, m.handover_to AS to, u.name AS von
       FROM matters m LEFT JOIN users u ON u.id = m.owner_user_id
       WHERE m.handover_to IS NOT NULL`);
     for (const m of ueb.rows) {
-      const stand = [
-        `Nächster Schritt: ${m.schritt ?? 'keiner eingetragen'}`,
-        `offene Zusagen: ${m.offen}`,
-        m.zuletzt_at ? `zuletzt: ${m.zuletzt ?? 'Eintrag'} (${ddmm(m.zuletzt_at)})` : null,
-      ].filter(Boolean).join(' · ');
       out.push({ kind: 'handover', dedupe_key: schluessel.handover(m.id, m.to), user_id: m.to, area_id: m.area_id,
-        text: `${m.von ?? 'Jemand'} übergibt dir „${m.title}“.`, reason: stand, target_type: 'matter', target_id: m.id });
+        text: `${m.von ?? 'Jemand'} übergibt dir „${m.title}“.`, reason: await kurzstand(tx, m.id, m.to), target_type: 'matter', target_id: m.id });
     }
 
     // after_event: an event with people from outside ended within the last day, nothing written since

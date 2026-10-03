@@ -66,7 +66,8 @@ export default async function Kalender({ searchParams }: { searchParams: Promise
 
   const offen = sp.t ? liste.find((t) => t.id === sp.t && (!sp.s || t.start === sp.s)) ?? liste.find((t) => t.id === sp.t) : null;
   const bearbeitet = sp.bearbeiten ? liste.find((t) => t.id === sp.bearbeiten && t.eigen) : null;
-  const neu = sp.neu && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(sp.neu) ? sp.neu : null;
+  // without a writable calendar there is no form to fill in only to fail at "Anlegen"
+  const neu = verbunden && sp.neu && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(sp.neu) ? sp.neu : null;
   const form: FormDaten | null = bearbeitet
     ? (() => {
         const s = new Date(bearbeitet.start); const e = new Date(bearbeitet.end);
@@ -103,7 +104,7 @@ export default async function Kalender({ searchParams }: { searchParams: Promise
             {!monat ? <a className="chip" role="button" aria-pressed={voll} href={url({ h: voll ? undefined : '24' })}>0–24 Uhr</a> : null}
             {ausserhalb && !voll ? <a className="mono" href={url({ h: '24' })}>{ausserhalb} außerhalb von {h0}–{h1} Uhr – anzeigen</a> : null}
           </div>
-          {!verbunden ? <Leer titel="Dein Kalender ist noch nicht verbunden." text="Termine anderer und aus Mails siehst du trotzdem. Verbinden: npm run quelle:kalender (Apple: caldav.icloud.com mit app-spezifischem Passwort)." /> : null}
+          {!verbunden ? <Leer titel="Anlegen geht erst mit einem Kalender, in den Kollege schreiben darf." text="Lesen klappt schon: Termine aus deinen Quellen, von anderen und aus Mails stehen hier. Zum Anlegen und Einladen den Kalender per CalDAV verbinden: npm run quelle:kalender (Apple: caldav.icloud.com mit app-spezifischem Passwort)." /> : null}
         </div>
 
         {monat ? (

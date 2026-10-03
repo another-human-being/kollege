@@ -79,6 +79,38 @@
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
 
+## Simulation (03.10.2026)
+
+`npm run simulation` (eigene Konfiguration, frische e2e-Datenbank) hat zwei Teile.
+
+- **Rundgang:** Jede Seite und je zwei Detailseiten jeder Liste, als Andreas, Julia und Mehmet, dazu das Handy (390 px).
+  - Geprüft werden Fehler (Konsole, Server, HTTP), technische Reste, das Wort „Vorgang“, englische Wörter, Bedienelemente ohne Namen, seitliches Scrollen und abgeschnittene Inhalte. Alle internen Links müssen funktionieren.
+  - Von jeder Seite gibt es ein Bildschirmfoto (`test-results/simulation/bilder/`). Die Fotos sind von Hand durchgesehen.
+- **Arbeitstag:** 14 Abläufe über alle Funktionen.
+  - Klären, Eingabe nach einer Beratung, Frage mit Quellen, „Später“.
+  - Mail beantworten und zurückholen, archivieren.
+  - Termin anlegen, Entwurf verwerfen und Rückgängig. Datei zuordnen.
+  - Übergabe und Annahme. Abschluss mit Rückblick. Rat aus dem Vorjahr. Anweisung zu Hinweisen.
+  - Nach jedem Schritt wird geprüft, ob die anderen Ansichten dasselbe sagen, z. B. Heute gegen Aufgaben, Chat-Antwort gegen Zusagen, Prüfen-Zähler gegen Bereiche.
+- **Ergebnis:** 192 Prüfschritte, nach den Korrekturen ohne Befund. Behoben wurde:
+  1. Heute zeigte bei „Wartet auf uns“ Uhrzeiten statt Tage. Eine Mail vom 25.09. sah aus wie von heute.
+  2. Eine Klärfrage nannte Wahlmöglichkeiten („neuer Bereich oder Events?“), die kein Knopf anbot. Jetzt führt „Öffnen und zuordnen“ dorthin, wo man sie beantwortet.
+  3. „Wie lief’s?“ beim Erledigen erschien nie: Nach dem Neuladen galt das Thema als erledigt, und die Frage verschwand.
+  4. Die Übergabe auf Heute zeigte keinen Kurzstand. Jetzt steht dort derselbe Text wie im Hinweis, aus einer gemeinsamen Funktion.
+  5. **Datenschutz:** Der Kurzstand einer Übergabe hätte den Betreff einer privaten Mail der bisherigen Besitzerin an den Empfänger gegeben. Jetzt zählt nur, was der Empfänger lesen darf (getestet).
+  6. Auf dem Handy war Kollege nicht bedienbar: Die Seitenleiste nahm die ganze Breite, der Inhalt war abgeschnitten.
+     - Jetzt gibt es ein Menü, eine Spalte und Liste oder Detail.
+     - Auf Heute steht die Eingabe unten (Design „Mobil“).
+  7. Kalender und Einstellungen widersprachen sich („nicht verbunden“ gegen „Kalender verbunden“). Das Formular ließ sich ohne beschreibbaren Kalender ausfüllen und scheiterte erst beim Anlegen.
+  8. Lange Titel wurden in der Detailansicht abgeschnitten.
+  9. Das Ersatzmodell `skript` legte „…-Hinweise nur montags“ ohne Regel ab. In der Entwicklung blieb der Satz also folgenlos.
+- **Grenze:** Die „Intelligenz“ lief mit den Ersatzmodellen (Orakel, `skript`), weil hier kein Modellschlüssel hinterlegt ist. Geprüft ist damit:
+  - ob alle Funktionen dieselben Tatsachen zeigen;
+  - ob die Schutzregeln greifen (Belege, Zahlen, Sichtbarkeit);
+  - was das System aus den Antworten macht.
+  - Nicht geprüft ist das Urteil eines echten Modells. Dafür: `npm run eval:chat` und `npm run eval:zuordnung` mit Mistral.
+- **Nicht behoben, weil nicht spezifiziert:** Die Wochenansicht des Kalenders ist auf dem Handy eng; das Design sieht mobil nur Heute vor. Der Ordnerbaum in Dateien ist auf dem Handy oben eingeklappt.
+
 ## Stufe 8 – gebaut
 
 - **Regeln in SQL** (`lib/hinweise/regeln.ts`). Der Worker wendet sie täglich um 06:30 an und eine Minute nach jedem Sync (höchstens ein Lauf wartet).

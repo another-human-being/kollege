@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { auth, signOut } from '@/auth';
 import { ChatListe } from '@/components/chat';
+import { MobilKopf } from '@/components/menue';
 import { RueckgaengigProvider } from '@/components/rueckgaengig';
 import { SeitenNav } from '@/components/seitennav';
 import { chatListe } from '@/lib/views/chats';
@@ -20,7 +21,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <RueckgaengigProvider>
       <div className="app">
-        <aside className="seite">
+        <MobilKopf />
+        <aside className="seite" id="seitenleiste">
           <div className="seite-marke">Kollege</div>
           <SeitenNav areas={nav.areas} />
           {/* §11: below the navigation, the chat history */}
