@@ -2,6 +2,7 @@
 // today's events. Scope: mine or team. Every item carries its area as label, a reason and its source.
 // Runs with the user's rights – only what the user may see.
 import { sql } from 'drizzle-orm';
+import { vorkommen } from '@/lib/connectors/ical';
 import { withUser } from '@/lib/db/client';
 import { berlinDate } from '@/lib/time';
 import { STALE_DAYS } from './areas';
@@ -88,10 +89,13 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
 
     const events = await tx.execute<Record<string, unknown>>(sql`
       SELECT e.id AS entry_id, e.title, e.occurred_at, e.meta->>'location' AS location,
+             e.meta->>'start' AS start, e.meta->>'end' AS end, e.meta->>'recurrence' AS rrule, e.meta->'exdates' AS exdates,
+             ${startOfDay} AS day_start, ${endOfDay} AS day_end,
              m.id AS matter_id, ${AREA_OF_MATTER} AS area_key
       FROM entries e
       LEFT JOIN LATERAL (SELECT l.target_id AS id FROM links l WHERE l.entry_id = e.id AND l.target_type = 'matter' LIMIT 1) m ON true
-      WHERE e.kind = 'event' AND e.occurred_at >= ${startOfDay} AND e.occurred_at < ${endOfDay}
+      WHERE e.kind = 'event' AND coalesce(e.meta->>'status', '') <> 'CANCELLED'
+        AND ((e.occurred_at >= ${startOfDay} AND e.occurred_at < ${endOfDay}) OR e.meta->>'recurrence' IS NOT NULL)
         AND (${!mine} OR app_user_id() = ANY (e.visible_to))
       ORDER BY e.occurred_at`);
 
@@ -146,7 +150,15 @@ export async function today(userId: string, scope: Scope, now = new Date()): Pro
         at: iso(t.due_at),
         overdue: overdue(t.due_at),
       })),
-      events: events.rows.map((e) => ({
+      // series (RRULE) appear on every day they occur, not only on their first
+      events: events.rows.flatMap((e) => {
+        if (!e.rrule) return [e];
+        if (!e.start || !e.end) return [];
+        const v = vorkommen({ start: e.start as string, end: e.end as string, rrule: e.rrule as string, exdates: (e.exdates as string[] | null) ?? [] },
+          new Date(e.day_start as string), new Date(e.day_end as string))
+          .find((x) => new Date(x.start) >= new Date(e.day_start as string));
+        return v ? [{ ...e, occurred_at: v.start }] : [];
+      }).sort((a, b) => String(iso(a.occurred_at)).localeCompare(String(iso(b.occurred_at)))).map((e) => ({
         id: e.entry_id as string,
         title: e.title as string,
         area: (e.area as string) ?? null,

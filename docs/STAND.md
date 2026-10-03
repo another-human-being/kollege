@@ -9,11 +9,11 @@
 - [x] 3 Eingabe & Chat
 - [x] 4 Mail-Eingang (Abnahme gegen lokalen IMAP-Server; am echten Uni-Postfach noch offen)
 - [x] 5 Mail-Client (Abnahme gegen lokale IMAP- und SMTP-Server; am echten Postfach offen)
-- [ ] 6 Kalender
+- [x] 6 Kalender (Abnahme gegen lokalen CalDAV-Server; an iCloud und Uni-Webmail offen)
 - [ ] 7 Laufwerk
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 5 gebaut (02.10.2026). Offen sind die Tests am echten Postfach (Stufe 4 und 5). Als Nächstes Stufe 6.
+**Aktuell:** Stufe 6 gebaut (03.10.2026). Offen sind die Tests am echten Postfach (Stufe 4 und 5) und am echten Kalender (Stufe 6). Als Nächstes Stufe 7.
 
 ## Stufe 1 – erledigt
 
@@ -78,6 +78,31 @@
     2. `npm run eval:zuordnung`.
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
+
+## Stufe 6 – gebaut
+
+- **Lesen über CalDAV** (`tsdav`, `ical.js`): iCloud, Radicale/Nextcloud und jeder andere CalDAV-Server.
+  - Einrichten mit `npm run quelle:kalender`; das Passwort wird verschlüsselt gespeichert, Kalender werden per Name gewählt.
+  - Der Sync überspringt unveränderte Kalender (ctag) und holt nur geänderte Objekte (etag). Gelöschte Termine verschwinden; hat kein Kalender mehr eine Kopie, gilt der Termin als abgesagt.
+  - Teilnehmende mit Status (zugesagt, abgesagt, Vorbehalt, offen) je Person (E48).
+  - Termine laufen durch dieselbe Zuordnung wie Mails. Abnahme: Ein Termin mit Teilnehmenden wird Person, Gründungsteam und Thema zugeordnet.
+- **Kalender `/kalender`** (E41):
+  - Woche (7–21 Uhr, umschaltbar auf 0–24 Uhr) und Monat. Überlappende Termine stehen nebeneinander, Serien erscheinen an jedem ihrer Tage.
+  - Klick in einen freien Platz legt einen Termin an. Nicht Verschicktes ist gestrichelt.
+  - Die Detailansicht zeigt Teilnehmende mit Status, bei fremden Terminen die Besitzerin oder den Besitzer.
+- **Anlegen, ändern, absagen:** `event.create`, `event.update`, `event.cancel` mit Rückgängig.
+  - Ohne Teilnehmende steht der Termin gleich im eigenen Kalender.
+  - Mit Teilnehmenden bleibt er ein Entwurf, bis die Person „Einladung senden“ drückt.
+  - Ändert sie einen Termin mit Eingeladenen, heißt der Knopf „Änderung senden“.
+- **Einladungen** (`event.send`):
+  - Nur ein Mensch kann sie auslösen; das Modell nicht (im Code erzwungen, getestet).
+  - Sie sind wie Mail 10 s zurückholbar.
+  - Der Job schreibt zuerst in den Kalender und schickt dann die Einladung (iMIP) über das eigene Postfach. Absagen gehen genauso raus.
+- **Tests:** 194 Vitest und 11 Playwright. Die Abnahme läuft gegen Radicale als lokalen CalDAV-Server. Geprüft werden außerdem:
+  - Erinnerungen (VALARM) und Apple-Felder bleiben beim Ändern erhalten.
+  - Eine gleichzeitige Änderung woanders gewinnt (412).
+  - Der Entwurf, Einladung, Änderung und Absage, das Zurückholen und das Rückgängig von „Anlegen“.
+  - Serien über die Umstellung auf Winterzeit.
 
 ## Stufe 5 – gebaut
 
@@ -162,6 +187,15 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
     - Archiv ist, was empfangen wurde und nicht mehr im Eingang liegt.
     - Archivieren verschiebt in den Archiv-Ordner des Servers (Sonderordner `\Archive`) oder legt „Archive“ an.
 32. **`nodemailer` 8 statt 10:** Das ist die Version, die `next-auth` für den späteren Magic-Link erwartet. Die Prüfung der Abhängigkeiten habe ich nicht umgangen.
+33. **Der Kalender folgt Kollege** über Kopien je Kalender (`event_copies`, analog `mail_copies`). Eine Änderung markiert die Kopie; der Worker schreibt sie vor jedem Sync zurück.
+    - Geschrieben wird mit If-Match. Hat jemand den Termin inzwischen in Apple, Outlook oder im Webmail geändert, gewinnt der Server: Kollege überschreibt nichts und zeigt am Termin einen Hinweis.
+    - Bestehende Termine werden an Ort und Stelle geändert. Erinnerungen, Herstellerfelder und die Zeitzone (TZID) bleiben.
+34. **Einladen ist ein eigener Schritt** (`event.send`). Logikfehler aufgelöst: §5 nennt `event.create|update|cancel` „extern, wenn Teilnehmende außerhalb des Teams“. Dann hätte das Modell keinen Termin mit Gästen auch nur vorbereiten können, und jede Änderung wäre sofort an alle gegangen.
+    - Jetzt geht beim Anlegen und Ändern nichts nach außen; der Termin wartet als Entwurf.
+    - Extern ist nur der Versand. Er ist ein Klick eines Menschen und 10 s zurückholbar (E10, E28, E43).
+    - Ein Termin ohne Gäste oder mit nur Team-Gästen ist intern.
+35. **Einladungen gehen über das eigene Postfach** (iMIP, RFC 6047), nicht über den Kalenderserver: So funktioniert es mit jedem Server gleich, und die Einladung liegt im eigenen Gesendet-Ordner. Damit der Server nicht zusätzlich einlädt, stehen die Teilnehmenden mit `SCHEDULE-AGENT=CLIENT` (RFC 6638) im Kalender.
+36. **Zeiten rechnet der Server in Berliner Zeit um,** nicht der Browser. Wer auf Reisen in anderer Zeitzone einen Termin anlegt, bekommt sonst eine verschobene Uhrzeit. Serien werden auf der Berliner Wanduhr aufgelöst: 10 Uhr bleibt auch nach der Zeitumstellung 10 Uhr.
 
 ## Befunde aus dem Bau
 
@@ -215,7 +249,7 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
 - **Berechnete Zustände** müssen alles zählen, was das Team hat, nicht nur das, was der Fragende lesen darf. Sonst gälte eine Mail für Julia als unbeantwortet, obwohl Andreas aus seinem Postfach geantwortet hat. Dafür gibt es `SECURITY DEFINER`-Funktionen (`waiting_on_us`, `matter_last_activity`, `org_last_activity`, `entry_owner_names`, Migration `0002_views.sql`). Sie liefern nur IDs, Zeitpunkte und Namen, keine Inhalte.
 - **„KI-Vermutung“ bei Feldern:** Ist ein Vorgang vom System angelegt und ungeprüft, gelten alle seine Felder als Vermutung, bis er übernommen wird. Eine Herkunft pro Feld nach der Übernahme (E32) ist nicht gespeichert. Das System setzt derzeit keine Felder an bestehenden Vorgängen, das Schema §7.2.4 sieht es nicht vor.
 - **„hängt“** nutzt N = 21 Tage fest. N aus Anweisungen des Bereichs kommt mit Stufe 3.
-- **„Heute“ zeigt Serientermine nur an ihrem ersten Tag** (e6, RRULE). Das Auflösen von Serien gehört zu Stufe 6.
+- ~~„Heute“ zeigt Serientermine nur an ihrem ersten Tag~~ (e6): in Stufe 6 behoben. Abgesagte Termine fehlen dort jetzt auch.
 - **Gründungsteams-Liste:** Ob ein Team „offen“ oder „erledigt“ ist, wird aus seinen Themen abgeleitet: offen, solange ein Thema offen ist oder es noch keins gibt.
 - **E23 („alles, was der Chat kann, geht auch von Hand“) widerspricht §11** („keine eigenen Felder für … neue Anweisung“). Es gilt die Bauvorlage: Anweisungen entstehen per Chat (Stufe 3), die Einstellungen können sie ändern und löschen.
 - **Auth.js v5** ist weiterhin Beta. Die Version ist exakt gepinnt (`next-auth@5.0.0-beta.32`). Der Magic-Link wird Tabellen für Verifizierungs-Tokens brauchen, die nicht in §4 stehen.
@@ -238,6 +272,16 @@ Eigene Fehler, durch Tests gefunden:
 - `model_calls` protokollierte das Modell aus `.env` statt des tatsächlich benutzten. Der Fehler wurde still verschluckt.
 - React führt Effekte im Entwicklungsmodus doppelt aus und bricht dabei den ersten Versand ab. Dadurch kam die erste Eingabe von Heute nie an. Gelöst mit einem Timer, den das Aufräumen storniert.
 
+### Befunde Stufe 6
+
+Durch Tests gefunden:
+- **Serien wurden in UTC aufgelöst.** Ein wöchentlicher Termin um 10 Uhr hätte nach dem 25.10. um 9 Uhr gestanden. Ebenso hätte das Ändern eines Termins seine Zeitzone durch UTC ersetzt; Apple und Outlook hätten die Serie dann im Winter verschoben. Beides ist behoben (Entscheidung 36).
+- **Eigener Fehler:** Das Formular rechnete die Uhrzeit in der Zeitzone des Browsers um; jetzt macht das der Server.
+- **Ein verworfener Entwurf verlor beim Rückgängig seine Kalender-Kopie** und wäre nie mehr in den Kalender gekommen. Jetzt wird die Kopie mit umgekehrt.
+- **Die App-Rolle durfte keine Kalender-Kopien anlegen** (Migration 0010 mit eigenen RLS-Regeln). Fremde Kopien bleiben unantastbar.
+- **Noch nicht gelesen:** einzeln geänderte Termine einer Serie (RECURRENCE-ID). Kollege zeigt die Serie so, wie sie ursprünglich angelegt wurde. Serien lassen sich in Kollege nicht bearbeiten, nur ansehen.
+- **Design, nicht gebaut** (steht nicht in der Bauvorlage; Frage unten): fremde Einladungen annehmen oder ablehnen, Termine verschieben per Ziehen.
+
 ### Befunde Stufe 5
 
 - **Eigener Konstruktionsfehler, vor dem Commit bemerkt:** Ich hatte den Gelesen-Status zuerst in `entries.meta` gelegt. Rückgängig hätte dann neue Postfach-Kopien gelöscht, die der Sync zwischenzeitlich eingetragen hat, und der Cursor holt sie nie wieder. Ersetzt durch `mail_copies` (Entscheidung 28).
@@ -254,6 +298,13 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 - **Erfundene IDs:** Verwies das Modell auf ein Objekt, das es nicht gibt, wäre die Zuordnung ins Leere gelaufen (`links.target_id` hat keinen Fremdschlüssel). Jetzt verhindert es das Schema schon beim Modell, und die Anwendung verwirft unbekannte IDs (`report.unknown`).
 
 ## Offene Fragen an Andreas
+
+- **Kalender** (Stufe 6):
+  - Bietet das Uni-Webmail CalDAV, und unter welcher Adresse? Das fragt man das Rechenzentrum.
+  - Outlook: Welche Art Konto nutzen die Kollegen? Ist Outlook nur mit dem Uni-Postfach über IMAP verbunden, liegt der Kalender meist nur lokal auf dem Rechner. Dann gibt es keine Schnittstelle, und der Kalender müsste ins Webmail oder nach iCloud umziehen. Bei einem Microsoft-Konto (Outlook.com/365) ginge es über Microsoft Graph; das steht in §12, ist aber nicht gebaut (Entscheidung 25 gilt für Mail).
+  - Apple: Für iCloud braucht jede Person ein app-spezifisches Passwort (appleid.apple.com).
+  - Sollen fremde Einladungen in Kollege angenommen oder abgelehnt werden können (Antwort an den Organisator)? Steht nicht in der Bauvorlage.
+  - Sollen einzeln verschobene Termine einer Serie gelesen und Serien bearbeitbar werden?
 
 - Rechenzentrum: Ist die Passwort-Anmeldung per IMAP für einen Dienst auf einem Server erlaubt (oder gibt es App-Passwörter)? Wie greift Kollege auf das StartHub-Postfach zu (eigene Kennung oder Funktionspostfach)?
 - Betrieb: VM im Uni-Netz oder EU-Cloud + Laufwerks-Worker? (bis Stufe 7)

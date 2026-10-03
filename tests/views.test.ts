@@ -38,6 +38,13 @@ describe('Heute', () => {
     expect(t.events).toMatchObject([{ title: 'Erstberatung Greenbyte', area: 'Gründungsteam', reason: 'Raum 2.14' }]);
   });
 
+  it('a series appears on each of its days at its local time, not only on the first (e6)', async () => {
+    // session 4: Tuesday 27.10., after the switch to winter time – 10:00 in Berlin is 09:00Z
+    const t = await today(fx.users.andreas!, 'mine', new Date('2026-10-27T07:00:00Z'));
+    expect(t.events).toMatchObject([{ title: 'Entrepreneurship Basics – Sitzung 1', at: '2026-10-27T09:00:00.000Z', reason: 'Hörsaal 1004' }]);
+    expect((await today(fx.users.andreas!, 'mine', new Date('2026-10-28T07:00:00Z'))).events).toEqual([]);
+  });
+
   it('Julia, mine: her waiting mails and the commitments of her event', async () => {
     const t = await today(fx.users.julia!, 'mine', NOW);
     expect(t.hints.map((h) => h.kind)).toEqual(['review_batch']); // Andreas' questions are his

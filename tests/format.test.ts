@@ -38,3 +38,17 @@ describe('field changes as data', () => {
     expect(base.fields.next_step).toBe('alt'); // base untouched
   });
 });
+
+describe('Berlin time for the calendar', async () => {
+  const { berlinInstant, berlinMinutes, berlinWeekStart } = await import('@/lib/time');
+  it('local time to an instant, across the switch to winter time', () => {
+    expect(new Date(berlinInstant('2026-10-12', '09:30')).toISOString()).toBe('2026-10-12T07:30:00.000Z');
+    expect(new Date(berlinInstant('2026-11-02', '09:30')).toISOString()).toBe('2026-11-02T08:30:00.000Z');
+    expect(new Date(berlinInstant('2026-10-25', '12:00')).toISOString()).toBe('2026-10-25T11:00:00.000Z');
+  });
+  it('minutes in Berlin and the Monday of a week', () => {
+    expect(berlinMinutes(new Date('2026-10-12T07:30:00Z'))).toBe(570);
+    expect(berlinWeekStart(new Date('2026-10-04T20:00:00Z'))).toBe('2026-09-28');
+    expect(berlinWeekStart(new Date('2026-10-05T08:00:00Z'))).toBe('2026-10-05');
+  });
+});

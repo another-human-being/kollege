@@ -9,6 +9,7 @@ import { ZURUECKHOLBAR_S } from '@/lib/actions/mail';
 import { einreihen } from '@/lib/jobs/queue';
 import { entwurfVorlage } from '@/lib/mail/vorlage';
 import { putBlob } from '@/lib/pipeline/blobs';
+import { addDays, berlinInstant } from '@/lib/time';
 import { chatTitel } from '@/lib/views/chats';
 
 export type Result = { ok: true; actionId: string; result?: unknown } | { ok: false; error: string };
@@ -135,4 +136,16 @@ export async function terminVersand(type: 'event.send' | 'event.cancel', id: str
   } catch (e) {
     return { ok: false, error: message(e) };
   }
+}
+
+/** a form in Berlin local time (CLAUDE.md: Europe/Berlin) – converted here, not in the browser */
+export async function terminSpeichern(id: string | undefined, f: {
+  title: string; datum: string; von: string; bisDatum: string; bis: string; allDay: boolean; location: string; notes: string; mit: string;
+}): Promise<Result> {
+  const start = berlinInstant(f.datum, f.allDay ? '00:00' : f.von);
+  // all-day: the end is exclusive, the day after the last one (iCalendar)
+  const end = f.allDay ? berlinInstant(addDays(f.bisDatum, 1), '00:00') : berlinInstant(f.bisDatum, f.bis);
+  const teilnahme = f.mit.split(/[,;\s]+/).filter((x) => x.includes('@')).map((email) => ({ email }));
+  const payload = { title: f.title, start, end, all_day: f.allDay, location: f.location || null, notes: f.notes || null, teilnahme };
+  return id ? perform('event.update', { id, ...payload }) : perform('event.create', payload);
 }

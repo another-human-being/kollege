@@ -2,6 +2,7 @@
 // place (unknown properties – alarms, Apple/Outlook extensions – stay as they were), create new
 // ones, and build invitations (iMIP, RFC 6047). Uses ical.js (Mozilla).
 import ICAL from 'ical.js';
+import { berlinInstant } from '@/lib/time';
 
 export type Teilnahme = 'zugesagt' | 'abgesagt' | 'vorbehalt' | 'offen' | 'nicht_eingeladen';
 
@@ -94,6 +95,24 @@ const DATE = (iso: string) => {
   const d = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
   return ICAL.Time.fromDateString(d);
 };
+const p2 = (n: number) => String(n).padStart(2, '0');
+/** the Berlin wall clock of an instant, as a floating time */
+const WAND = (iso: string) => {
+  const t = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date(iso));
+  return ICAL.Time.fromDateTimeString(t.replace(' ', 'T'));
+};
+/** set a start or end; unchanged times stay as they were, a local time (TZID) stays local –
+ *  written in UTC, a weekly series would move by an hour in winter in Apple/Outlook */
+function zeit(v: ICAL.Component, name: 'dtstart' | 'dtend', iso: string, allDay: boolean, tzid: unknown) {
+  const p = v.getFirstProperty(name);
+  const alt = p?.getFirstValue() as ICAL.Time | undefined;
+  if (alt && alt.isDate === allDay && (allDay ? alt.toString() === DATE(iso).toString() : alt.toJSDate().getTime() === new Date(iso).getTime())) return;
+  const zone = !allDay && typeof tzid === 'string' && ICAL.TimezoneService.has(tzid) ? ICAL.TimezoneService.get(tzid) : null;
+  const t = allDay ? DATE(iso) : zone ? UTC(iso).convertToZone(zone) : UTC(iso);
+  const neu = v.updatePropertyWithValue(name, t);
+  if (zone) neu.setParameter('tzid', tzid as string);
+  else neu.removeParameter('tzid');
+}
 const PARTSTAT_ICS: Record<Teilnahme, string> = { zugesagt: 'ACCEPTED', abgesagt: 'DECLINED', vorbehalt: 'TENTATIVE', offen: 'NEEDS-ACTION', nicht_eingeladen: 'NEEDS-ACTION' };
 
 function setzen(v: ICAL.Component, d: TerminDaten, opts: { serverSchedules: boolean }) {
@@ -104,9 +123,10 @@ function setzen(v: ICAL.Component, d: TerminDaten, opts: { serverSchedules: bool
   set('summary', d.title);
   set('description', d.notes ?? null);
   set('location', d.location ?? null);
-  v.updatePropertyWithValue('dtstart', d.allDay ? DATE(d.start) : UTC(d.start));
+  const tzid = v.getFirstProperty('dtstart')?.getParameter('tzid');
+  zeit(v, 'dtstart', d.start, d.allDay, tzid);
   v.removeAllProperties('duration');
-  v.updatePropertyWithValue('dtend', d.allDay ? DATE(d.end) : UTC(d.end));
+  zeit(v, 'dtend', d.end, d.allDay, tzid);
   v.updatePropertyWithValue('dtstamp', ICAL.Time.now());
   v.updatePropertyWithValue('last-modified', ICAL.Time.now());
   v.updatePropertyWithValue('sequence', Number(v.getFirstPropertyValue('sequence') ?? 0) + 1);
@@ -146,6 +166,7 @@ export function geaenderterTermin(ics: string, d: TerminDaten): string {
   const cal = new ICAL.Component(ICAL.parse(ics));
   const v = cal.getAllSubcomponents('vevent').find((x) => !x.hasProperty('recurrence-id'));
   if (!v) throw new Error('no event in calendar object');
+  zones(cal);
   setzen(v, d, { serverSchedules: false });
   return cal.toString();
 }
@@ -163,13 +184,17 @@ export function einladung(ics: string, method: 'REQUEST' | 'CANCEL'): string {
 
 /** occurrences of a series within [von, bis) – for the calendar view */
 export function vorkommen(t: { start: string; end: string; rrule: string | null; exdates?: string[] }, von: Date, bis: Date): { start: string; end: string }[] {
-  const dauer = new Date(t.end).getTime() - new Date(t.start).getTime();
   if (!t.rrule) return new Date(t.start) < bis && new Date(t.end) > von ? [{ start: t.start, end: t.end }] : [];
-  const it = ICAL.Recur.fromString(t.rrule).iterator(UTC(t.start));
+  // a series repeats at its local time (10:00 stays 10:00 after the switch to winter time):
+  // expand on the Berlin wall clock, then each occurrence back to an instant
+  const dauer = new Date(t.end).getTime() - new Date(t.start).getTime();
+  const recur = ICAL.Recur.fromString(t.rrule);
+  if (recur.until && !recur.until.isDate) recur.until = WAND(recur.until.toJSDate().toISOString());
+  const it = recur.iterator(WAND(t.start));
   const aus = new Set((t.exdates ?? []).map((x) => new Date(x).getTime()));
   const out: { start: string; end: string }[] = [];
   for (let n = it.next(), i = 0; n && i < 1000; n = it.next(), i++) {
-    const s = n.toJSDate();
+    const s = new Date(berlinInstant(`${n.year}-${p2(n.month)}-${p2(n.day)}`, `${p2(n.hour)}:${p2(n.minute)}`));
     if (s >= bis) break;
     if (s.getTime() + dauer > von.getTime() && !aus.has(s.getTime())) out.push({ start: s.toISOString(), end: new Date(s.getTime() + dauer).toISOString() });
   }

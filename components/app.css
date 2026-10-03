@@ -119,3 +119,30 @@ select.fe { cursor: pointer; }
 .kg-umschalter a { font-size: 13px; line-height: 20px; padding: 2px 10px; border-radius: 1px; color: var(--ink-muted); text-decoration: none; }
 .kg-umschalter a[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .kg-umschalter a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* calendar (E41, E48): week grid, all-day bar, overlaps side by side; unsent = dashed */
+.kal { overflow: auto; }
+.kal-woche { display: grid; grid-template-columns: 56px repeat(7, minmax(0, 1fr)); padding: 0 20px 24px; }
+.kal-kopf { font-size: 13px; padding: 6px 4px; border-bottom: 1px solid var(--rule); }
+.kal-heute { font-weight: 600; }
+.kal-ecke { font-size: 11px; color: var(--ink-muted); padding: 4px 0; }
+.kal-ganz { min-height: 24px; border-bottom: 1px solid var(--rule); border-left: 1px solid var(--rule); padding: 2px; display: grid; gap: 2px; align-content: start; }
+.kal-zeiten { position: relative; }
+.kal-zeiten > div { font-size: 11px; color: var(--ink-muted); box-sizing: border-box; padding-top: 2px; }
+.kal-spalte { position: relative; height: var(--h); border-left: 1px solid var(--rule); background-image: linear-gradient(var(--rule) 1px, transparent 1px); background-size: 100% 48px; }
+.kal-we { background-color: var(--paper-sunk); }
+.kal-slot { position: absolute; left: 0; right: 0; }
+.kal-slot:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.kal-termin { position: absolute; box-sizing: border-box; padding: 2px 4px; font-size: 12px; line-height: 16px; overflow: hidden; border: 1px solid var(--line-control); border-left: 3px solid var(--ink); background: var(--paper); color: var(--ink); text-decoration: none; border-radius: var(--radius-1); }
+.kal-termin--offen, .kal-mini.kal-termin--offen { border-style: dashed; }
+.kal-termin--fremd { border-left-color: var(--ink-faint); color: var(--ink-muted); }
+.kal-termin--aktiv { outline: 2px solid var(--accent); }
+.kal-mini { display: block; font-size: 12px; line-height: 16px; padding: 1px 4px; border: 1px solid var(--line-control); border-radius: var(--radius-1); color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kal-monat { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 0 20px 24px; }
+.kal-tag { min-height: 96px; border-left: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 4px; display: grid; gap: 2px; align-content: start; }
+.kal-tag > a.mono { color: var(--ink-muted); text-decoration: none; font-size: 12px; }
+.kal-tag--fremd { background: var(--paper-sunk); }
+.kal-tag--heute > a.mono { color: var(--ink); font-weight: 600; }
+.kal-person { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; border-top: 1px solid var(--rule); font-size: 14px; line-height: 22px; }
+.kal-person > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.kal-person > .mono { color: var(--ink-muted); white-space: nowrap; }
