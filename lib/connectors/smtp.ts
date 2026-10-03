@@ -17,6 +17,8 @@ export interface Ausgehend {
   references?: string[];
   attachments: { filename: string; contentType: string; content: Buffer }[];
   date: Date;
+  /** an invitation or cancellation (iMIP, RFC 6047): calendar programs show it with buttons */
+  icalEvent?: { method: 'REQUEST' | 'CANCEL'; content: string; filename?: string };
 }
 
 export async function baueMail(m: Ausgehend): Promise<Buffer> {

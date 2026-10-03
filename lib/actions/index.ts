@@ -4,6 +4,7 @@
 import './area';
 import './chat';
 import './contacts';
+import './event';
 import './handover';
 import './hint';
 import './instruction';

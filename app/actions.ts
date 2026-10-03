@@ -28,6 +28,12 @@ const MESSAGES: [RegExp, string][] = [
   [/mailbox not found or not yours/, 'Aus diesem Postfach kannst du nicht senden.'],
   [/no copy of this mail in your mailbox/, 'Diese Mail liegt nicht in deinem Postfach.'],
   [/not in your inbox/, 'Liegt nicht mehr im Eingang.'],
+  [/no calendar connected/, 'Es ist kein Kalender verbunden.'],
+  [/end before start/, 'Das Ende liegt vor dem Beginn.'],
+  [/only coming events/, 'Absagen gibt es nur für kommende Termine.'],
+  [/read only/, 'Termin von jemand anderem – nur lesbar.'],
+  [/nothing to send/, 'Es gibt nichts zu senden.'],
+  [/being sent/, 'Wird gerade gesendet.'],
 ];
 
 function message(e: unknown): string {
@@ -111,6 +117,21 @@ export async function anhangHochladen(form: FormData): Promise<{ ok: true; anhan
     if (f.size > 20 * 1024 * 1024) return { ok: false, error: 'Die Datei ist größer als 20 MB.' };
     const blob_path = await putBlob(Buffer.from(await f.arrayBuffer()));
     return { ok: true, anhang: { blob_path, filename: f.name, mime: f.type || 'application/octet-stream' } };
+  } catch (e) {
+    return { ok: false, error: message(e) };
+  }
+}
+
+// --- Kalender (stage 6) -------------------------------------------------------------------
+
+/** "Einladung senden" / "Änderung senden" / cancel with invited people: out after 10 s unless undone */
+export async function terminVersand(type: 'event.send' | 'event.cancel', id: string): Promise<Result> {
+  try {
+    const userId = await currentUserId();
+    const { actionId, result } = await runAction<{ art?: string }>({ type: 'user', userId }, type, { id });
+    if (result.art) await einreihen('senden', { actionId }, { startAfter: ZURUECKHOLBAR_S }).catch((e: unknown) => console.error('[termin einreihen]', e));
+    refresh();
+    return { ok: true, actionId, result };
   } catch (e) {
     return { ok: false, error: message(e) };
   }

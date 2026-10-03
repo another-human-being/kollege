@@ -101,12 +101,13 @@ export async function sendeEntwurf(actionId: string): Promise<{ ergebnis: SendeE
   return { ergebnis: 'gesendet', entryId: r.entryId };
 }
 
-/** mails still waiting past their 10 s (job lost, worker restarted): their send actions */
+/** mails and invitations still waiting past their 10 s (job lost, worker restarted): their send actions */
 export async function wartendeSendungen(aelterAlsSekunden = 15): Promise<string[]> {
   const r = await withSystem((tx) => tx.execute<{ id: string }>(sql`
     SELECT a.id FROM actions a JOIN entries e ON e.id = (a.payload->>'id')::uuid
-    WHERE a.type = 'mail.send' AND a.undone_at IS NULL AND a.inverse IS NOT NULL
-      AND e.kind = 'draft' AND e.meta->'send'->>'status' = 'queued'
+    WHERE a.undone_at IS NULL AND a.inverse IS NOT NULL
+      AND ((a.type = 'mail.send' AND e.kind = 'draft' AND e.meta->'send'->>'status' = 'queued')
+        OR (a.type IN ('event.send', 'event.cancel') AND e.kind = 'event' AND e.meta->>'versand' = 'sendet'))
       AND (e.meta->'send'->>'send_after')::timestamptz < now() - make_interval(secs => ${aelterAlsSekunden})
     ORDER BY a.created_at`));
   return r.rows.map((x) => x.id);

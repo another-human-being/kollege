@@ -8,6 +8,8 @@ import { withSystem } from '@/lib/db/client';
 import { connections } from '@/lib/db/schema';
 import { runImport } from '@/lib/pipeline/import';
 import { syncConnection } from '@/lib/pipeline/ingest';
+import { kalenderSchreiben } from '@/lib/kalender/schreiben';
+import { sendeTermin } from '@/lib/kalender/senden';
 import { rueckschreiben } from '@/lib/mail/rueckschreiben';
 import { sendeEntwurf, wartendeSendungen } from '@/lib/mail/senden';
 import { processEntry } from '@/lib/pipeline/process';
@@ -20,6 +22,12 @@ const SYNC_CRON: Record<Connection['kind'], string> = {
   calendar: '*/10 * * * *',
   drive: '*/30 * * * *',
 };
+
+/** mail or event: both wait 10 s and go out under the lock of their action (E43) */
+async function sende(actionId: string): Promise<{ ergebnis: string; entryId?: string }> {
+  const m = await sendeEntwurf(actionId);
+  return m.ergebnis === 'nicht_wartend' ? sendeTermin(actionId) : m;
+}
 
 async function scheduleSync(boss: PgBoss, conns: Connection[]) {
   for (const c of conns) {
@@ -41,6 +49,8 @@ export async function startJobs(boss: PgBoss): Promise<void> {
     // first what Kollege changed (read, archived), then what is new in the mailbox
     const zurueck = await rueckschreiben(job!.data.connectionId);
     if (zurueck.fehler.length) console.error('[rueckschreiben]', zurueck.fehler);
+    const kalender = await kalenderSchreiben(job!.data.connectionId);
+    if (kalender.fehler.length) console.error('[kalender schreiben]', kalender.fehler);
     const r = await syncConnection(job!.data.connectionId);
     for (const entryId of r.newEntryIds) await boss.send('process', { entryId });
     return { new: r.newEntryIds.length, errors: r.errors.length };
@@ -48,7 +58,7 @@ export async function startJobs(boss: PgBoss): Promise<void> {
 
   // E43: queued by the app 10 s after "Senden"; recalled mails are skipped under the action lock
   await boss.work<{ actionId: string }>('senden', async ([job]) => {
-    const r = await sendeEntwurf(job!.data.actionId);
+    const r = await sende(job!.data.actionId);
     if (r.ergebnis === 'gesendet' && r.entryId) await boss.send('process', { entryId: r.entryId });
     return r;
   });
@@ -57,7 +67,7 @@ export async function startJobs(boss: PgBoss): Promise<void> {
   await boss.work('senden-nachholen', async () => {
     const ids = await wartendeSendungen();
     for (const actionId of ids) {
-      const r = await sendeEntwurf(actionId);
+      const r = await sende(actionId);
       if (r.ergebnis === 'gesendet' && r.entryId) await boss.send('process', { entryId: r.entryId });
     }
     return { nachgeholt: ids.length };
