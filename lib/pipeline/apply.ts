@@ -146,7 +146,10 @@ export async function applyAssignment(
   const personNames = personIds.length
     ? await tx.select({ id: people.id, name: people.name }).from(people).where(inArray(people.id, personIds))
     : [];
+  const schonDa = await fruehereFassungen(tx, entry);
   for (const t of out.tasks) {
+    // an edited or moved file: what an earlier version already said became a task back then
+    if (schonDa && t.quote && schonDa.includes(norm(t.quote))) continue;
     const owner = await resolveOwner(tx, t.direction, t.owner_hint ?? undefined, personNames, resolveOrg);
     await runAction(
       SYSTEM,
@@ -270,4 +273,21 @@ async function clarify(tx: Tx, entry: Entry, cands: Candidates, out: FastOutput)
     { tx },
   );
   return hintId;
+}
+
+const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+
+/**
+ * Text of the earlier versions of a drive file – the same path, or the same content under another
+ * path (moved) – already processed. Null for anything else.
+ */
+async function fruehereFassungen(tx: Tx, entry: Entry): Promise<string | null> {
+  const m = entry.meta as { path?: string; hash?: string };
+  if (entry.kind !== 'file' || !m.path || !entry.connection_id) return null;
+  const rows = await tx.select({ text: entries.body_text }).from(entries).where(sql`
+    ${entries.kind} = 'file' AND ${entries.connection_id} = ${entry.connection_id} AND ${entries.id} <> ${entry.id}
+    AND ${entries.processing_state} = 'done'
+    AND (${entries.external_id} = ${m.path} OR (${m.hash ?? null}::text IS NOT NULL AND ${entries.meta}->>'hash' = ${m.hash ?? null}))`);
+  const text = rows.map((r) => r.text ?? '').join('\n');
+  return text ? norm(text) : null;
 }

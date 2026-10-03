@@ -31,6 +31,8 @@ services:
     environment: *app-env
     volumes:
       - blobs:/data/blobs
+      # team drive (stage 7): the SMB share mounted on the host, read-only for Kollege
+      - ${DRIVE_HOST_PATH:-/mnt/drive}:/mnt/drive:ro
     depends_on:
       postgres:
         condition: service_healthy

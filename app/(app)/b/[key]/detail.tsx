@@ -195,7 +195,7 @@ export function MatterAnsicht({ d, team, me, now }: { d: MatterDetail; team: Tea
 
       {d.files.length ? (
         <Abschnitt id="d-dateien" titel="Dateien" anzahl={d.files.length}>
-          {d.files.map((f) => <div key={f.id} className="gz"><span className="mono">{tag(f.at, now)}</span><span>{f.title}{f.summary ? <span className="mono"> {f.summary}</span> : null}</span></div>)}
+          {d.files.map((f) => <div key={f.id} className="gz"><span className="mono">{tag(f.at, now)}</span><span><a className="kg-bezug" href={`/dateien?d=${f.id}`}>{f.title}</a>{f.summary ? <span className="mono"> {f.summary}</span> : null}</span></div>)}
         </Abschnitt>
       ) : null}
 

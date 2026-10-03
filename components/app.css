@@ -146,3 +146,11 @@ select.fe { cursor: pointer; }
 .kal-person { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; border-top: 1px solid var(--rule); font-size: 14px; line-height: 22px; }
 .kal-person > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .kal-person > .mono { color: var(--ink-muted); white-space: nowrap; }
+
+/* Dateien (stage 7): folder tree left of the list */
+.baum-spalte { width: 210px; flex-shrink: 0; border-right: 1px solid var(--rule); padding: 20px 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+.baum { display: flex; flex-direction: column; gap: 1px; }
+.baum a { font-size: 13px; line-height: 20px; padding: 3px 8px; border-radius: var(--radius-1); color: var(--ink-muted); display: flex; justify-content: space-between; gap: 8px; text-decoration: none; }
+.baum a[aria-current="true"] { background: var(--paper-sunk); color: var(--ink); }
+.baum a:focus-visible { outline: 2px solid var(--accent); }
+.pfad { font-family: var(--font-mono); font-size: 12px; line-height: 18px; color: var(--ink-muted); word-break: break-all; }

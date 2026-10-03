@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { anhangHochladen, entwurfFuer, mailSenden, perform } from '@/app/actions';
 import { Aktion, Etikett } from '@/components/kg';
 import { useAktion } from '@/components/rueckgaengig';
+import { Zuordnung, type Bezug, type Ziel } from '@/components/zuordnung';
 
 type Anhang = { blob_path: string; filename: string; mime: string };
 const liste = (s: string) => s.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
@@ -41,8 +42,8 @@ export function ThreadKopf({
 }: {
   letzteId: string;
   eingangIds: string[];
-  bezuege: { type: string; id: string; name: string; origin: string; link_id: string }[];
-  ziele: { type: 'matter' | 'org'; id: string; name: string }[];
+  bezuege: Bezug[];
+  ziele: Ziel[];
 }) {
   const router = useRouter();
   const { run, show } = useAktion();
@@ -53,24 +54,7 @@ export function ThreadKopf({
   };
   return (
     <div style={{ display: 'grid', gap: 12 }}>
-      <div className="filterzeile" role="group" aria-label="Gehört zu">
-        <span className="mono">Gehört zu</span>
-        {bezuege.map((b) => (
-          <span key={b.link_id} className="bz">
-            <a className="kg-bezug" href={b.type === 'matter' ? `/m/${b.id}` : b.type === 'org' ? `/o/${b.id}` : `/p/${b.id}`}>{b.name}</a>
-            {b.origin === 'model' ? <Etikett>KI-Vermutung</Etikett> : null}
-            <button type="button" className="kg-aktion kg-aktion--text" aria-label={`${b.name} entfernen`}
-              onClick={() => run('entry.unlink', { link_id: b.link_id }, 'Zuordnung entfernt')}>×</button>
-          </span>
-        ))}
-        <select aria-label="Zuordnen zu" className="chip" value="" onChange={(e) => {
-          const [type, id] = e.target.value.split(':');
-          if (type && id) void run('entry.link', { entry_id: letzteId, target_type: type, target_id: id }, 'Zugeordnet');
-        }}>
-          <option value="">+ zuordnen</option>
-          {ziele.map((z) => <option key={`${z.type}:${z.id}`} value={`${z.type}:${z.id}`}>{z.name}</option>)}
-        </select>
-      </div>
+      <Zuordnung entryId={letzteId} bezuege={bezuege} ziele={ziele} />
       <div className="kg-aktionen">
         <Aktion onClick={() => oeffne('antwort')}>Antworten</Aktion>
         <Aktion onClick={() => oeffne('allen')}>Allen antworten</Aktion>

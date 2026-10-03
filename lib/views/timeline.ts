@@ -54,7 +54,8 @@ export async function timeline(
     SELECT DISTINCT e.id, e.kind, e.occurred_at, e.title, e.summary, e.body_text,
            e.meta->'conversation' AS conversation, e.author_user_id = app_user_id() AS mine,
            (e.visibility = 'restricted' AND cardinality(e.visible_to) = 1) AS private,
-           coalesce(u.name, p.name, e.meta->'from'->>'name') AS author
+           coalesce(u.name, p.name, e.meta->'from'->>'name') AS author,
+           coalesce(e.connection_id::text, '') || ':' || coalesce(e.external_id, e.id::text) AS file_key, e.meta ? 'geloescht' AS geloescht
     FROM links l JOIN entries e ON e.id = l.entry_id
     LEFT JOIN users u ON u.id = e.author_user_id
     LEFT JOIN people p ON p.id = e.author_person_id
@@ -112,7 +113,19 @@ export async function timeline(
         conversation: (e.conversation as NoteRef['conversation']) ?? null,
       }))
       .sort((a, b) => b.at.localeCompare(a.at)),
-    files: [...visible.rows.filter((e) => e.kind === 'file').map(ref), ...attachments.rows.map(ref)],
+    files: [...aktuelleDateien(visible.rows).map(ref), ...attachments.rows.map(ref)],
     systemSteps: steps.rows[0]!.n,
   };
+}
+
+/** a drive file has a version per content (stage 7): only the newest of each, none deleted */
+function aktuelleDateien(rows: Record<string, unknown>[]) {
+  const neueste = new Map<string, Record<string, unknown>>();
+  for (const e of rows) {
+    if (e.kind !== 'file') continue;
+    const k = e.file_key as string;
+    const da = neueste.get(k);
+    if (!da || iso(e.occurred_at) > iso(da.occurred_at)) neueste.set(k, e);
+  }
+  return [...neueste.values()].filter((e) => !e.geloescht).sort((a, b) => iso(a.occurred_at).localeCompare(iso(b.occurred_at)));
 }

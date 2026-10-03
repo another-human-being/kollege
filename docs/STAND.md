@@ -10,10 +10,10 @@
 - [x] 4 Mail-Eingang (Abnahme gegen lokalen IMAP-Server; am echten Uni-Postfach noch offen)
 - [x] 5 Mail-Client (Abnahme gegen lokale IMAP- und SMTP-Server; am echten Postfach offen)
 - [x] 6 Kalender (Abnahme gegen lokalen CalDAV-Server; an iCloud und Uni-Webmail offen)
-- [ ] 7 Laufwerk
+- [x] 7 Laufwerk (Abnahme gegen einen lokalen Ordner; am eingehängten Uni-Laufwerk offen)
 - [ ] 8 Hinweise & Rat
 
-**Aktuell:** Stufe 6 gebaut (03.10.2026). Offen sind die Tests am echten Postfach (Stufe 4 und 5) und am echten Kalender (Stufe 6). Als Nächstes Stufe 7.
+**Aktuell:** Stufe 7 gebaut (03.10.2026). Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7). Als Nächstes Stufe 8.
 
 ## Stufe 1 – erledigt
 
@@ -78,6 +78,24 @@
     2. `npm run eval:zuordnung`.
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
+
+## Stufe 7 – gebaut
+
+- **Laufwerk:** Das SMB-Laufwerk wird vom Betriebssystem eingehängt (nur lesend), der Worker liest den Ordner (`DRIVE_MOUNT`).
+  - Einrichten mit `npm run quelle:laufwerk -- --pfad /mnt/drive --unc '\\server\freigabe'`. Das SMB-Passwort bleibt in der Zugangsdatei des Systems und erreicht Kollege nie.
+  - Änderungen werden über Änderungszeit und Größe erkannt und über den Inhalts-Hash bestätigt. Nur „angefasste“ Dateien werden nicht neu verarbeitet.
+  - Große Ordner kommen in Paketen zu 100 Dateien.
+- **Textauszug und Zusammenfassung:** PDF, DOCX, XLSX, CSV und Text, wie bei Anhängen. Das `fast`-Modell fasst zusammen und ordnet zu.
+  - Abnahme: Eine Datei im Ordner „Events/Gründungsnacht 2026“ landet beim Event, fest über die Regel „gleicher Ordner“.
+- **Fassungen:** Jede inhaltliche Änderung ist ein eigener Eintrag (§4: Pfad + Hash). Die Ansichten zeigen die neueste Fassung, frühere stehen in der Datei unter „Fassungen“.
+  - Gelöschte Dateien verschwinden aus den Listen; ihre Fassungen bleiben, markiert.
+  - Kommt eine Datei oder eine ältere Fassung zurück, ist sie wieder aktuell.
+- **Dateiansicht `/dateien`** (nach dem Design):
+  - Ordnerbaum mit Anzahl, dazu „Aus Mails“; Liste mit Suche und den Filtern Zugeordnet / Ohne Zuordnung.
+  - Detail: Pfad, Herunterladen, Pfad kopieren, Ordner, Geändert, Umfang, Sichtbar, „Gehört zu“ (änderbar), „Worum es geht“ und der Textauszug.
+  - Anhänge aus persönlichen Postfächern sieht nur, wer die Mail sehen darf (RLS).
+  - Auf der Seite eines Themas verweisen die Dateien in die Dateiansicht.
+- **Tests:** 203 Vitest und 13 Playwright. Geprüft werden auch Sperrdateien, versteckte Dateien, Links, die Importgrenze, Fassungen ohne doppelte Aufgaben, Löschen und Wiederherstellen sowie ein fehlendes Laufwerk.
 
 ## Stufe 6 – gebaut
 
@@ -196,6 +214,15 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
     - Ein Termin ohne Gäste oder mit nur Team-Gästen ist intern.
 35. **Einladungen gehen über das eigene Postfach** (iMIP, RFC 6047), nicht über den Kalenderserver: So funktioniert es mit jedem Server gleich, und die Einladung liegt im eigenen Gesendet-Ordner. Damit der Server nicht zusätzlich einlädt, stehen die Teilnehmenden mit `SCHEDULE-AGENT=CLIENT` (RFC 6638) im Kalender.
 36. **Zeiten rechnet der Server in Berliner Zeit um,** nicht der Browser. Wer auf Reisen in anderer Zeitzone einen Termin anlegt, bekommt sonst eine verschobene Uhrzeit. Serien werden auf der Berliner Wanduhr aufgelöst: 10 Uhr bleibt auch nach der Zeitumstellung 10 Uhr.
+37. **Schutzregeln für das Laufwerk:**
+    - Ein nicht erreichbares oder plötzlich leeres Laufwerk ist ein Fehler. Sonst hielte Kollege ein abgefallenes SMB-Mount für „alles gelöscht“.
+    - Links werden nicht verfolgt (Schleifen, Wege aus der Freigabe heraus).
+    - Sperrdateien (`~$…`, `.~lock…`), versteckte Dateien und Systemdateien bleiben draußen.
+    - Dateien über 50 MB werden nur gehasht und als Metadaten gespeichert; geöffnet werden sie direkt auf dem Laufwerk.
+38. **Keine doppelten Aufgaben aus geänderten Dateien.** Logikfehler aufgelöst: Nach §4 ist jede Fassung ein neuer Eintrag. Ein Protokoll mit einem korrigierten Tippfehler hätte also alle seine Aufgaben noch einmal erzeugt.
+    - Jetzt übergeht Kollege eine Aufgabe, deren wörtliches Zitat schon in einer früheren Fassung derselben Datei stand. Das gilt auch für denselben Inhalt unter anderem Pfad, also eine verschobene Datei.
+    - Neue Absprachen in der neuen Fassung werden weiterhin zu Aufgaben.
+39. **„Öffnen in Word“ aus dem Design geht nicht:** Ein Browser darf keine SMB-Pfade öffnen. Stattdessen gibt es „Herunterladen“ und „Pfad kopieren“ (`\\server\freigabe\…`, für Explorer oder Finder).
 
 ## Befunde aus dem Bau
 
@@ -272,6 +299,13 @@ Eigene Fehler, durch Tests gefunden:
 - `model_calls` protokollierte das Modell aus `.env` statt des tatsächlich benutzten. Der Fehler wurde still verschluckt.
 - React führt Effekte im Entwicklungsmodus doppelt aus und bricht dabei den ersten Versand ab. Dadurch kam die erste Eingabe von Heute nie an. Gelöst mit einem Timer, den das Aufräumen storniert.
 
+### Befunde Stufe 7
+
+- **Eigener Fehler, durch Test gefunden:** Im Test verdeckte eine lokale Hilfsfunktion die gleichnamige Ansicht. Umbenannt.
+- **„Gehört zu“ ist jetzt ein gemeinsamer Baustein** für Mail und Dateien (zweiter konkreter Verwendungsfall).
+- **Design, nicht gebaut** (steht nicht in der Bauvorlage; Frage unten): Hochladen, „Kollege fragen“ zu einer Datei, ein persönlicher Ordner „nur du“, Prüfen ungeprüfter Datei-Zuordnungen in einem eigenen Modus.
+- **Der Bearbeiter einer Datei** ist über SMB nicht lesbar. Kollege nennt bei Laufwerksdateien niemanden; die Fixtures haben ihn.
+
 ### Befunde Stufe 6
 
 Durch Tests gefunden:
@@ -299,6 +333,10 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 
 ## Offene Fragen an Andreas
 
+- **Laufwerk** (Stufe 7):
+  - Adresse der Freigabe (`\\…\…`) und ein Dienstkonto mit Lesezugriff beim Rechenzentrum erfragen. Kollege braucht nur Lesen.
+  - Gibt es Ordner, die nicht ins Team gehören (Personal, Finanzen)? Sie lassen sich ausschließen, indem nur ein Unterordner eingehängt wird.
+  - Sollen Hochladen, „Kollege fragen“ zu einer Datei und ein persönlicher Ordner dazukommen (Design, nicht in der Bauvorlage)?
 - **Kalender** (Stufe 6):
   - Bietet das Uni-Webmail CalDAV, und unter welcher Adresse? Das fragt man das Rechenzentrum.
   - Outlook: Welche Art Konto nutzen die Kollegen? Ist Outlook nur mit dem Uni-Postfach über IMAP verbunden, liegt der Kalender meist nur lokal auf dem Rechner. Dann gibt es keine Schnittstelle, und der Kalender müsste ins Webmail oder nach iCloud umziehen. Bei einem Microsoft-Konto (Outlook.com/365) ginge es über Microsoft Graph; das steht in §12, ist aber nicht gebaut (Entscheidung 25 gilt für Mail).

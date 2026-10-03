@@ -5,13 +5,14 @@
 import { eq, inArray, sql } from 'drizzle-orm';
 import { fixtureConnector } from '@/lib/connectors/fixture';
 import { caldavConnector } from '@/lib/connectors/caldav';
+import { laufwerkConnector } from '@/lib/connectors/laufwerk';
 import { imapConnector } from '@/lib/connectors/imap';
 import type { Connection, Connector, RawItem, SyncError } from '@/lib/connectors/types';
 import { withSystem, type Tx } from '@/lib/db/client';
 import { connections, entries, eventCopies, mailCopies, users } from '@/lib/db/schema';
 import { putBlob } from './blobs';
 
-const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector, imap: imapConnector, caldav: caldavConnector };
+const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector, imap: imapConnector, caldav: caldavConnector, smb: laufwerkConnector };
 
 export interface SyncSummary {
   /** entries stored for the first time – each needs process:<entry> */
@@ -55,7 +56,9 @@ export async function syncConnection(connectionId: string, opts: { now?: Date } 
       }
     }
     for (const err of errors) await withSystem((tx) => storeError(tx, conn, err, now));
-    for (const href of result.removed ?? []) await withSystem((tx) => removeCopy(tx, conn, href));
+    for (const ref of result.removed ?? []) {
+      await withSystem((tx) => (conn.kind === 'drive' ? removeFile(tx, conn, ref) : removeCopy(tx, conn, ref)));
+    }
     summary.errors.push(...errors);
     cursor = result.cursor;
     await withSystem((tx) =>
@@ -185,6 +188,11 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
     }
   }
 
+  if (item.kind === 'file' && !row!.inserted) {
+    // a version that comes back (restored, or an older content again) is the current one again
+    await tx.update(entries).set({ occurred_at: item.occurredAt, meta: sql`${entries.meta} - 'geloescht'` }).where(eq(entries.id, row!.id));
+  }
+
   if (!row!.inserted) {
     // attachment entries share the visibility of their mail
     await tx
@@ -234,4 +242,10 @@ async function removeCopy(tx: Tx, conn: Connection, href: string) {
     const [rest] = await tx.select({ id: eventCopies.id }).from(eventCopies).where(eq(eventCopies.entry_id, g.entry_id));
     if (!rest) await tx.update(entries).set({ meta: sql`${entries.meta} || '{"status": "CANCELLED", "an_quelle_geloescht": true}'::jsonb` }).where(eq(entries.id, g.entry_id));
   }
+}
+
+/** a file gone from the drive: its versions stay (Verlauf, links), marked as deleted */
+async function removeFile(tx: Tx, conn: Connection, path: string) {
+  await tx.update(entries).set({ meta: sql`${entries.meta} || '{"geloescht": true}'::jsonb` })
+    .where(sql`${entries.connection_id} = ${conn.id} AND ${entries.kind} = 'file' AND ${entries.external_id} = ${path}`);
 }
