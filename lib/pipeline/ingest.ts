@@ -4,13 +4,14 @@
 // they record what arrived, they do not decide anything.
 import { eq, inArray, sql } from 'drizzle-orm';
 import { fixtureConnector } from '@/lib/connectors/fixture';
+import { caldavConnector } from '@/lib/connectors/caldav';
 import { imapConnector } from '@/lib/connectors/imap';
 import type { Connection, Connector, RawItem, SyncError } from '@/lib/connectors/types';
 import { withSystem, type Tx } from '@/lib/db/client';
-import { connections, entries, mailCopies, users } from '@/lib/db/schema';
+import { connections, entries, eventCopies, mailCopies, users } from '@/lib/db/schema';
 import { putBlob } from './blobs';
 
-const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector, imap: imapConnector };
+const connectors: Partial<Record<Connection['provider'], Connector>> = { fixture: fixtureConnector, imap: imapConnector, caldav: caldavConnector };
 
 export interface SyncSummary {
   /** entries stored for the first time – each needs process:<entry> */
@@ -54,6 +55,7 @@ export async function syncConnection(connectionId: string, opts: { now?: Date } 
       }
     }
     for (const err of errors) await withSystem((tx) => storeError(tx, conn, err, now));
+    for (const href of result.removed ?? []) await withSystem((tx) => removeCopy(tx, conn, href));
     summary.errors.push(...errors);
     cursor = result.cursor;
     await withSystem((tx) =>
@@ -79,6 +81,12 @@ function visibilityOf(conn: Connection) {
     : { visibility: 'restricted' as const, visible_to: [conn.user_id] as string[] };
 }
 
+interface KalenderOrt {
+  calendar_url: string;
+  href: string;
+  etag: string;
+}
+
 interface Ort {
   folder: string;
   uid: number;
@@ -91,7 +99,7 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
   const vis = visibilityOf(conn);
   if (item.kind === 'event' && vis.visibility === 'restricted') {
     // invited team members see the event too (decision 2026-10-01)
-    const invited = [item.meta.organizer as string, ...((item.meta.attendees as string[]) ?? [])];
+    const invited = [item.meta.organizer as string | null, ...((item.meta.attendees as string[]) ?? [])].filter((x): x is string => !!x);
     const team = await tx.select({ id: users.id }).from(users).where(inArray(users.email, invited));
     vis.visible_to = [...new Set([...vis.visible_to, ...team.map((u) => u.id)])].sort();
   }
@@ -101,8 +109,8 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
     attachments.push({ filename: a.filename, mime: a.mime, text: a.text, blob_path: await putBlob(a.content) });
   }
 
-  // where this copy lies (mail via IMAP): stored in mail_copies, not in meta
-  const { ort, ...meta } = item.meta as { ort?: Ort } & Record<string, unknown>;
+  // where this copy lies (mail via IMAP, events via CalDAV): stored in *_copies, not in meta
+  const { ort, kalender_ort: kOrt, ...meta } = item.meta as { ort?: Ort; kalender_ort?: KalenderOrt } & Record<string, unknown>;
 
   const authorEmail =
     item.kind === 'mail' ? (item.meta.from as { email: string }).email
@@ -157,6 +165,26 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
       });
   }
 
+  if (kOrt) {
+    // a local change not yet written wins until the worker has written it (then the server's state comes back)
+    const [lokal] = await tx.select({ id: eventCopies.id }).from(eventCopies)
+      .where(sql`${eventCopies.entry_id} = ${row!.id} AND ${eventCopies.pending}`);
+    await tx
+      .insert(eventCopies)
+      .values({ entry_id: row!.id, connection_id: conn.id, calendar_url: kOrt.calendar_url, href: kOrt.href, etag: kOrt.etag })
+      .onConflictDoUpdate({
+        target: [eventCopies.entry_id, eventCopies.connection_id],
+        set: lokal ? { updated_at: sql`now()` } : { calendar_url: kOrt.calendar_url, href: kOrt.href, etag: kOrt.etag, updated_at: sql`now()` },
+      });
+    // events change at the source (time, place, attendees) – mails never do
+    if (!row!.inserted && !lokal) {
+      await tx
+        .update(entries)
+        .set({ title: item.title, body_text: item.bodyText, occurred_at: item.occurredAt, blob_path: blob, meta: sql`${entries.meta} || ${JSON.stringify(meta)}::jsonb` })
+        .where(eq(entries.id, row!.id));
+    }
+  }
+
   if (!row!.inserted) {
     // attachment entries share the visibility of their mail
     await tx
@@ -195,4 +223,15 @@ async function storeError(tx: Tx, conn: Connection, err: SyncError, now: Date) {
       processing_state: 'skipped',
     })
     .onConflictDoNothing();
+}
+
+/** deleted at the source: the copy goes; without any copy left the event counts as cancelled */
+async function removeCopy(tx: Tx, conn: Connection, href: string) {
+  const gone = await tx.delete(eventCopies)
+    .where(sql`${eventCopies.connection_id} = ${conn.id} AND ${eventCopies.href} = ${href} AND NOT ${eventCopies.pending}`)
+    .returning({ entry_id: eventCopies.entry_id });
+  for (const g of gone) {
+    const [rest] = await tx.select({ id: eventCopies.id }).from(eventCopies).where(eq(eventCopies.entry_id, g.entry_id));
+    if (!rest) await tx.update(entries).set({ meta: sql`${entries.meta} || '{"status": "CANCELLED", "an_quelle_geloescht": true}'::jsonb` }).where(eq(entries.id, g.entry_id));
+  }
 }

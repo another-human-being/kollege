@@ -64,6 +64,13 @@
       "when": 1790923839433,
       "tag": "0008_thread_stubs",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791014046352,
+      "tag": "0009_event_copies",
+      "breakpoints": true
     }
   ]
 }

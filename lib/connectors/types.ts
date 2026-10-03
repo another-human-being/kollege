@@ -48,6 +48,8 @@ export interface SyncResult {
   cursor: unknown;
   /** more is waiting (large import): store this batch, save the cursor, call again */
   more?: boolean;
+  /** external ids that disappeared at the source (calendar objects deleted there) */
+  removed?: string[];
 }
 
 export interface Connector {

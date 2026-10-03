@@ -304,3 +304,21 @@ export const mailCopies = pgTable(
   },
   (t) => [unique('mail_copies_place').on(t.entry_id, t.connection_id, t.folder)],
 );
+
+// Stage 6: where an event lies – one row per calendar connection. etag guards writes (If-Match).
+// pending = Kollege changed it and the worker still has to write it; loeschen = remove it there.
+export const eventCopies = pgTable(
+  'event_copies',
+  {
+    id: id(),
+    ...stamps(),
+    entry_id: uuid('entry_id').notNull().references(() => entries.id, { onDelete: 'cascade' }),
+    connection_id: uuid('connection_id').notNull().references(() => connections.id),
+    calendar_url: text('calendar_url').notNull(),
+    href: text('href').notNull(),
+    etag: text('etag'),
+    pending: boolean('pending').notNull().default(false),
+    loeschen: boolean('loeschen').notNull().default(false),
+  },
+  (t) => [unique('event_copies_place').on(t.entry_id, t.connection_id)],
+);

@@ -8,7 +8,7 @@ export type Actor = { type: 'user'; userId: string } | { type: 'model'; userId: 
 
 /** Tables an inverse may touch. */
 export const UNDOABLE_TABLES = [
-  'areas', 'orgs', 'people', 'person_emails', 'matters', 'entries', 'links', 'tasks', 'hints', 'mail_copies',
+  'areas', 'orgs', 'people', 'person_emails', 'matters', 'entries', 'links', 'tasks', 'hints', 'mail_copies', 'event_copies',
 ] as const;
 export type UndoableTable = (typeof UNDOABLE_TABLES)[number];
 
