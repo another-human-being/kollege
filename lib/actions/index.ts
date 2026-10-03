@@ -18,4 +18,4 @@ import './task';
 export { runAction, undoAction, type RunOptions } from './run';
 export { defineAction, getAction, listActions } from './registry';
 export { ActionError, type Actor } from './types';
-export { answerHint } from './answer';
+export { answerHint, answerHintText } from './answer';

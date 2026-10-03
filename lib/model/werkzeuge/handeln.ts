@@ -15,7 +15,7 @@ const NICHT_FUER_MODELL = new Set(['chat.create', 'chat.update', 'chat.append', 
 const BESCHREIBUNG: Record<string, string> = {
   'note.create': 'Notiz oder Gesprächsnotiz (conversation: Beratung, Telefonat, Treffen …) an einem Eintrag, einer Organisation oder Person ablegen. Für alles, was jemand erzählt und bleiben soll.',
   'task.create': 'Aufgabe (direction ours: wir schulden es, owner_user_id aus dem Team) oder Zusage der anderen Seite (direction theirs: owner_person_id oder nur org_id). Frist als due_date (YYYY-MM-DD). source_entry_id = Notiz, aus der es stammt.',
-  'instruction.create': 'Anweisung speichern („ab jetzt …“). scope personal (nur für mich), area (für einen Bereich, area_id) oder team.',
+  'instruction.create': 'Anweisung speichern („ab jetzt …“). scope personal (nur für mich), area (für einen Bereich, area_id) oder team. Regelt eine persönliche Anweisung, welche Hinweise wann erscheinen („Social-Media-Hinweise nur montags“), fülle zusätzlich hinweise (arten, bereiche, wochentage oder aus).',
   'matter.create': 'Neuen Eintrag in einem Bereich anlegen (Event, Lehrveranstaltung, Beitrag, Thema eines Gründungsteams mit org_id).',
   'matter.update': 'Titel, Felder, Phase, Daten eines Eintrags ändern.',
   'entry.link': 'Einen Eintrag (Mail, Termin, Datei, Notiz) einem Eintrag, einer Organisation oder Person zuordnen.',

@@ -85,6 +85,7 @@ export default async function Einstellungen({ searchParams }: { searchParams: Pr
             <Anweisung key={a.id} geltung={a.scope === 'Bereich' ? `Bereich ${a.area}` : a.scope}
               aktionen={<Tu type="instruction.delete" payload={{ id: a.id }} text="Anweisung gelöscht" variante="text">Löschen</Tu>}>
               <Feld id={`i-${a.id}`} wert={a.text} label="Anweisung" change={{ type: 'instruction.update', base: { id: a.id }, key: 'body_text' }} breite={520} />
+              {a.hinweise ? <div className="mono" style={{ color: 'var(--ink-muted)' }}>{a.hinweise}</div> : null}
             </Anweisung>
           ))}
         </Abschnitt>

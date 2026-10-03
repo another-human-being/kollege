@@ -5,7 +5,7 @@ import { Abschnitt, Aussage, Etikett, Hinweis, Leer } from '@/components/kg';
 import { faellig, seit, tag, uhrzeit } from '@/lib/format';
 import { navigation } from '@/lib/views/nav';
 import { todayPage, type MatterItem, type TodayItem } from '@/lib/views/today';
-import { HinweisAntworten, Uebergabe, ImTeam, Uebernehmen } from './client';
+import { Erledigt, Festhalten, HinweisAntworten, ImTeam, Spaeter, Uebergabe, Uebernehmen } from './client';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,14 +29,21 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
   const chips = [{ key: '', label: 'Alle' }, ...nav.areas.map((a) => ({ key: a.key, label: a.name_plural }))];
   const termin = (i: TodayItem) => i.entry_id === i.id; // events carry their entry as id
 
-  const zeile = (i: TodayItem, gruende: Parameters<typeof Hinweis>[0]['gruende']) => (
+  const zeile = (i: TodayItem, gruende: Parameters<typeof Hinweis>[0]['gruende'], extra?: React.ReactNode) => (
     <Hinweis key={i.id} zeit={termin(i) ? uhrzeit(i.at!) : i.at ? tag(i.at, now) : ''} titel={<strong>{i.title}</strong>}
-      kontext={wo(i)} gruende={gruende} dringend={i.overdue} />
+      kontext={wo(i)} gruende={gruende} dringend={i.overdue}
+      aktionen={extra || i.hintId ? <>{extra}{i.hintId ? <Spaeter hintId={i.hintId} /> : null}</> : undefined} />
   );
   const matterZeile = (m: MatterItem, extra?: React.ReactNode) => (
     <Hinweis key={m.id} zeit={tag(m.last_activity, now)} titel={<strong>{m.title}</strong>}
       kontext={<><Etikett>{m.area}</Etikett><a className="kg-bezug" href={`/m/${m.id}`}>öffnen</a>{m.owner ? <span>· {m.owner}</span> : null}</>}
-      gruende={[{ art: 'berechnet', text: m.reason }]} aktionen={extra} />
+      gruende={[{ art: 'berechnet', text: m.reason }]}
+      aktionen={extra || m.hintId ? <>{extra}{m.hintId ? <Spaeter hintId={m.hintId} /> : null}</> : undefined} />
+  );
+  const festhalten = p.momente.filter((h) => h.kind !== 'advice');
+  const rat = p.momente.filter((h) => h.kind === 'advice');
+  const hinweisKontext = (h: (typeof p.momente)[number]) => (
+    <>{h.area ? <Etikett>{h.area}</Etikett> : null}{h.matter_id ? <a className="kg-bezug" href={`/m/${h.matter_id}`}>öffnen</a> : null}</>
   );
 
   return (
@@ -72,11 +79,31 @@ export default async function Heute({ searchParams }: { searchParams: Promise<{ 
         </Abschnitt>
       ) : null}
 
+      {festhalten.length ? (
+        <Abschnitt id="h-festhalten" titel="Kurz festhalten" anzahl={festhalten.length} aside="was war – hilft beim nächsten Mal">
+          {festhalten.map((h) => (
+            <Hinweis key={h.id} zeit={h.at ? tag(h.at, now) : ''} titel={<strong>{h.title}</strong>} kontext={hinweisKontext(h)}
+              gruende={h.reason ? [{ art: h.kind === 'outcome' ? 'berechnet' : 'belegt', text: h.reason, quelle: h.kind === 'after_event' ? 'Kalender' : undefined }] : []}
+              aktionen={<Festhalten hintId={h.id} label={h.title} optionen={h.options.map((o) => o.label)} />} />
+          ))}
+        </Abschnitt>
+      ) : null}
+
+      {rat.length ? (
+        <Abschnitt id="h-rat" titel="Aus früheren Fällen" anzahl={rat.length} aside="ein Rat, mit Beleg">
+          {rat.map((h) => (
+            <Hinweis key={h.id} zeit={h.at ? tag(h.at, now) : ''} titel={h.title} kontext={hinweisKontext(h)}
+              gruende={h.reason ? h.reason.split(' · ').map((b) => ({ art: 'belegt' as const, text: b })) : []}
+              aktionen={<><HinweisAntworten hintId={h.id} optionen={h.options.map((o) => o.label)} /><Spaeter hintId={h.id} /></>} />
+          ))}
+        </Abschnitt>
+      ) : null}
+
       <Abschnitt id="h-heute" titel="Heute" anzahl={p.today.length} leer={<Leer titel="Heute steht nichts an." text="Termine und Fristen für heute erscheinen hier." />}>
         {p.today.map((i) =>
           termin(i)
             ? zeile(i, i.reason ? [{ art: 'belegt', text: i.reason, quelle: 'Kalender' }] : [])
-            : zeile(i, [{ art: 'berechnet', text: i.overdue ? faellig(i.at!, now) : 'heute fällig', dringend: i.overdue }]),
+            : zeile(i, [{ art: 'berechnet', text: i.overdue ? faellig(i.at!, now) : 'heute fällig', dringend: i.overdue }], <Erledigt taskId={i.id} />),
         )}
       </Abschnitt>
 

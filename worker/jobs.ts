@@ -2,6 +2,7 @@
 //  import  first connection: sync + process bundled, own queue so it never holds up regular syncs
 //  sync    per connection on a schedule; new entries → process
 //  process one entry
+//  hinweise  rules and advice (§10): daily 06:30 and shortly after each sync (stately: at most one queued)
 import { ne } from 'drizzle-orm';
 import type { PgBoss } from 'pg-boss';
 import { withSystem } from '@/lib/db/client';
@@ -13,6 +14,7 @@ import { sendeTermin } from '@/lib/kalender/senden';
 import { rueckschreiben } from '@/lib/mail/rueckschreiben';
 import { sendeEntwurf, wartendeSendungen } from '@/lib/mail/senden';
 import { processEntry } from '@/lib/pipeline/process';
+import { hinweiseLauf } from '@/lib/hinweise';
 
 type Connection = typeof connections.$inferSelect;
 
@@ -37,9 +39,13 @@ async function scheduleSync(boss: PgBoss, conns: Connection[]) {
 
 export async function startJobs(boss: PgBoss): Promise<void> {
   for (const q of ['import', 'sync', 'process', 'senden', 'senden-nachholen']) await boss.createQueue(q);
+  await boss.createQueue('hinweise', { policy: 'stately' });
+  // after a sync the new entries are still being processed – the run waits a little for them
+  const hinweiseBald = () => boss.send('hinweise', {}, { startAfter: 60 });
 
   await boss.work<{ connectionIds: string[] }>('import', async ([job]) => {
     const r = await runImport(job!.data.connectionIds);
+    await hinweiseBald();
     const conns = await withSystem((tx) => tx.select().from(connections));
     await scheduleSync(boss, conns.filter((c) => job!.data.connectionIds.includes(c.id)));
     return { processed: r.results.size, unreviewed: r.unreviewed };
@@ -53,6 +59,7 @@ export async function startJobs(boss: PgBoss): Promise<void> {
     if (kalender.fehler.length) console.error('[kalender schreiben]', kalender.fehler);
     const r = await syncConnection(job!.data.connectionId);
     for (const entryId of r.newEntryIds) await boss.send('process', { entryId });
+    await hinweiseBald();
     return { new: r.newEntryIds.length, errors: r.errors.length };
   });
 
@@ -73,6 +80,9 @@ export async function startJobs(boss: PgBoss): Promise<void> {
     return { nachgeholt: ids.length };
   });
   await boss.schedule('senden-nachholen', '* * * * *', {}, { tz: 'Europe/Berlin' });
+
+  await boss.work('hinweise', async () => hinweiseLauf());
+  await boss.schedule('hinweise', '30 6 * * *', {}, { tz: 'Europe/Berlin' });
 
   await boss.work<{ entryId: string }>('process', async ([job]) => {
     const r = await processEntry(job!.data.entryId);

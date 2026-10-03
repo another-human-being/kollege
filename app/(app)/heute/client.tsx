@@ -1,6 +1,6 @@
 'use client';
 import { useState, type ReactNode } from 'react';
-import { answer } from '@/app/actions';
+import { answer, hinweisText } from '@/app/actions';
 import { Aktion } from '@/components/kg';
 import { useAktion } from '@/components/rueckgaengig';
 
@@ -65,5 +65,45 @@ export function ImTeam({ anzahl, children }: { anzahl: number; children: ReactNo
       </div>
       {offen ? <div className="kg-abschnitt-liste">{children}</div> : null}
     </section>
+  );
+}
+
+/** design Heute: "Später" puts an item off until tomorrow morning (hint.snooze, with undo) */
+export function Spaeter({ hintId }: { hintId: string }) {
+  const { run } = useAktion();
+  return <Aktion variante="text" onClick={() => run('hint.snooze', { hint_id: hintId }, 'Verschoben auf morgen')}>Später</Aktion>;
+}
+
+export function Erledigt({ taskId }: { taskId: string }) {
+  const { run } = useAktion();
+  return <Aktion onClick={() => run('task.complete', { id: taskId }, 'Erledigt')}>Erledigt</Aktion>;
+}
+
+/** a moment answered in a few words: "Was kam raus?" → note, "Wie lief's?" → outcome note */
+export function Festhalten({ hintId, label, optionen }: { hintId: string; label: string; optionen: string[] }) {
+  const { show } = useAktion();
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  return (
+    <div style={{ display: 'grid', gap: 8 }}>
+      <textarea className="feld" rows={2} aria-label={label} placeholder="ein, zwei Sätze" value={text} onChange={(e) => setText(e.target.value)} />
+      <div className="kg-aktionen">
+        <Aktion variante="primaer" disabled={busy || !text.trim()} onClick={async () => {
+          setBusy(true);
+          const redo = () => hinweisText(hintId, text);
+          show(await redo(), 'Festgehalten', redo);
+          setBusy(false);
+        }}>Festhalten</Aktion>
+        {optionen.map((o, i) => (
+          <Aktion key={o} variante="text" disabled={busy} onClick={async () => {
+            setBusy(true);
+            const redo = () => answer(hintId, i);
+            show(await redo(), o, redo);
+            setBusy(false);
+          }}>{o}</Aktion>
+        ))}
+        <Spaeter hintId={hintId} />
+      </div>
+    </div>
   );
 }

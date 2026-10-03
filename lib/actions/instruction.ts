@@ -14,6 +14,20 @@ async function assertInstruction(tx: Tx, id: string) {
   if (!e) throw new ActionError(`instruction ${id} not found`);
 }
 
+/**
+ * §10: which hints someone gets and how often is set by personal instructions in the chat
+ * ("Social-Media-Hinweise nur montags"). The model reads the sentence once and stores it as a
+ * rule; Heute applies it without a model (decision 42).
+ */
+export const HinweisRegel = z.object({
+  arten: z.array(z.enum(['overdue', 'waiting', 'stale', 'handover', 'after_event', 'outcome', 'advice', 'clarify', 'review_batch'])).min(1).optional()
+    .describe('welche Hinweise: overdue (eigene Aufgabe überfällig), waiting (wartet auf uns / Zusage anderer), stale (hängt), handover, after_event (Was kam raus?), outcome (Wie lief’s?), advice (Rat), clarify, review_batch; leer = alle'),
+  bereiche: z.array(z.string()).min(1).optional().describe('Schlüssel der Bereiche (area key), leer = alle'),
+  wochentage: z.array(z.number().int().min(1).max(7)).min(1).optional().describe('nur an diesen Tagen zeigen, 1 = Montag … 7 = Sonntag'),
+  aus: z.boolean().optional().describe('true = diese Hinweise gar nicht zeigen'),
+}).refine((r) => r.aus || r.wochentage, { message: 'aus or wochentage' });
+export type HinweisRegel = z.infer<typeof HinweisRegel>;
+
 /** personal (only for me) > area > team (§9.1) */
 export const instructionCreate = defineAction({
   type: 'instruction.create',
@@ -22,7 +36,9 @@ export const instructionCreate = defineAction({
       body_text: z.string().trim().min(1).max(1000),
       scope: z.enum(['personal', 'area', 'team']),
       area_id: z.uuid().optional(),
+      hinweise: HinweisRegel.optional().describe('nur bei persönlichen Anweisungen, die regeln, welche Hinweise wann erscheinen'),
     })
+    .refine((p) => !p.hinweise || p.scope === 'personal', { message: 'hint rules are personal' })
     .refine((p) => (p.scope === 'area') === !!p.area_id, { message: 'area_id belongs to scope area (and only there)' }),
   external: false,
   allowedActors: ['user', 'model'],
@@ -43,6 +59,7 @@ export const instructionCreate = defineAction({
         instruction_user_id: personal ? me : null,
         instruction_area_id: p.area_id ?? null,
         processing_state: 'done',
+        ...(p.hinweise ? { meta: { hinweise: p.hinweise } } : {}),
       })
       .returning({ id: entries.id });
     return { result: { id: e!.id }, inverse: [{ op: 'delete', table: 'entries', id: e!.id }] };

@@ -1,5 +1,6 @@
 // Einstellungen: Bereiche, Anweisungen, Quellen (status only; connecting sources comes with stage 4).
 import { sql } from 'drizzle-orm';
+import { HinweisRegel } from '@/lib/actions/instruction';
 import { withUser } from '@/lib/db/client';
 import type { AreaInfo } from './areas';
 
@@ -11,7 +12,7 @@ export async function settings(userId: string) {
     // personal instructions are restricted to their owner by RLS
     const instructions = await tx.execute<Record<string, unknown>>(sql`
       SELECT e.id, e.body_text AS text, e.instruction_area_id AS area_id, a.name_plural AS area,
-             e.instruction_user_id IS NOT NULL AS personal, e.occurred_at
+             e.instruction_user_id IS NOT NULL AS personal, e.occurred_at, e.meta->'hinweise' AS hinweise
       FROM entries e LEFT JOIN areas a ON a.id = e.instruction_area_id
       WHERE e.kind = 'instruction'
       ORDER BY e.instruction_user_id IS NOT NULL DESC, a.sort NULLS FIRST, e.occurred_at`);
@@ -26,6 +27,7 @@ export async function settings(userId: string) {
         area: (i.area as string) ?? null,
         // personal > area > team (§9.1)
         scope: i.personal ? 'persönlich' : i.area_id ? 'Bereich' : 'Team',
+        hinweise: regelText(i.hinweise),
       })),
       sources: sources.rows.map((s) => ({
         id: s.id as string,
@@ -39,4 +41,20 @@ export async function settings(userId: string) {
       })),
     };
   });
+}
+
+const ART: Record<string, string> = {
+  overdue: 'Überfällig', waiting: 'Wartet', stale: 'Hängt', handover: 'Übergabe', after_event: 'Was kam raus?',
+  outcome: 'Wie lief’s?', advice: 'Rat', clarify: 'Kurz klären', review_batch: 'Prüfen',
+};
+const TAG = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+/** how the rule behind an instruction about hints was understood (decision 42) – shown, so it can be checked */
+function regelText(v: unknown): string | null {
+  const r = HinweisRegel.safeParse(v);
+  if (!r.success) return null;
+  const was = r.data.arten ? r.data.arten.map((a) => ART[a] ?? a).join(', ') : 'alle Hinweise';
+  const wo = r.data.bereiche ? ` in ${r.data.bereiche.join(', ')}` : '';
+  const wann = r.data.aus ? 'nie' : `nur ${r.data.wochentage!.map((d) => TAG[d - 1]).join(', ')}`;
+  return `Wirkt auf ${was}${wo}: ${wann}`;
 }

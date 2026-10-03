@@ -11,9 +11,9 @@
 - [x] 5 Mail-Client (Abnahme gegen lokale IMAP- und SMTP-Server; am echten Postfach offen)
 - [x] 6 Kalender (Abnahme gegen lokalen CalDAV-Server; an iCloud und Uni-Webmail offen)
 - [x] 7 Laufwerk (Abnahme gegen einen lokalen Ordner; am eingehängten Uni-Laufwerk offen)
-- [ ] 8 Hinweise & Rat
+- [x] 8 Hinweise & Rat (Rat mit Ersatzmodell geprüft; mit Mistral am echten Datenbestand offen)
 
-**Aktuell:** Stufe 7 gebaut (03.10.2026). Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7). Als Nächstes Stufe 8.
+**Aktuell:** Alle acht Stufen gebaut (03.10.2026). Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7), dazu der Rat (Stufe 8) mit Mistral. Danach: Betrieb (VM, Anmeldung per Magic-Link) und die offenen Fragen unten.
 
 ## Stufe 1 – erledigt
 
@@ -78,6 +78,25 @@
     2. `npm run eval:zuordnung`.
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
+
+## Stufe 8 – gebaut
+
+- **Regeln in SQL** (`lib/hinweise/regeln.ts`). Der Worker wendet sie täglich um 06:30 an und eine Minute nach jedem Sync (höchstens ein Lauf wartet).
+  - `overdue`: eigene Aufgabe überfällig.
+  - `waiting`: Zusage anderer überfällig, oder eine Mail wartet auf uns, je Person, die sie lesen darf.
+  - `stale`: Thema hängt.
+  - `handover`: an die Empfängerin, mit Kurzstand (nächster Schritt, offene Zusagen, letztes Ereignis).
+  - `after_event`: Termin mit Externen vor höchstens einem Tag zu Ende, seither nichts geschrieben → „Was kam raus?“.
+  - `outcome`: Thema auf erledigt ohne Rückblick → „Wie lief’s?“.
+- **Abnahme:** Jeder Hinweis erscheint einmal (Schlüssel je Ursache), immer mit Grund, und schließt sich, wenn die Ursache weg ist. Ein verschobener Termin oder eine neue Frist ist eine neue Ursache.
+- **Heute:**
+  - „Später“ an jedem Hinweis: aus den Augen bis morgen, mit Rückgängig. „Erledigt“ an überfälligen eigenen Aufgaben.
+  - Neu: „Kurz festhalten“ für „Was kam raus?“ (wird eine Gesprächsnotiz am Thema) und „Wie lief’s?“ (wird der Rückblick). Beides mit einem Rückgängig.
+  - Neu: „Aus früheren Fällen“ für den Rat, mit Belegen.
+- **Rat aus früheren Fällen** (§9.3, `lib/hinweise/rat.ts`): Für neue Themen liest `think` Vorgänger oder vergleichbare erledigte Themen und gibt höchstens einen Rat mit wörtlichem Beleg.
+  - Abnahme an den Testdaten: „Gründungsnacht 2026“ fragt nach dem Vorgänger 2025. Nach „Ja“ kommt der Rat, früher einzuladen, mit dem Beleg aus dem Rückblick 2025 (f4).
+- **Anweisungen zu Hinweisen:** „Wartet-Hinweise nur montags“ wirkt auf Heute. Die Einstellungen zeigen, wie der Satz verstanden wurde („Wirkt auf Wartet: nur Mo“).
+- **Tests:** 215 Vitest und 14 Playwright.
 
 ## Stufe 7 – gebaut
 
@@ -223,6 +242,19 @@ Ab hier entscheide ich selbstständig nach `docs/VORGEHEN.md` (Freigabe Andreas,
     - Jetzt übergeht Kollege eine Aufgabe, deren wörtliches Zitat schon in einer früheren Fassung derselben Datei stand. Das gilt auch für denselben Inhalt unter anderem Pfad, also eine verschobene Datei.
     - Neue Absprachen in der neuen Fassung werden weiterhin zu Aufgaben.
 39. **„Öffnen in Word“ aus dem Design geht nicht:** Ein Browser darf keine SMB-Pfade öffnen. Stattdessen gibt es „Herunterladen“ und „Pfad kopieren“ (`\\server\freigabe\…`, für Explorer oder Finder).
+40. **Hinweise sind das Gedächtnis der Heute-Listen, keine zweite Liste.** Logikfehler aufgelöst: §10 legt Überfälliges, Wartendes und Hängendes als Hinweise an. Heute (Stufe 2) zeigt genau das schon live. Beides zu zeigen hieße, alles doppelt zu zeigen.
+    - Heute bleibt live, also sofort richtig, auch ohne Worker-Lauf. Die Hinweis-Zeile merkt sich je Ursache, dass sie erschien, ob sie verschoben wurde („Später“) und ob jemand sie von Hand erledigt hat.
+    - Von Hand erledigt kommt sie nicht wieder.
+    - Ein Hinweis zählt einmal je Ursache, nicht je Objekt. Eine neue Frist ist ein neuer Hinweis, dieselbe nicht.
+41. **Rat nur mit Erfahrung, sonst eine Frage.** Logikfehler aufgelöst: §9.3 gibt Rat „bei ähnlichen erledigten Vorgängen“, Denkweise 5 verbietet Rat bei weniger als zwei Fällen.
+    - Jetzt gilt: Ein von einem Menschen gesetzter Vorgänger reicht, mindestens zwei vergleichbare erledigte Themen auch.
+    - Genau ein vergleichbares Thema ohne Vorgänger: eine Frage „Ist … der Vorgänger?“ (Denkweise 9). Das beantwortet auch die alte Frage, wo der Vorgänger vorgeschlagen wird (e5).
+    - Im Code geprüft: Zitate müssen wörtlich in ihrer Quelle stehen, jede Zahl im Rat in den Daten. Sonst gibt es keinen Rat.
+    - Pro Thema wird höchstens einmal gefragt; auch „zu wenig Erfahrung“ wird gemerkt.
+    - Der Rat entsteht im Worker-Lauf für Themen der letzten drei Tage, nicht in `matter.create`. Die Aktionsschicht ist eine Transaktion, und ein Modellaufruf hätte darin nichts zu suchen.
+42. **Anweisungen zu Hinweisen versteht das Modell einmal, angewendet werden sie ohne Modell.** Das Chat-Modell legt zur persönlichen Anweisung eine Regel ab (welche Arten, welche Bereiche, welche Wochentage oder gar nicht).
+    - Heute filtert danach, ohne Modellaufruf pro Hinweis.
+    - Die Einstellungen zeigen die Regel, damit man sieht, ob der Satz richtig verstanden wurde.
 
 ## Befunde aus dem Bau
 
@@ -299,6 +331,13 @@ Eigene Fehler, durch Tests gefunden:
 - `model_calls` protokollierte das Modell aus `.env` statt des tatsächlich benutzten. Der Fehler wurde still verschluckt.
 - React führt Effekte im Entwicklungsmodus doppelt aus und bricht dabei den ersten Versand ab. Dadurch kam die erste Eingabe von Heute nie an. Gelöst mit einem Timer, den das Aufräumen storniert.
 
+### Befunde Stufe 8
+
+- **Der Import schließt keine Themen:** „Gründungsnacht 2025“ liegt in der Vergangenheit, bleibt aber offen, bis jemand sie schließt. Erst dann taugt sie als früherer Fall. Frage unten.
+- **„Was kam raus?“ gilt nicht für Serientermine** (z. B. jede Vorlesungssitzung). Sonst käme die Frage jede Woche. Nur Einzeltermine.
+- **An den Testdaten selbst gefunden:** Die Beratung mit Kitchen Loop (30.09.) löst am 01.10. ein „Was kam raus?“ aus. Die Regel greift also auch ohne eigens gebaute Testfälle.
+- **Nicht gebaut** (steht nicht in der Bauvorlage; Frage unten): Benachrichtigung außerhalb der App (Mail, Handy), der Rat auf der Seite des Themas.
+
 ### Befunde Stufe 7
 
 - **Eigener Fehler, durch Test gefunden:** Im Test verdeckte eine lokale Hilfsfunktion die gleichnamige Ansicht. Umbenannt.
@@ -333,6 +372,10 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 
 ## Offene Fragen an Andreas
 
+- **Hinweise** (Stufe 8):
+  - Sollen vergangene Events von selbst als erledigt gelten (Datum vorbei), damit sie als frühere Fälle zählen und „Wie lief’s?“ fragen? Jetzt schließt sie ein Mensch.
+  - Sollen Hinweise auch außerhalb der App ankommen (morgendliche Mail, Handy)? Nicht in der Bauvorlage.
+  - Soll der Rat zusätzlich auf der Seite des Themas stehen, nicht nur in Heute?
 - **Laufwerk** (Stufe 7):
   - Adresse der Freigabe (`\\…\…`) und ein Dienstkonto mit Lesezugriff beim Rechenzentrum erfragen. Kollege braucht nur Lesen.
   - Gibt es Ordner, die nicht ins Team gehören (Personal, Finanzen)? Sie lassen sich ausschließen, indem nur ein Unterordner eingehängt wird.
@@ -350,7 +393,7 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 - Klärungshinweis zu einer eingeschränkten Mail mit mehreren Berechtigten: Wer bekommt ihn? Jetzt geht er an die erste Person in `visible_to`.
 - Rolle neuer Personen (founder/partner/…) aus der Rolle der Org ableiten?
 - f5 (Folien ohne Text, allein im Ordner): Soll „Ordnername ≈ Vorgangstitel“ als feste Zuordnung gelten, oder soll das Modell auch ohne Textauszug mit den Metadaten gefragt werden?
-- e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen (Eingangsweg oder erst Rat in Stufe 8)?
+- ~~e5 → gn_2025: An welcher Stelle wird der Vorgänger vorgeschlagen?~~ Beantwortet mit Entscheidung 41: als Frage im Rat (Stufe 8).
 - f3 (Plätze 60): Soll das Modell Feldwerte für bestehende Vorgänge vorschlagen können? Das Schema §7.2.4 sieht das nicht vor.
 - Ausschluss-Anweisungen im Filter (§7.2.1): Wie werden Anweisungen in Alltagssprache vor dem Modellaufruf angewendet? (Stufe 4)
 - Chats löschen (Design: ChatListe „Löschen“)? Steht nicht in der Bauvorlage. Die Karten verweisen auf ihren Chat; ich würde „Archivieren“ statt Löschen vorschlagen.

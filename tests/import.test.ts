@@ -260,10 +260,10 @@ const CHECKED = [
 const LATER: Record<string, string> = {
   team_overview: 'Stufe 2 (Ansicht Heute/Team)',
   open_question_in_waiting_on_us: 'Stufe 2/8 („wartet auf uns“)',
-  predecessor_suggested: 'offene Frage: Vorgänger-Vorschlag ist im Eingangsweg nicht spezifiziert',
+  predecessor_suggested: 'Stufe 8: geprüft in tests/hinweise.test.ts (Frage „Ist … der Vorgänger?“, Entscheidung 41)',
   fields_suggested: 'offene Frage: Feldvorschläge zu bestehenden Vorgängen sind im Schema §7.2.4 nicht vorgesehen',
   linked_by_folder_to: 'offene Frage: f5 liegt allein im Ordner, die Ordnerregel §7.2.2 greift nicht',
-  used_for_advice_in_stage_8: 'Stufe 8',
+  used_for_advice_in_stage_8: 'Stufe 8: geprüft in tests/hinweise.test.ts (Rat mit Beleg aus dem Rückblick f4)',
 };
 
 describe('expected.json item asserts', () => {

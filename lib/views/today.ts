@@ -5,6 +5,8 @@ import { sql } from 'drizzle-orm';
 import { vorkommen } from '@/lib/connectors/ical';
 import { withUser } from '@/lib/db/client';
 import { berlinDate } from '@/lib/time';
+import { HinweisRegel } from '@/lib/actions/instruction';
+import { schluessel } from '@/lib/hinweise/schluessel';
 import { STALE_DAYS } from './areas';
 
 export type Scope = 'mine' | 'team';
@@ -24,6 +26,8 @@ export interface TodayItem {
   /** ISO timestamp relevant for sorting (due date, received, start) */
   at: string | null;
   overdue: boolean;
+  /** the hint behind this item (stage 8) – for "Später" */
+  hintId?: string;
 }
 
 export interface Today {
@@ -184,6 +188,7 @@ export interface MatterItem {
   owner: string | null;
   last_activity: string;
   reason: string;
+  hintId?: string;
 }
 
 export interface TodayPage {
@@ -193,6 +198,8 @@ export interface TodayPage {
   weWaitFor: TodayItem[];
   stale: MatterItem[];
   handoversToMe: (MatterItem & { from: string | null })[];
+  /** moments (§10): "Was kam raus?", "Wie lief's?", advice from earlier cases */
+  momente: Today['hints'];
   review: Today['hints'];
   /** live count of unreviewed items per area and for contacts (H2) */
   reviewCounts: { key: string; label: string; href: string; n: number }[];
@@ -254,18 +261,49 @@ export async function todayPage(userId: string, now = new Date(), areaKey?: stri
     .filter((c) => c.n > 0 && (!areaKey || c.key === areaKey))
     .map((c) => ({ ...c, href: c.key === 'contacts' ? '/kontakte?ungeprueft=1' : `/b/${c.key}?ungeprueft=1` }));
 
+  // the hint rows are the memory of the live items (decision 40): put off ("Später") or done by
+  // hand, an item stays out of sight; otherwise it carries its hint for "Später"
+  const stale = rows.filter((m) => m.owner_id === userId && m.last < staleBefore).map((m) => item(m, quiet(m)));
+  const handovers = rows.filter((m) => m.handover_to === userId).map((m) => ({ ...item(m, 'Übergabe an dich – wartet auf Annahme'), from: m.owner }));
+  const keys = new Map<object, string[]>();
+  for (const i of today_) if (i.overdue && i.at && i.id !== i.entry_id) keys.set(i, [schluessel.overdue(i.id, new Date(i.at))]);
+  for (const i of t.waitingOnUs) keys.set(i, [schluessel.mail(i.id, userId), schluessel.mail(i.id, null)]);
+  for (const i of t.weWaitFor) if (i.overdue && i.at) keys.set(i, [schluessel.zusage(i.id, new Date(i.at))]);
+  for (const m of stale) keys.set(m, [schluessel.stale(m.id, new Date(m.last_activity))]);
+  for (const m of handovers) keys.set(m, [schluessel.handover(m.id, userId)]);
+  const alle = [...keys.values()].flat();
+  const zustand = new Map((await withUser(userId, (tx) => tx.execute<{ id: string; dedupe_key: string; status: string; show_from: string | null }>(sql`
+    SELECT id, dedupe_key, status, show_from FROM hints WHERE dedupe_key = ANY (${pgArray(alle)}::text[])`))).rows.map((h) => [h.dedupe_key, h]));
+  const sichtbar = <T extends object>(xs: T[]): (T & { hintId?: string })[] => xs.flatMap((x) => {
+    const h = (keys.get(x) ?? []).map((k) => zustand.get(k)).find(Boolean);
+    if (!h) return [x];
+    if (h.status !== 'open' || (h.show_from && new Date(h.show_from) > now)) return [];
+    return [{ ...x, hintId: h.id }];
+  });
+
+  // personal instructions about hints ("Social-Media-Hinweise nur montags", decision 42)
+  const regeln = (await withUser(userId, (tx) => tx.execute<{ r: unknown }>(sql`
+    SELECT meta->'hinweise' AS r FROM entries WHERE kind = 'instruction' AND instruction_user_id = ${userId} AND meta ? 'hinweise'`)))
+    .rows.flatMap((x) => { const r = HinweisRegel.safeParse(x.r); return r.success ? [r.data] : []; });
+  const wochentag = ((new Date(`${berlinDate(now)}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+  const zeigen = <T extends { area_key: string | null }>(art: string, xs: T[], gilt: (x: T) => boolean = () => true) =>
+    xs.filter((x) => !gilt(x) || !regeln.some((r) =>
+      (!r.arten || r.arten.includes(art as never)) && (!r.bereiche || (x.area_key !== null && r.bereiche.includes(x.area_key)))
+      && (r.aus || (r.wochentage && !r.wochentage.includes(wochentag)))));
+  const hinweisArt = <T extends { kind: string; area_key: string | null }>(xs: T[]) => xs.filter((x) => zeigen(x.kind, [x]).length > 0);
+
   return {
     reviewCounts,
-    clarify: inArea(t.hints.filter((h) => h.kind === 'clarify')),
-    today: inArea(today_),
-    waitingOnUs: inArea(t.waitingOnUs),
-    weWaitFor: inArea(t.weWaitFor),
-    stale: inArea(rows.filter((m) => m.owner_id === userId && m.last < staleBefore).map((m) => item(m, quiet(m)))),
-    handoversToMe: inArea(
-      rows.filter((m) => m.handover_to === userId).map((m) => ({ ...item(m, 'Übergabe an dich – wartet auf Annahme'), from: m.owner })),
-    ),
+    clarify: inArea(hinweisArt(t.hints.filter((h) => h.kind === 'clarify'))),
+    // only overdue tasks are hints; what is due today and today's events always show
+    today: inArea(zeigen('overdue', sichtbar(today_), (i) => i.overdue && i.id !== i.entry_id)),
+    waitingOnUs: inArea(zeigen('waiting', sichtbar(t.waitingOnUs))),
+    weWaitFor: inArea(zeigen('waiting', sichtbar(t.weWaitFor))),
+    stale: inArea(zeigen('stale', sichtbar(stale))),
+    handoversToMe: inArea(zeigen('handover', sichtbar(handovers))),
+    momente: inArea(hinweisArt(t.hints.filter((h) => h.kind === 'after_event' || h.kind === 'outcome' || h.kind === 'advice'))),
     // the review hint counts everything; per area the list shows its own number (H2)
-    review: t.hints.filter((h) => h.kind === 'review_batch'),
+    review: hinweisArt(t.hints.filter((h) => h.kind === 'review_batch')),
     team: {
       unowned: inArea(rows.filter((m) => m.owner_id === null).map((m) => item(m, 'neu, niemand zuständig'))),
       stuckAtOthers: inArea(
@@ -275,4 +313,9 @@ export async function todayPage(userId: string, now = new Date(), areaKey?: stri
       ),
     },
   };
+}
+
+/** a text[] literal for ANY(...) */
+function pgArray(xs: string[]): string {
+  return `{${xs.map((x) => `"${x.replace(/(["\\])/g, '\\$1')}"`).join(',')}}`;
 }

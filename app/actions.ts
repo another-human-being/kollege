@@ -4,7 +4,7 @@
 import { refresh } from 'next/cache';
 import { ZodError } from 'zod';
 import { currentUserId } from '@/auth';
-import { ActionError, answerHint, runAction, undoAction } from '@/lib/actions';
+import { ActionError, answerHint, answerHintText, runAction, undoAction } from '@/lib/actions';
 import { ZURUECKHOLBAR_S } from '@/lib/actions/mail';
 import { einreihen } from '@/lib/jobs/queue';
 import { entwurfVorlage } from '@/lib/mail/vorlage';
@@ -35,6 +35,9 @@ const MESSAGES: [RegExp, string][] = [
   [/read only/, 'Termin von jemand anderem – nur lesbar.'],
   [/nothing to send/, 'Es gibt nichts zu senden.'],
   [/being sent/, 'Wird gerade gesendet.'],
+  [/Bitte kurz etwas eintragen/, 'Bitte kurz etwas eintragen.'],
+  [/noch nichts zugeordnet/, 'Der Termin ist noch nichts zugeordnet – bitte erst zuordnen.'],
+  [/no longer open/, 'Das ist schon erledigt.'],
 ];
 
 function message(e: unknown): string {
@@ -69,6 +72,17 @@ export async function undo(actionId: string): Promise<Result> {
 export async function answer(hintId: string, optionIndex: number): Promise<Result> {
   try {
     const { actionId } = await answerHint(await currentUserId(), hintId, optionIndex);
+    refresh();
+    return { ok: true, actionId };
+  } catch (e) {
+    return { ok: false, error: message(e) };
+  }
+}
+
+/** a moment answered in words: "Was kam raus?" → note, "Wie lief's?" → outcome note (stage 8) */
+export async function hinweisText(hintId: string, text: string): Promise<Result> {
+  try {
+    const { actionId } = await answerHintText(await currentUserId(), hintId, text);
     refresh();
     return { ok: true, actionId };
   } catch (e) {

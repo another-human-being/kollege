@@ -21,7 +21,10 @@ async function main() {
   const s = await seed();
   const { runImport } = await import('@/lib/pipeline/import');
   const r = await runImport(s.connections);
-  console.log(`Neu aufgebaut: ${r.results.size} Einträge verarbeitet, ${r.unreviewed} ungeprüft`);
+  // as the worker does after every sync (stage 8)
+  const { hinweiseLauf } = await import('@/lib/hinweise');
+  const h = await hinweiseLauf();
+  console.log(`Neu aufgebaut: ${r.results.size} Einträge verarbeitet, ${r.unreviewed} ungeprüft, ${h.neu} Hinweise`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

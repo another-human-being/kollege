@@ -3,6 +3,7 @@ import { hints } from '@/lib/db/schema';
 import { ALL_ACTORS, updateWithInverse } from './helpers';
 import { defineAction, getAction } from './registry';
 import { ActionError } from './types';
+import { addDays, berlinDate, berlinInstant } from '@/lib/time';
 
 export const HintOption = z.object({
   label: z.string().min(1),
@@ -55,5 +56,17 @@ export const hintResolve = defineAction({
   allowedActors: ALL_ACTORS,
   async apply(tx, { hint_id }) {
     return { result: { id: hint_id }, inverse: [await updateWithInverse(tx, hints, 'hints', hint_id, { status: 'done' })] };
+  },
+});
+
+/** "Später" (design Heute): the hint and its item are out of sight until the given time – by default tomorrow morning */
+export const hintSnooze = defineAction({
+  type: 'hint.snooze',
+  schema: z.object({ hint_id: z.uuid(), bis: z.iso.datetime({ offset: true }).optional() }),
+  external: false,
+  allowedActors: ALL_ACTORS,
+  async apply(tx, { hint_id, bis }) {
+    const until = bis ? new Date(bis) : new Date(berlinInstant(addDays(berlinDate(new Date()), 1), '00:00'));
+    return { result: { id: hint_id, bis: until.toISOString() }, inverse: [await updateWithInverse(tx, hints, 'hints', hint_id, { show_from: until })] };
   },
 });
