@@ -1,4 +1,4 @@
-Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid var(--rule);padding:20px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}.baum{display:flex;flex-direction:column;gap:1px}.baum button{all:unset;cursor:pointer;font-size:13px;line-height:20px;padding:3px 8px;border-radius:2px;color:var(--ink-muted);display:flex;justify-content:space-between;gap:8px}.baum button[aria-pressed="true"]{background:var(--paper-sunk);color:var(--ink)}.baum button:focus-visible{outline:2px solid var(--accent)}.ld-liste--schmal{width:340px}.tagz{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.tag{display:inline-flex;gap:4px;align-items:baseline;font-size:13px;padding:1px 4px 1px 8px;border:1px solid var(--rule);border-radius:2px}.tag button{all:unset;cursor:pointer;color:var(--ink-muted);padding:0 4px}.tag button:focus-visible{outline:2px solid var(--accent)}.pfad{font-family:var(--font-mono);font-size:12px;line-height:18px;color:var(--ink-muted);word-break:break-all}
+Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid var(--rule);padding:20px 12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}.baum{display:flex;flex-direction:column;gap:1px}.baum button{all:unset;cursor:pointer;font-size:13px;line-height:20px;padding:3px 8px;border-radius:2px;color:var(--ink-muted);display:flex;justify-content:space-between;gap:8px}.baum button[aria-pressed="true"]{background:var(--paper-sunk);color:var(--ink)}.baum button:focus-visible{outline:2px solid var(--accent)}.ld-liste--schmal{width:340px}.tagz{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.tag{display:inline-flex;gap:4px;align-items:baseline;font-size:13px;padding:1px 4px 1px 8px;border:1px solid var(--rule);border-radius:2px}.tag button{all:unset;cursor:pointer;color:var(--ink-muted);padding:0 4px}.tag button:focus-visible{outline:2px solid var(--accent)}.pfad{font-family:var(--font-mono);font-size:12px;line-height:18px;color:var(--ink-muted);word-break:break-all}.d-angaben summary{cursor:pointer;list-style:none}.d-angaben summary::-webkit-details-marker{display:none}.d-angaben summary .kg-abschnitt-titel::after{content:" +";color:var(--ink-muted)}.d-angaben[open] summary .kg-abschnitt-titel::after{content:" –"}.d-angaben summary:focus-visible{outline:2px solid var(--accent)}
 @@SIDE:dateien@@
 <div class="{{ldKlasse}}">
 <nav class="baum-spalte" aria-label="Ordner auf dem Netzlaufwerk">
@@ -34,7 +34,7 @@ Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid 
 </div>
 
 <div class="ld-detail">
-<div class="ld-zu"><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
+<div class="ld-zu"><button type="button" class="ld-wort" onClick="{{vollToggle}}" aria-pressed="{{vollAn}}" title="{{vollTitel}}">{{vollText}}</button><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
 <sc-if value="{{hatDetail}}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{d.istUngeprueft}}" hint-placeholder-val="{{ false }}">
 <div class="ungeprueft-banner"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import><span>Zuordnung von Kollege – {{d.grund}}</span><span style="flex-grow: 1"></span><button type="button" class="kg-aktion kg-aktion--sekundaer" onClick="{{d.uebernehmen}}">Übernehmen</button><button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.verwerfen}}">Zuordnung verwerfen</button></div>
@@ -48,14 +48,15 @@ Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid 
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{d.pfadKopieren}}">Pfad kopieren</button>
 <button type="button" class="kg-aktion kg-aktion--text" onClick="{{kcAuf}}">Kollege fragen</button>
 </div>
-<div class="felder">
-<label for="d-ordner">Ordner</label>
-<select id="d-ordner" class="fe" data-feld="ordner" value="{{d.ordner}}" onChange="{{d.f.wahl}}" style="justify-self: start"><sc-for list="{{ordnerOptionen}}" as="o" hint-placeholder-count="8"><option value="{{o.key}}">{{o.name}}</option></sc-for></select>
-<span class="fl">Geändert</span><span style="font-size: 14px; line-height: 28px">{{d.zeit}}</span>
-<span class="fl">Umfang</span><span style="font-size: 14px; line-height: 28px">{{d.fakten}}</span>
-<span class="fl">Sichtbar</span><span style="font-size: 14px; line-height: 28px; display: flex; gap: 8px; align-items: center"><sc-if value="{{d.privat}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Privat"></x-import></sc-if>{{d.sichtbar}}</span>
 </div>
+
+<section class="kg-abschnitt" aria-label="Zusammenfassung">
+<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Worum es geht</h2><span class="kg-abschnitt-aside"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import> aus dem Dateiinhalt</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{d.kurz}}</x-import>
+<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{d.lang}}</x-import>
 </div>
+</section>
 
 <section class="kg-abschnitt" aria-label="Zugeordnet">
 <div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Zugeordnet</h2><span class="kg-abschnitt-aside">Bereiche und Personen</span></div>
@@ -66,13 +67,17 @@ Dateien|1280|1000|.baum-spalte{width:210px;flex-shrink:0;border-right:1px solid 
 </div>
 </section>
 
-<section class="kg-abschnitt" aria-label="Zusammenfassung">
-<div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Worum es geht</h2><span class="kg-abschnitt-aside"><x-import component-from-global-scope="Kollege.Vermutung">KI-Vermutung</x-import> aus dem Dateiinhalt</span></div>
-<div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
-<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{d.kurz}}</x-import>
-<x-import component-from-global-scope="Kollege.Aussage" art="einschaetzung" marke="{{ false }}">{{d.lang}}</x-import>
+
+<details class="kg-abschnitt d-angaben">
+<summary class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Dateiangaben</h2><span class="kg-abschnitt-aside">{{d.angabenZeile}}</span></summary>
+<div class="felder" style="margin-top: 8px">
+<label for="d-ordner">Ordner</label>
+<select id="d-ordner" class="fe" data-feld="ordner" value="{{d.ordner}}" onChange="{{d.f.wahl}}" style="justify-self: start"><sc-for list="{{ordnerOptionen}}" as="o" hint-placeholder-count="8"><option value="{{o.key}}">{{o.name}}</option></sc-for></select>
+<span class="fl">Geändert</span><span style="font-size: 14px; line-height: 28px">{{d.zeit}}</span>
+<span class="fl">Umfang</span><span style="font-size: 14px; line-height: 28px">{{d.fakten}}</span>
+<span class="fl">Sichtbar</span><span style="font-size: 14px; line-height: 28px; display: flex; gap: 8px; align-items: center"><sc-if value="{{d.privat}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kollege.Privat"></x-import></sc-if>{{d.sichtbar}}</span>
 </div>
-</section>
+</details>
 
 <section class="kg-abschnitt" aria-label="Verlauf">
 <div class="kg-abschnitt-kopf"><h2 class="kg-abschnitt-titel">Verlauf</h2></div>

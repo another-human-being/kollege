@@ -5,7 +5,8 @@ class Component extends DCLogic {
       view: 'uebersicht', chatId: null, scope: 'Meins', bereichFilter: 'Alle',
       offen: {}, gesendet: {}, spaeter: {}, erledigt: {}, sheet: null,
       chats: this.startChats(), conv: this.startConv(), zaehler: 0,
-      stream: null, laedt: null, geloescht: null, msgGesendet: {}, klaert: {}, teamNeu: {}, teamWer: null
+      stream: null, laedt: null, geloescht: null, msgGesendet: {}, klaert: {}, teamNeu: {}, teamWer: null,
+      hAuf: null, hErl: {}, hEnt: {}, hAus: {}, hFolge: false, hToast: null
     };
   }
   startChats() {
@@ -190,6 +191,155 @@ class Component extends DCLogic {
     var m = Object.assign({}, this.state[key]); m[id] = !m[id];
     var p = {}; p[key] = m; this.setState(p);
   }
+  // ——— Heute (E56): Diese Woche · Offen (Entscheiden / Erledigen) · Ausstehend mit Wiedervorlage (E57) ———
+  heuteDaten() {
+    var woche = [
+      { tag: 'Heute', datum: 'Mi 30.09.', klasse: 'hx-wd hx-wd--heute', anzahl: '2 Termine', termine: [
+        { zeit: '10:00', titel: 'Beratung Kitchen Loop', ort: 'Raum 2.14', vorbei: true }, { jetzt: '11:40' },
+        { zeit: '13:30', titel: 'Beratung Solaro · Raum 2.14', ort: 'Raum 2.14' }],
+        fristen: [{ text: 'Feedback Finanzplan an Tom', mein: true, id: 'fin' }, { text: 'Save-the-Date Gründungsnacht', mein: true, id: 'std' }] },
+      { tag: 'Do', datum: '01.10.', klasse: 'hx-wd', anzahl: '2 Termine', termine: [
+        { zeit: '14:00', titel: 'Erstberatung Greenbyte', ort: 'Raum 2.14' }, { zeit: '15:30', titel: 'Sprechstunde Max Brandt', ort: 'Raum 2.14' }],
+        fristen: [{ text: 'Wiedervorlage Nordlicht', id: 'a-nord', wv: true }] },
+      { tag: 'Fr', datum: '02.10.', klasse: 'hx-wd', anzahl: '1 Termin', termine: [{ zeit: '09:00', titel: 'Mentoring Nordlicht', ort: 'online' }],
+        fristen: [{ text: 'Kontakt Frau Weber vermitteln', mein: true, id: 'weber' }, { text: 'Pitchdeck von Solaro erwartet', id: 'a-pd' }] },
+      { tag: 'Sa–So', datum: '03.–04.10.', klasse: 'hx-wd hx-wd--ende', anzahl: '', termine: [{ frei: 'Tag der Deutschen Einheit' }], fristen: [] }
+    ];
+    var entscheiden = [
+      { id: 'e-vogt', art: 'senden', titel: 'Antwort an Karin Vogt freigeben', bezug: 'Stadtwerke', f: 'heute', fk: 'h',
+        gruende: [{ art: 'belegt', text: 'Frau Vogt fragt, ob ihr die Rahmenvereinbarung bis Ende Oktober unterschreiben könnt', quelle: 'Mail 29.09.' }, { art: 'einschaetzung', text: 'Ton wie in deinen letzten Mails an sie' }],
+        entwurf: { an: 'Karin Vogt (Stadtwerke)', betreff: 'Re: Rahmenvereinbarung', text: 'Liebe Frau Vogt,\n\nvielen Dank – wir prüfen die Rahmenvereinbarung bis Mitte Oktober und melden uns dann mit einem Termin zur Unterschrift.\n\nViele Grüße\nAndreas', quelle: 'Mail 29.09.', grund: 'Frage nach Unterschrift bis Ende Oktober' },
+        erledigtText: 'Mail an Karin Vogt gesendet' },
+      { id: 'e-presse', art: 'hand', titel: 'Presseanfrage zuordnen', bezug: 'Augsburger Allgemeine', f: 'heute', fk: 'h',
+        gruende: [{ art: 'belegt', text: '„Könnten Sie uns zwei Gründerinnen für ein Porträt vermitteln?“', quelle: 'Mail 30.09.' }, { art: 'einschaetzung', text: 'passt vermutlich zu Mehmet – er betreut die Porträtreihe' }],
+        antworten: [['Übernehmen', 'Übernommen – steht jetzt unter Erledigen'], ['Mehmet', 'Mehmet zugewiesen – steht jetzt auf seinem Heute'], ['Julia', 'Julia zugewiesen – steht jetzt auf ihrem Heute']] },
+      { id: 'e-lisa', art: 'frage', titel: 'Ist „Lisa“ Lisa Meier von Solaro?', bezug: 'Solaro', f: 'Do', fk: '',
+        gruende: [{ art: 'belegt', text: 'Neue Absenderadresse l.meier@gmx.de, Signatur „Lisa – Solaro“', quelle: 'Mail 28.09.' }, { art: 'berechnet', text: 'blockiert die Antwort an Lisa, die bis Do fällig ist' }],
+        antworten: [['Ja, Lisa Meier', 'Zugeordnet: Lisa Meier – Adresse ergänzt'], ['Andere Person', 'Als andere Person markiert'], ['Neu anlegen', 'Neuer Kontakt angelegt']] },
+      { id: 'e-jury', art: 'frage', titel: '„Jury-Briefing“ einem Event zuordnen', bezug: 'Kalender', f: '–', fk: '',
+        gruende: [{ art: 'belegt', text: 'Termin am 04.11. ohne Bezug', quelle: 'Kalender 04.11.' }, { art: 'einschaetzung', text: 'eher Pitch-Abend – dort ist eine Jury geplant' }],
+        antworten: [['Pitch-Abend', 'Dem Pitch-Abend zugeordnet'], ['Gründungsnacht', 'Der Gründungsnacht zugeordnet'], ['Keins davon', 'Ohne Bereich gelassen']] }
+    ];
+    var erledigen = [
+      { id: 'raum', titel: 'Raum für Sitzung 3 buchen', bezug: 'Entrepreneurship Basics', f: 'seit Di', fk: 'ue',
+        gruende: [{ art: 'belegt', text: 'Prof. Hartmann bittet um einen Raum mit Beamer für 40 Personen', quelle: 'Mail 28.09.' }, { art: 'berechnet', text: 'seit gestern überfällig', dringend: true }],
+        links: [['Mail öffnen', 'Mail.dc.html']] },
+      { id: 'raus', titel: 'Ergebnis der Beratung nachtragen', bezug: 'Kitchen Loop', f: 'heute', fk: 'h',
+        gruende: [{ art: 'belegt', text: 'Beratung Kitchen Loop heute 10:00–11:00 ist vorbei', quelle: 'Kalender' }],
+        chat: 'Kitchen Loop: ' },
+      { id: 'fin', titel: 'Feedback zum Finanzplan an Tom', bezug: 'Solaro', f: 'heute', fk: 'h',
+        gruende: [{ art: 'belegt', text: '„Könnt ihr bis Mitte der Woche drüberschauen?“', quelle: 'Mail 26.09.' }, { art: 'berechnet', text: 'Mitte der Woche = heute' }],
+        links: [['Finanzplan öffnen', 'Dateien.dc.html']] },
+      { id: 'std', titel: 'Save-the-Date Gründungsnacht verschicken', bezug: 'Gründungsnacht 2026', f: 'heute', fk: 'h',
+        gruende: [{ art: 'belegt', text: 'nach Anweisung von Julia', quelle: 'Anweisung 22.09.' }], links: [['Event öffnen', 'Events.dc.html']] },
+      { id: 'max', titel: 'Max Brandt antworten', bezug: 'Lern-App', f: 'Do 15:30', fk: '',
+        gruende: [{ art: 'belegt', text: '„Soll ich zur Sprechstunde Unterlagen mitbringen?“', quelle: 'Mail 29.09.' }, { art: 'berechnet', text: 'vor seiner Sprechstunde Do 15:30' }],
+        links: [['In Mail antworten', 'Mail.dc.html']] },
+      { id: 'weber', titel: 'Kontakt zu Frau Weber (IHK) vermitteln', bezug: 'Solaro', f: 'Fr', fk: '',
+        gruende: [{ art: 'belegt', text: 'in der Beratung zugesagt', quelle: 'Chat 30.09.' }], links: [['Kontakt öffnen', 'Kontakte.dc.html']] },
+      { id: 'pruef', titel: 'Importierte Kontakte prüfen', bezug: '214 offen', f: '–', fk: '',
+        gruende: [{ art: 'berechnet', text: 'Kontakte 88 · Gründungsteams 52 · Events 31 · Social Media 21 · Lehre 14 · Aufgaben 5 · Dateien 3' }],
+        links: [['Kontakte prüfen', 'Kontakte.dc.html']], keinKreis: true }
+    ];
+    var ausstehend = [
+      { id: 'a-nord', titel: 'Rückmeldung zum Folgetermin', von: 'von Jonas Berg', bezug: 'Nordlicht', bis: '–', wv: 'Do 01.10.', wvNah: true,
+        gruende: [{ art: 'belegt', text: 'Erstberatung, seitdem kein Kontakt', quelle: 'Termin 07.09.' }, { art: 'berechnet', text: 'Wiedervorlage = 5 Werktage nach der letzten Nachricht ohne Antwort' }],
+        entwurf: { an: 'Jonas Berg (Nordlicht Analytics)', betreff: 'Wie geht es bei euch weiter?', text: 'Hallo Jonas,\n\nseit unserer Erstberatung Anfang September habe ich nichts mehr von euch gehört. Wie geht es mit Nordlicht weiter? Wenn ihr mögt, finden wir einen Termin für ein zweites Gespräch.\n\nViele Grüße\nAndreas', quelle: 'Termin 07.09.', grund: 'Erstberatung am 07.09., seitdem kein Kontakt' } },
+      { id: 'a-pd', titel: 'Pitchdeck inkl. Finanzteil', von: 'von Lisa Meier', bezug: 'Solaro', bis: 'Fr 02.10.', wv: 'Mo 05.10.',
+        gruende: [{ art: 'belegt', text: 'Final zugesagt bis Fr 02.10.', quelle: 'Chat 30.09.' }, { art: 'berechnet', text: 'Wiedervorlage = Werktag nach der Frist, nur wenn nichts gekommen ist' }] },
+      { id: 'a-folien', titel: 'Folien für Sitzung 3', von: 'von Prof. Hartmann', bezug: 'Entrepreneurship Basics', bis: 'Di 06.10.', wv: 'Mi 07.10.',
+        gruende: [{ art: 'belegt', text: '„Die Folien schicke ich bis Dienstag.“', quelle: 'Mail 28.09.' }] },
+      { id: 'a-fp', titel: 'Finanzplan überarbeiten (Personalkosten)', von: 'von Tom Kraus', bezug: 'Solaro', bis: 'Do 15.10.', wv: 'Fr 16.10.',
+        gruende: [{ art: 'belegt', text: 'in der Beratung vereinbart', quelle: 'Chat 30.09.' }] }
+    ];
+    return { woche: woche, entscheiden: entscheiden, erledigen: erledigen, ausstehend: ausstehend };
+  }
+  hMeldung(text, undo) {
+    var self = this;
+    this.setState({ hToast: { text: text, undo: undo || null }, geloescht: null });
+    clearTimeout(this._ht); this._ht = setTimeout(function () { self.setState({ hToast: null }); }, 9000);
+  }
+  hSetze(key, id, wert, text) {
+    var self = this, alt = this.state[key][id];
+    var m = Object.assign({}, this.state[key]); m[id] = wert;
+    var p = {}; p[key] = m; p.hAuf = null;
+    this.setState(p);
+    this.hMeldung(text, function () { var n = Object.assign({}, self.state[key]); if (alt === undefined) delete n[id]; else n[id] = alt; var q = {}; q[key] = n; self.setState(q); });
+  }
+  heuteVals() {
+    var self = this, st = this.state, D = this.heuteDaten();
+    var knopf = function (label, los, primaer) { return { label: label, istKnopf: true, istLink: false, href: '#', klasse: 'kg-aktion ' + (primaer ? 'kg-aktion--sekundaer' : 'kg-aktion--text'), los: los }; };
+    var link = function (label, href, primaer) { return { label: label, istKnopf: false, istLink: true, href: href, klasse: 'kg-aktion ' + (primaer ? 'kg-aktion--sekundaer' : 'kg-aktion--text'), los: function () {} }; };
+    var basis = function (o, liste) {
+      var auf = st.hAuf === o.id;
+      return { id: o.id, titel: o.titel, von: o.von || '', bezug: o.bezug || '', auf: auf, aufAria: auf ? 'true' : 'false',
+        klasse: 'hx-p' + (auf ? ' hx-p--auf' : ''), gruende: (o.gruende || []).map(function (g) { return Object.assign({ quelle: '', dringend: false }, g); }), hatEntwurf: false, entwurf: { an: '', betreff: '', text: '' },
+        ansehen: function () {}, senden: function () {}, erledigt: function () {},
+        toggle: function () { self.setState({ hAuf: self.state.hAuf === o.id ? null : o.id }); },
+        kreis: false, ist_senden: false, ist_hand: false, ist_frage: false, ist_sand: false, ist_pruef: false, f2: '', f2Klasse: 'hx-f2' };
+    };
+    var offeneEnt = D.entscheiden.filter(function (o) { return !st.hEnt[o.id]; });
+    var naechste = function (id) { var r = offeneEnt.filter(function (o) { return o.id !== id; })[0]; return r ? r.id : null; };
+    var entscheide = function (o, wert, text) {
+      var m = Object.assign({}, self.state.hEnt); m[o.id] = wert;
+      self.setState({ hEnt: m, hAuf: self.state.hFolge ? naechste(o.id) : null, hFolge: self.state.hFolge && !!naechste(o.id) });
+      self.hMeldung(text, function () { var n = Object.assign({}, self.state.hEnt); delete n[o.id]; self.setState({ hEnt: n }); });
+    };
+    var ent = offeneEnt.map(function (o) {
+      var b = basis(o); b['ist_' + o.art] = true;
+      b.f = o.f; b.fKlasse = 'hx-f' + (o.fk ? ' hx-f--' + o.fk : '');
+      if (o.entwurf) {
+        b.hatEntwurf = true; b.entwurf = o.entwurf;
+        b.senden = function () { entscheide(o, 'gesendet', o.erledigtText); };
+        b.ansehen = function () { self.setState({ sheet: Object.assign({ id: 'h:' + o.id }, o.entwurf) }); };
+        b.knoepfe = [knopf('Später', function () { self.setState({ hAuf: null }); })];
+      } else {
+        b.knoepfe = o.antworten.map(function (a, i) { return knopf(a[0], function () { entscheide(o, a[0], a[1]); }, true); });
+      }
+      return b;
+    });
+    var erl = D.erledigen.filter(function (o) { return !st.hErl[o.id]; }).map(function (o) {
+      var b = basis(o); b.kreis = !o.keinKreis; b.ist_pruef = !!o.keinKreis;
+      b.f = o.f; b.fKlasse = 'hx-f' + (o.fk ? ' hx-f--' + o.fk : '');
+      b.erledigt = function () { self.hSetze('hErl', o.id, true, '„' + o.titel + '“ erledigt'); };
+      var k = (o.links || []).map(function (l, i) { return link(l[0], l[1], i === 0); });
+      if (o.chat) k.unshift(knopf('Im Chat nachtragen', function () { self.senden(o.chat, null); }, true));
+      if (!o.keinKreis) k.push(knopf('Erledigt', b.erledigt));
+      b.knoepfe = k;
+      return b;
+    });
+    if (offeneEnt.length === 0 && st.hFolge) { /* nichts mehr */ }
+    var aus = D.ausstehend.filter(function (o) { return st.hAus[o.id] !== 'da'; }).map(function (o) {
+      var b = basis(o); b.ist_sand = true;
+      var spaeter = st.hAus[o.id] === 'spaeter';
+      b.f = o.bis; b.fKlasse = 'hx-f';
+      b.f2 = spaeter ? 'in 1 Woche' : o.wv; b.f2Klasse = 'hx-f' + (o.wvNah && !spaeter ? ' hx-f--b' : '');
+      var k = [knopf('Ist da', function () { self.hSetze('hAus', o.id, 'da', '„' + o.titel + '“ als erhalten markiert'); }, true)];
+      if (o.entwurf) { b.hatEntwurf = true; b.entwurf = o.entwurf;
+        b.senden = function () { self.hSetze('hAus', o.id, 'spaeter', 'Nachfrage an ' + o.entwurf.an.split(' (')[0] + ' gesendet – Wiedervorlage in 1 Woche'); };
+        b.ansehen = function () { self.setState({ sheet: Object.assign({ id: 'h:' + o.id }, o.entwurf) }); };
+      } else k.push(knopf('Jetzt erinnern', function () { self.hSetze('hAus', o.id, 'spaeter', 'Erinnerung an ' + o.von.replace('von ', '') + ' vorbereitet – Wiedervorlage in 1 Woche'); }));
+      k.push(knopf('Wiedervorlage verschieben', function () { self.hSetze('hAus', o.id, 'spaeter', 'Wiedervorlage um 1 Woche verschoben'); }));
+      b.knoepfe = k;
+      return b;
+    });
+    var woche = D.woche.map(function (d) {
+      return { tag: d.tag, datum: d.datum, klasse: d.klasse, anzahl: d.anzahl,
+        termine: d.termine.map(function (t) { return { istJetzt: !!t.jetzt, istTermin: !!t.zeit, istFrei: !!t.frei, zeit: t.zeit || t.jetzt || '', titel: t.titel || t.frei || '', ort: t.ort || '', klasse: 'hx-we' + (t.vorbei ? ' hx-we--vorbei' : '') }; }),
+        fristen: d.fristen.filter(function (f) { return !st.hErl[f.id] && st.hAus[f.id] !== 'da'; }).map(function (f) { return { text: f.text, mein: !!f.mein, fremd: !f.mein, klasse: 'hx-wfi' + (f.mein ? ' hx-wfi--mein' : '') }; }),
+        hatFristen: d.fristen.length > 0 };
+    });
+    var ueber = erl.filter(function (o) { return o.fKlasse.indexOf('ue') >= 0; }).length;
+    return {
+      hWoche: woche, hEntscheiden: ent, hErledigen: erl, hAusstehend: aus,
+      hEntZahl: ent.length, hErlZahl: erl.length, hOffenZahl: ent.length + erl.length, hAusZahl: aus.length,
+      hEntLeer: ent.length === 0, hEntNichtLeer: ent.length > 0, hErlLeer: erl.length === 0, hAusLeer: aus.length === 0,
+      hTermine: '2 Termine', hHatUeber: ueber > 0, hUeberText: ueber + ' überfällig',
+      hFolgeLabel: st.hFolge ? 'Durchgehen beenden' : 'Nacheinander durchgehen →',
+      hFolgeHint: st.hFolge ? 'nach jeder Antwort öffnet sich die nächste' : '',
+      hFolgeToggle: function () { if (self.state.hFolge) self.setState({ hFolge: false, hAuf: null }); else self.setState({ hFolge: true, hAuf: offeneEnt.length ? offeneEnt[0].id : null }); }
+    };
+  }
   renderVals() {
     var self = this, st = this.state;
     var gesamt = 0, prueft = 0;
@@ -273,21 +423,22 @@ class Component extends DCLogic {
       { id: 'jury2', zeit: 'seit 9 Tagen', vor: 'Pitch-Abend: ', kern: 'Jury unvollständig', nach: ' – Frau Weber hat nicht geantwortet.', vorgang: 'Events · Pitch-Abend', wer: 'Julia', gruende: [{ art: 'belegt', text: 'Juryanfrage an Anna Weber', quelle: 'Mail 21.09.' }, { art: 'berechnet', text: 'zugesagte Antwort seit 5 Tagen überfällig' }] }]
       .filter(function (h) { return BF === 'Alle' || h.vorgang.split(' · ')[0] === BF; })
       .map(function (h) { var t = h.vorgang.split(' · '); var gefragt = !!(st.nachgefragt || {})[h.id]; return Object.assign({}, h, { bereich: t[0], eintrag: t[1], href: self.bereichHref(h.vorgang), nachfragenLabel: gefragt ? '✓ ' + h.wer + ' gefragt · Rückgängig' : h.wer + ' fragen', nachfragen: function () { var m = Object.assign({}, self.state.nachgefragt); m[h.id] = !m[h.id]; self.setState({ nachgefragt: m }); } }); });
-    var CG = (function () {
-        var q = (st.chatSuche || '').trim().toLowerCase(), F = st.chatFilterW || 'Alle';
-        var cs = st.chats.filter(function (c) {
-          if (F === 'Angepinnt' && !c.angepinnt) return false;
-          if (F === 'Mit Bereich' && !c.etikett) return false;
-          if (F === 'Ohne Bereich' && c.etikett) return false;
-          var inhalt = (st.conv[c.id] || []).map(function (m) { return m.text || ''; }).join(' ');
-          return !q || (c.titel + ' ' + (c.etikett || '') + ' ' + inhalt).toLowerCase().indexOf(q) >= 0;
-        });
-        var gruppe = function (c) { return c.angepinnt ? 'Angepinnt' : c.datum === 'heute' || c.datum === 'gerade' ? 'Heute' : c.datum === 'gestern' ? 'Gestern' : (c.datum >= '28.09.' ? 'Diese Woche' : 'Älter'); };
-        return ['Angepinnt', 'Heute', 'Gestern', 'Diese Woche', 'Älter'].map(function (g) {
-          return { titel: g, chats: cs.filter(function (c) { return gruppe(c) === g; }).map(function (c) { var n = (st.conv[c.id] || []).length; return { titel: c.titel, datum: c.datum, unter: (c.etikett ? c.etikett + ' · ' : '') + n + ' Nachrichten', los: function () { self.setState({ view: 'chat', chatId: c.id }); }, pinLabel: c.angepinnt ? 'Lösen' : 'Anpinnen', pin: function () { self.setState({ chats: self.state.chats.map(function (x) { return x.id === c.id ? Object.assign({}, x, { angepinnt: !x.angepinnt }) : x; }) }); } }; }) };
-        }).filter(function (g) { return g.chats.length; });
-      })();
-    return {
+    var CQ = (st.chatSuche || '').trim().toLowerCase();
+    var CS = st.chats.filter(function (c) {
+      var inhalt = (st.conv[c.id] || []).map(function (m) { return m.text || ''; }).join(' ');
+      return !CQ || (c.titel + ' ' + (c.etikett || '') + ' ' + inhalt).toLowerCase().indexOf(CQ) >= 0;
+    }).map(function (c) {
+      var offen = st.chatMehr === c.id;
+      return { titel: c.titel, etikett: c.etikett || '', hatEtikett: !!c.etikett, datum: c.datum, angepinnt: !!c.angepinnt,
+        los: function () { self.setState({ view: 'chat', chatId: c.id, chatMehr: null }); },
+        mehrOffen: offen, mehrAria: offen ? 'true' : 'false', mehrToggle: function () { self.setState({ chatMehr: self.state.chatMehr === c.id ? null : c.id }); },
+        pinLabel: c.angepinnt ? 'Lösen' : 'Anpinnen',
+        pin: function () { self.setState({ chatMehr: null, chats: self.state.chats.map(function (x) { return x.id === c.id ? Object.assign({}, x, { angepinnt: !x.angepinnt }) : x; }) }); },
+        weg: function () { var cs = self.state.chats, idx = cs.map(function (x) { return x.id; }).indexOf(c.id); self.setState({ chatMehr: null, hToast: null, chats: cs.filter(function (x) { return x.id !== c.id; }), geloescht: { chat: cs[idx], idx: idx } }); clearTimeout(self.toastT); self.toastT = setTimeout(function () { self.setState({ geloescht: null }); }, 8000); } };
+    });
+    var CG = [];
+    var HV = this.heuteVals();
+    return Object.assign(HV, {
       navUebersicht: st.view === 'uebersicht' ? 'page' : 'false',
       navChat: st.view === 'chat' ? 'page' : 'false',
       zumChat: function () { self.setState({ view: 'chat', chatId: self.state.chatId || 'c1' }); },
@@ -305,8 +456,11 @@ class Component extends DCLogic {
         self.setState(patch);
         clearTimeout(self.toastT); self.toastT = setTimeout(function () { self.setState({ geloescht: null }); }, 8000);
       },
-      zeigeToast: !!st.geloescht,
+      zeigeToast: !!st.geloescht || !!st.hToast,
       toastTitel: st.geloescht ? st.geloescht.chat.titel : '',
+      toastText: st.hToast ? st.hToast.text : (st.geloescht ? 'Chat „' + st.geloescht.chat.titel + '“ gelöscht' : ''),
+      toastKannZurueck: st.hToast ? !!st.hToast.undo : true,
+      toastUndo: function () { var t = self.state.hToast; if (t) { self.setState({ hToast: null }); if (t.undo) t.undo(); return; } var g = self.state.geloescht; if (!g) return; var cs = self.state.chats.slice(); cs.splice(g.idx, 0, g.chat); self.setState({ chats: cs, geloescht: null }); },
       loeschenZurueck: function () {
         var g = self.state.geloescht; if (!g) return;
         var cs = self.state.chats.slice(); cs.splice(g.idx, 0, g.chat);
@@ -339,9 +493,10 @@ class Component extends DCLogic {
       chatLeer: !st.chatId, chatNichtLeer: !!st.chatId,
       chatSuche: st.chatSuche || '', chatSucheTippen: function (e) { self.setState({ chatSuche: e.target.value }); },
       chatFilter: ['Alle', 'Angepinnt', 'Mit Bereich', 'Ohne Bereich'].map(function (f) { return { label: f, an: (st.chatFilterW || 'Alle') === f ? 'true' : 'false', los: function () { self.setState({ chatFilterW: f }); } }; }),
-      keineChats: CG.length === 0,
+      keineChats: CS.length === 0,
       chatGruppen: CG,
-      chatAnzahl: st.chats.length + ' Chats',
+      chatAnzahl: st.chats.length + ' Chats', chatAnzahlZahl: st.chats.length,
+      chatsAngepinnt: CS.filter(function (c) { return c.angepinnt; }), chatsZuletzt: CS.filter(function (c) { return !c.angepinnt; }), hatAngepinnt: CS.some(function (c) { return c.angepinnt; }),
       nachrichten: nachrichten,
       chatLaedt: !!st.laedt && st.laedt === st.chatId,
       vorschlaege: vorschlaege,
@@ -350,10 +505,11 @@ class Component extends DCLogic {
       sheetZu: function () { self.setState({ sheet: null }); },
       sheetSenden: function () {
         var s = self.state.sheet;
+        if (s && s.id && String(s.id).indexOf('h:') === 0) { var hid = s.id.slice(2); self.setState({ sheet: null }); var eo = self.heuteDaten().entscheiden.filter(function (x) { return x.id === hid; })[0]; if (eo) { var me = Object.assign({}, self.state.hEnt); me[hid] = 'gesendet'; self.setState({ hEnt: me, hAuf: null }); self.hMeldung(eo.erledigtText, function () { var n = Object.assign({}, self.state.hEnt); delete n[hid]; self.setState({ hEnt: n }); }); } else self.hSetze('hAus', hid, 'spaeter', 'Nachfrage gesendet – Wiedervorlage in 1 Woche'); return; }
         if (s && s.id) { var g = Object.assign({}, self.state.gesendet); g[s.id] = true; self.setState({ sheet: null, gesendet: g }); }
         else if (s && s.msgKey) { var m = Object.assign({}, self.state.msgGesendet); m[s.msgKey] = true; self.setState({ sheet: null, msgGesendet: m }); }
         else self.setState({ sheet: null });
       }
-    };
+    });
   }
 }

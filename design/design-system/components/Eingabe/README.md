@@ -10,6 +10,6 @@ Das zentrale Eingabefeld und zugleich der Chat: man schreibt in eigenen Worten, 
 - Schrift `input` (18/28) – größer als der Rest, damit es sich wie Schreiben anfühlt, nicht wie Suchen.
 - Zustände: `leer` (Platzhalter, Knopf aus), `bereit` (Text, Knopf „Merken“ an), `verarbeitet` (Text grau, „Lese mit, ordne zu…“). Danach ersetzt die `Quittung` die Eingabe-Ansicht darunter.
 - ⏎ schickt ab, ⇧⏎ neue Zeile. Nichts verlässt hier das Haus.
-- Gerahmt (`line-control`, `radius-2`, `paper-sunk`): eines der zwei Grenzobjekte. Siehe README „Rahmen = Grenze“.
+- Weiße Karte (`surface`, Haarlinie, Radius 14) mit Kontext-Chip („@ Kontext …“) und rundem Senden-Knopf in Tinte (E54). Bleibt eines der Grenzobjekte (Rahmen = Grenze).
 - Mobil: klebt unten am Bildschirm über der Tastatur, volle Breite, Knopf 44px hoch.
 - Jede Antwort, die etwas im Record ändert, endet mit einer `Karte` (Rückgängig inklusive).

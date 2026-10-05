@@ -28,6 +28,11 @@
         rest = [{ typ: 'karte', punkte: punkte, privat: privat, folgen: folgen, linkText: 'Im Verlauf ansehen', linkHref: '#verlauf' }];
         self.setState({ kcNotizen: [{ text: text, privat: privat }].concat(self.state.kcNotizen) });
       }
+      if (frage) {
+        var funde = (cfg.belege || []).map(function (b) { return b.quelle; }).filter(Boolean);
+        var schritte = [{ art: 'lesen', text: cfg.name + ' gelesen: ' + cfg.anzahl }, { art: 'suche', text: 'Belege gesucht', funde: antwort ? funde : [] }, antwort ? { art: 'gefunden', text: funde.length + (funde.length === 1 ? ' Beleg' : ' Belege') + ' gefunden' } : { art: 'luecke', text: 'Nichts Belastbares gefunden – ich rate nicht' }];
+        self.setState({ kcMsgs: self.state.kcMsgs.concat([{ typ: 'schritte', schritte: schritte }]) });
+      }
       self.kcStreamen(antwort, rest);
     }, 800);
   }
@@ -51,7 +56,8 @@
       sidebarChats: this.kgChats(),
       kcName: cfg.name, kcKontext: cfg.name + ' · ' + cfg.anzahl, kcPlatzhalter: cfg.platzhalter,
       kcOffen: !!st.kcOffen, kcLaden: !!st.kcLaden,
-      kcMsgs: msgs.map(function (m) { return Object.assign({ istDu: m.typ === 'du', istKollege: m.typ === 'kollege', istAussage: m.typ === 'aussage', istKarte: m.typ === 'karte', istLuecke: m.typ === 'luecke', streamt: false }, m); }),
+      kcMsgs: msgs.map(function (m) { return Object.assign({ istDu: m.typ === 'du', istKollege: m.typ === 'kollege', istAussage: m.typ === 'aussage', istKarte: m.typ === 'karte', istLuecke: m.typ === 'luecke', istSchritte: m.typ === 'schritte', schritte: [], streamt: false }, m); }),
+      kcNeu: function () { self.setState({ kcMsgs: [], kcStream: null, kcLaden: false }); },
       kcSenden: function (t) { self.kcSenden(t); },
       kcZu: function () { self.setState({ kcOffen: false }); },
       kcAuf: function () { self.setState({ kcOffen: true }); },
@@ -157,7 +163,9 @@
     return { personen: P, orgs: O };
   }
   // Detailansicht schließen: Liste nimmt dann die ganze Breite ein; Klick auf eine Zeile öffnet wieder
-  detailVals() { var self = this; return { ldKlasse: 'ld' + (this.state.zu ? ' ld--zu' : ''), detailZu: function () { self.setState({ zu: true, kcOffen: false }); }, detailOffen: !this.state.zu, detailIstZu: !!this.state.zu }; }
+  // Vollbild (E52): Detail legt sich als Overlay über die Liste – zum fokussierten Arbeiten
+  detailVals() { var self = this, voll = !!this.state.voll && !this.state.zu; return { ldKlasse: 'ld' + (this.state.zu ? ' ld--zu' : '') + (voll ? ' ld--voll' : ''), detailZu: function () { self.setState({ zu: true, voll: false, kcOffen: false }); }, detailOffen: !this.state.zu, detailIstZu: !!this.state.zu,
+    vollAn: voll ? 'true' : 'false', vollText: voll ? 'Verkleinern' : 'Vollbild', vollTitel: voll ? 'Zurück zur Liste mit Detail' : 'Im Vollbild öffnen – Liste ausblenden', vollToggle: function () { self.setState({ voll: !self.state.voll }); } }; }
   // ——— Bearbeiten, Rückgängig, Prüfen (gemeinsam für alle Werkzeuge) ———
   basisState() { return { edits: {}, letzte: null, sel: null, pAuswahl: {}, pAlle: false, pWarumOffen: false, pWarum: '' }; }
   wert(id, feld, fallback) { var e = this.state.edits[id]; return e && e[feld] !== undefined ? e[feld] : fallback; }

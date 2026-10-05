@@ -64,15 +64,20 @@ IBM Plex als Familie mit drei Stimmen – verwandt, aber unterscheidbar. Fallbac
 
 ## Layout
 
-- Links eine schmale Seitenleiste (264px): Navigation als Schrägstrich-Pfade in Gruppen (Werkzeuge, Bereiche), darunter nur „+ Neuer Chat“. Kein Chatverlauf, keine Zähler, keine Widgets – frühere und angepinnte Chats stehen auf der Chat-Seite.
+- Links eine Seitenleiste (240px, einklappbar auf 58px): oben ein Feld „Neuer Chat oder Suche“ (⌘K), dann Heute und Chat, die einklappbaren Gruppen Werkzeuge und Bereiche – Bereiche als Baum mit ihren laufenden Einträgen –, Einstellungen, ganz unten das Konto mit Menü. Seitennamen groß, mit Icon, ohne Schrägstrich. Einzige Zahl: offene Aufgaben je Eintrag im Baum (Bestand). Kein Chatverlauf, keine Neuigkeitszähler, keine Widgets – frühere und angepinnte Chats stehen auf der Chat-Seite (E55).
+- Detailansichten rechts lassen sich schließen (×) und als Vollbild über die Liste legen.
+- Längere Detailansichten gliedern sich in benannte Cluster (Kopf in `label`-Schrift, Linie oben); Seltenes steht eingeklappt am Ende.
 - Daneben eine Spalte, links ausgerichtet, maximal `measure` breit, oberer Rand `space-7`.
 - Der Chat folgt gewohnten Chat-Programmen: eigene Nachrichten rechts als Blase, Kollege links ohne Blase, Belege eingerückt mit Linie.
 - Links eine schmale Zeitspalte (`col-date`, 96px, Mono): Heute, Quittung und Verlauf teilen diese Kante. Das Datum steht vorn, wie in einem Logbuch.
 - Abschnitte trennt `space-6` Weißraum plus eine Haarlinie unter dem Label. Einträge trennt eine `rule`-Linie.
-- Keine Karten, keine Schatten. Einzige Ausnahme: das Blatt „Entwurf ansehen“ (`shadow-sheet`).
+- Flächen statt Karten: App-Grund `paper-sunk`, darauf eine weiße Arbeitsfläche (`surface`, `radius-3`, Haarlinie), ebenso Kontext-Chat und Konto. Keine Karte pro Eintrag. Schatten nur für schwebende Blätter und Menüs (`shadow-sheet`).
+- Aktiver Zustand ist eine weiße Pille mit Haarlinie (Navigation, Umschalter); Hover tönt mit `tint`.
+- Etiketten, Filter, Personen und Status sind Pillen (`radius-pille`); Eingabefelder und Knöpfe haben `radius-feld` und eine sichtbare Haarlinie. Personen tragen ein Kürzel im grauen Kreis (`kg-kuerzel`), keine Fotos.
+- Überschriften in Satzschreibung; Versalien nur noch in `label` für sehr kleine Marken.
 - Rahmen nur für Eingaben, Entwürfe und gestrichelte KI-Vermutungen. Alles andere trennt eine Linie oben.
 - Farben mit Bedeutung: `attention` nur für Überfälliges, `accent` für Fokus und Aufforderungen, `ink-faint` nie für lesbaren Text. `primaer` nur für Senden und Merken.
-- Radien: `radius-0` für alles, `radius-1` (2px) für Knöpfe und Etiketten, `radius-2` (4px) für Eingabe und Entwurf.
+- Radien: `radius-0` für Zeilen und Abschnitte, `radius-feld` (6px) für Felder und Knöpfe, `radius-3` (12px) für Flächen und Entwürfe, `radius-pille` für Pillen, `radius-1` (2px) nur für kleine Marken.
 
 ## Bewegung und Zustände
 
@@ -87,9 +92,9 @@ IBM Plex als Familie mit drei Stimmen – verwandt, aber unterscheidbar. Fallbac
 - Notizen und Verlaufseinträge können privat sein: Schloss (`Privat`) vor dem Text, nur die Besitzerin sieht sie. Beim ersten Auftreten auf einer Seite steht das Wort dabei; gehört der Eintrag jemand anderem, sagt `Privat` wem („nur Julia“).
 - Chats sind grundsätzlich persönlich. Was ein Chat im Record ablegt, sieht das Team – die `Karte` sagt, wenn ein Eintrag privat abgelegt wurde.
 
-## Zeichen statt Icons
+## Icons und Zeichen
 
-Das System nutzt keine Icon-Bibliothek. Einzige Ausnahme ist das Schloss für „privat“ (Sichtbarkeit ist zu wichtig für ein Wort allein). Sonst trägt ein kleiner Satz typografischer Zeichen Bedeutung, immer mit Wort daneben:
+Linien-Icons (16 px, Strich 1,6, Farbe wie der Text, eigene einfache Geometrie, Baustein `Icon`) stehen nur in Navigation, Clusterköpfen, Suche und Aktionsleisten – immer mit Wort daneben oder als Knopf mit Tooltip. Im Fließtext bleibt das Schloss für „privat“ das einzige Piktogramm. Bedeutung im Text tragen weiter typografische Zeichen, immer mit Wort daneben:
 
 | Zeichen | Bedeutung |
 | --- | --- |
@@ -114,7 +119,7 @@ Für Eingaben direkt nach einem Gespräch.
 
 | Screen | Bausteine |
 | --- | --- |
-| Heute | Seitenleiste, `Eingabe`, Bereichsfilter, „Kurz klären“ mit `Klaerung`, `Abschnitt` × 5 mit `Hinweis` (Bereich als `Etikett`), zuklappbar „Im Team“, `Leer` |
+| Heute | Seitenleiste, Kopf als Satz, „Diese Woche“ (Tagesspalten ab heute, Termine, Fristen, Jetzt-Linie in Tinte), „Offen“ in Entscheiden und Erledigen (eine Zeile pro Punkt, aufklappbar mit `Aussage`n, `Entwurf` und Antworten), „Ausstehend“ mit erwartet bis und Wiedervorlage (E56, E57) |
 | Chat | Startseite mit `Eingabe` und früheren Chats (Angepinnt zuerst); im Chat `Nachricht`, `Aussage`/`Quelle`, `Karte` (Quittung oder Anweisung), `Klaerung`, `Entwurf` (auch gesperrt oder geplant), `Wissensluecke`, `Eingabe` |
 | Bereich (Liste + Detail) | Felder des Bereichs (KI-Vermutung bis bestätigt), nächster Schritt, `Zusage` in zwei Spalten (aus Aufgaben), Bezüge, `Verlauf` mit Herkunft und `Privat`, „Übergeben an …“ mit Zustand „wartet auf Annahme“; Gründungsteam = Beratungsakte mit Personen und Gesprächen |
 | Kontakte | Personen und Organisationen (über ID verknüpft), alle Adressen, Zusammenführen mit Vorschau und feldweiser Auswahl, `Verlauf` über alle Bereiche |

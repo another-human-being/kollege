@@ -76,6 +76,7 @@ class Component extends DCLogic {
         moeglich: Object.keys(V).filter(function (k) { return bz.indexOf(k) < 0; }).map(function (k) { return { key: k, name: V[k].name }; }),
         zuordnen: function (e) { var k = e.target.value; if (!k) return; setBz(bz.concat([k]), 'Zugeordnet: ' + V[k].name); },
         verlauf: d.verlauf.map(function (v) { return { monat: v[0].length > 6 ? 'früher' : 'September 2026', datum: v[0], art: v[1], text: v[2], quelle: v[3] }; }),
+        angabenZeile: d.fakten + ' · geändert ' + d.zeit + (self.wert(d.id, 'privat', !!d.privat) ? ' · privat' : ''),
         istUngeprueft: ung(d), grund: d.grund || '',
         uebernehmen: function () { self.aendere([{ id: d.id, feld: 'geprueft', wert: 'ok', basis: '' }], 'Zuordnung übernommen: ' + nm); },
         verwerfen: function () { self.aendere([{ id: d.id, feld: 'geprueft', wert: 'ok', basis: '' }, { id: d.id, feld: 'bezuege', wert: [], basis: d.bezuege }], 'Zuordnung verworfen – Datei bleibt, ohne Bereich'); }

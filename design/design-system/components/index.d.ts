@@ -79,4 +79,9 @@ export declare function Privat(props: PrivatProps): React.ReactElement;
 export interface VermutungProps { children?: React.ReactNode }
 export declare function Vermutung(props: VermutungProps): React.ReactElement;
 
-declare global { interface Window { Kollege: { Navigation: typeof Navigation; Abschnitt: typeof Abschnitt; Eingabe: typeof Eingabe; Aussage: typeof Aussage; Quelle: typeof Quelle; Bezug: typeof Bezug; Etikett: typeof Etikett; Aktion: typeof Aktion; Umschalter: typeof Umschalter; Hinweis: typeof Hinweis; Entwurf: typeof Entwurf; Quittung: typeof Quittung; Verlauf: typeof Verlauf; Zusage: typeof Zusage; Klaerung: typeof Klaerung; Anweisung: typeof Anweisung; Leer: typeof Leer; Laden: typeof Laden; Nachricht: typeof Nachricht; Karte: typeof Karte; Wissensluecke: typeof Wissensluecke; ChatListe: typeof ChatListe; Privat: typeof Privat; Vermutung: typeof Vermutung } } }
+export interface IconProps { name: 'hoch' | 'lesen' | 'suche' | 'gefunden' | 'luecke'; className?: string }
+export declare function Icon(props: IconProps): React.ReactElement;
+export interface Schritt { art: 'lesen' | 'suche' | 'gefunden' | 'luecke'; text: React.ReactNode; funde?: string[] }
+export interface SchritteProps { schritte: Schritt[] }
+export declare function Schritte(props: SchritteProps): React.ReactElement;
+declare global { interface Window { Kollege: { Navigation: typeof Navigation; Abschnitt: typeof Abschnitt; Eingabe: typeof Eingabe; Aussage: typeof Aussage; Quelle: typeof Quelle; Bezug: typeof Bezug; Etikett: typeof Etikett; Aktion: typeof Aktion; Umschalter: typeof Umschalter; Hinweis: typeof Hinweis; Entwurf: typeof Entwurf; Quittung: typeof Quittung; Verlauf: typeof Verlauf; Zusage: typeof Zusage; Klaerung: typeof Klaerung; Anweisung: typeof Anweisung; Leer: typeof Leer; Laden: typeof Laden; Nachricht: typeof Nachricht; Karte: typeof Karte; Wissensluecke: typeof Wissensluecke; ChatListe: typeof ChatListe; Privat: typeof Privat; Vermutung: typeof Vermutung; Icon: typeof Icon; Schritte: typeof Schritte } } }

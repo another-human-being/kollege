@@ -1,7 +1,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = Object.assign(this.basisState(), this.kcState(), { modus: 'Woche', scope: 'Meins', sel: null, neu: null, wasText: '', panelZu: false, wo: 0, tag: 2, kSuche: '', ganzerTag: false });
+    this.state = Object.assign(this.basisState(), this.kcState(), { modus: 'Woche', scope: 'Meins', sel: null, neu: null, wasText: '', panelZu: false, wo: 0, tag: 2, kSuche: '', ganzerTag: false, extEntwurf: null, tnHover: null });
   }
   kcCfg() { var e = this.aktuell(); return { name: e ? this.wert(e.id, 'titel', e.titel) : 'Kalender', anzahl: 'Termine, Teilnehmende, letzte Mails', platzhalter: 'Frag etwas zu diesem Termin', antwort: 'Karin Vogt hat nach dem Gespräch die Rahmenvereinbarung geschickt (Mail 29.09.). Offen ist, wer sie prüft.', belege: [{ art: 'belegt', text: 'Rahmenvereinbarung als Vorschlag', quelle: 'Mail 29.09.' }], luecke: 'Dazu steht im Termin nichts, was ich auswerten könnte.' }; }
   team() { return ['Andreas', 'Julia', 'Mehmet']; }
@@ -37,6 +37,8 @@ class Component extends DCLogic {
   endTag(e) { return this.v(e, 'endTag') || this.v(e, 'tag'); }
   mehrtaegig(e) { return this.off(this.endTag(e)) > this.off(this.v(e, 'tag')); }
   ganz(e) { return !!this.v(e, 'ganztag') || this.mehrtaegig(e); }
+  teamIn(s) { var t = this.team(); return String(s || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return t.indexOf(x) >= 0; }); }
+  kontaktZu(name) { var K = this.kontaktDaten(); var p = K.personen.filter(function (x) { return x.name === name; })[0]; if (!p) return null; var o = K.orgs.filter(function (x) { return x.id === p.orgId; })[0]; return { p: p, org: o ? o.name : '' }; }
   personen(s) { var t = this.team(); return String(s || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return x && t.indexOf(x) < 0; }); }
   externe(e) { return this.personen(this.v(e, 'leute')); }
   // Wer hat die Einladung bekommen, wer hat geantwortet – je Person
@@ -181,7 +183,25 @@ class Component extends DCLogic {
         setStart: function (x) { var a = self.min(x.target.value), dauer = (oE - oT) * 1440 + self.min(eZ) - self.min(sZ); if (dauer <= 0) dauer = 60; var b = a + dauer; setze({ start: x.target.value, ende: self.zeit(b % 1440), endTag: self.key(oT + Math.floor(b / 1440)) }); },
         setEnde: function (x) { setze({ ende: x.target.value }); },
         hatExterne: ext.length > 0, externe: ext.join(', '),
-        teilnehmer: ext.map(function (n) { var z = inv.indexOf(n) < 0 ? 'nicht eingeladen' : ant[n] || 'Antwort offen'; return { name: n, status: z, stil: 'color: var(--ink-muted)' }; }),
+        teamWahl: this.team().filter(function (n) { return n !== self.v(e, 'wer'); }).map(function (n) {
+          var drin = self.teamIn(self.v(e, 'leute')).indexOf(n) >= 0;
+          return { name: n, kuerzel: n[0], an: drin ? 'true' : 'false', los: function () {
+            var tm = self.teamIn(self.v(e, 'leute')).filter(function (x) { return x !== n; }); if (!drin) tm.push(n);
+            var ihr = n === 'Julia' ? 'ihrem' : 'seinem';
+            setze({ leute: tm.concat(ext).join(', ') }, istNeu ? null : (drin ? n + ' ist nicht mehr dabei – der Termin verschwindet aus ' + ihr + ' Kalender' : n + ' sieht den Termin jetzt in ' + ihr + ' Kalender und bekommt eine Benachrichtigung'));
+          } };
+        }),
+        teamHinweis: (function () { var tm = self.teamIn(self.v(e, 'leute')).filter(function (x) { return x !== self.v(e, 'wer'); }); if (!tm.length) return ''; return istNeu ? tm.join(' und ') + ' bekommt beim Speichern eine Benachrichtigung' : 'steht auch im Kalender von ' + tm.join(' und '); })(),
+        externText: st.extEntwurf && st.extEntwurf.id === e.id ? st.extEntwurf.text : ext.join(', '),
+        externTippen: function (x) { self.setState({ extEntwurf: { id: e.id, text: x.target.value } }); },
+        externFertig: function () {
+          var en = self.state.extEntwurf; if (!en || en.id !== e.id) return;
+          var neuExt = self.personen(en.text); self.setState({ extEntwurf: null });
+          if (neuExt.join(', ') === ext.join(', ')) return;
+          var dazu = neuExt.filter(function (n) { return ext.indexOf(n) < 0; });
+          setze({ leute: self.teamIn(self.v(e, 'leute')).concat(neuExt).join(', ') }, istNeu ? null : 'Gespeichert' + (dazu.length ? ' – ' + dazu.join(', ') + ' noch nicht eingeladen' : ''));
+        },
+        teilnehmer: ext.map(function (n) { var z = inv.indexOf(n) < 0 ? 'nicht eingeladen' : ant[n] || 'Antwort offen'; return { name: n, status: z, kuerzel: n.replace(/^(Prof\. |Dr\. )+/g, '').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2), pille: 'kg-pille' + (z === 'Antwort offen' ? ' kg-pille--offen' : ''), stil: 'color: var(--ink-muted)', zeige: function (x) { var top = 80; try { var r = x.currentTarget.getBoundingClientRect(), k = x.currentTarget.closest('.kal').getBoundingClientRect(); top = Math.max(8, r.top - k.top - 12); } catch (er) {} self.setState({ tnHover: { name: n, top: top } }); } }; }),
         ganztag: gt, ganztagToggle: function () { setze({ ganztag: !gt }); },
         wiederholung: this.v(e, 'wiederholung') || 'keine', erinnerung: this.v(e, 'erinnerung') || '30 Min. vorher', kalender: this.v(e, 'kalender') || (ext.length ? 'Persönlich (Outlook)' : 'Teamkalender'), verfuegbar: this.v(e, 'verfuegbar') || 'belegt', notiz: this.v(e, 'notiz') || '',
         istNeu: istNeu, istAbgesagt: s === 'abgesagt',
@@ -197,9 +217,12 @@ class Component extends DCLogic {
           if (!n.titel.trim()) n.titel = 'Neuer Termin';
           n.eingeladene = []; n.status = self.externe(n).length ? 'entwurf' : 'fest';
           self.setState({ neu: null, sel: n.id });
-          self.aendere([{ id: '_neu', feld: 'termine', wert: self.wert('_neu', 'termine', []).concat([n]), basis: [] }], self.externe(n).length ? 'Termin gespeichert – Einladung noch nicht verschickt' : 'Termin gespeichert');
+          var tm = self.teamIn(n.leute);
+          self.aendere([{ id: '_neu', feld: 'termine', wert: self.wert('_neu', 'termine', []).concat([n]), basis: [] }], 'Termin gespeichert' + (tm.length ? ' – ' + tm.join(' und ') + ' benachrichtigt' : '') + (self.externe(n).length ? ' – Einladung an Externe noch nicht verschickt' : ''));
         },
         kannEinladen: bearbeitbar && !istNeu && s !== 'abgesagt' && ne.length > 0 && !vorbei,
+        wartet: bearbeitbar && !istNeu && s !== 'abgesagt' && !vorbei && (ne.length > 0 || !!this.v(e, 'geaendert')),
+        wartetText: ne.length && !vorbei ? (inv.length ? ne.join(', ') + (ne.length === 1 ? ' ist' : ' sind') + ' noch nicht eingeladen.' : 'Einladung noch nicht verschickt.') : 'Änderung noch nicht verschickt.',
         einladenLabel: inv.length ? 'Einladung an ' + ne.join(', ') + ' senden' : 'Einladung senden',
         einladen: function () { self.aendere([{ id: e.id, feld: 'eingeladene', wert: inv.concat(ne), basis: undefined }, { id: e.id, feld: 'status', wert: 'eingeladen', basis: e.status }, { id: e.id, feld: 'geaendert', wert: false, basis: false }], 'Einladung an ' + ne.join(', ') + ' über dein Postfach gesendet'); },
         kannAendern: bearbeitbar && !!this.v(e, 'geaendert') && s !== 'abgesagt',
@@ -222,12 +245,21 @@ class Component extends DCLogic {
     var entw = meine.filter(function (x) { return !self.vorbei(x) && (self.nichtEingeladen(x).length > 0 || self.v(x, 'geaendert')); });
     var tagOpt = []; for (var t = 0; t < 14; t++) tagOpt.push(t);
     if (e) [this.off(this.v(e, 'tag')), this.off(this.endTag(e))].forEach(function (o) { if (tagOpt.indexOf(o) < 0) tagOpt.unshift(o); });
-    var zeiten = []; for (var hh = 0; hh < 24; hh++) { ['00', '30'].forEach(function (mm) { zeiten.push((hh < 10 ? '0' : '') + hh + ':' + mm); }); }
+    var zeiten = []; for (var mz = 0; mz < 24 * 60; mz += 5) zeiten.push(this.zeit(mz));
     if (e) [this.v(e, 'start'), this.ende(e)].forEach(function (z) { if (zeiten.indexOf(z) < 0) zeiten.push(z); });
     var q = st.kSuche.trim().toLowerCase();
     var treffer = !q ? [] : T.filter(function (x) { return (self.v(x, 'titel') + ' ' + self.v(x, 'leute') + ' ' + self.v(x, 'ort')).toLowerCase().indexOf(q) >= 0; });
+    var tnKarte = { zeigen: false, pos: '', name: '', rolle: '', zeilen: [], notiz: '' };
+    if (st.tnHover && e) {
+      var kz = this.kontaktZu(st.tnHover.name);
+      tnKarte = { zeigen: true, pos: 'top: ' + st.tnHover.top + 'px', name: st.tnHover.name,
+        rolle: kz ? kz.p.rolle + (kz.org ? ' · ' + kz.org : '') : 'noch nicht in Kontakte',
+        zeilen: kz ? [{ k: 'E-Mail', w: kz.p.adressen[0].adresse }, { k: 'Telefon', w: kz.p.telefon || '–' }, { k: 'Letzter Kontakt', w: kz.p.letzter }, { k: 'Kontakt über', w: kz.p.ueber }] : [{ k: 'Hinweis', w: 'Beim Speichern als ungeprüfter Kontakt angelegt' }],
+        notiz: kz && kz.p.notiz ? kz.p.notiz : '' };
+    }
     return Object.assign(this.kcVals(), this.toastVals(), {
       sidebarChats: this.kgChats(),
+      tnKarte: tnKarte, tnWeg: function () { self.setState({ tnHover: null }); },
       modi: ['Tag', 'Woche', 'Monat'], modus: st.modus, setModus: function (w) { self.setState({ modus: w }); },
       istTag: istTag, istWochenRaster: !istTag,
       zurueck: function () { if (self.state.modus === 'Monat') return self.aendere([], 'Im Prototyp gibt es nur den September', true); if (self.state.modus === 'Tag') self.setState({ tag: self.state.tag - 1 }); else self.setState({ wo: self.state.wo - 1 }); },
@@ -240,6 +272,11 @@ class Component extends DCLogic {
       panelOffen: !st.panelZu, panelIstZu: !!st.panelZu,
       panelZu: function () { self.setState({ panelZu: true, sel: null, neu: null }); },
       panelAuf: function () { self.setState({ panelZu: false }); },
+      panelNach: function () { self.setState({ panelZu: false, panelTab: 'nach', sel: null, neu: null }); },
+      panelEinl: function () { self.setState({ panelZu: false, panelTab: 'einl', sel: null, neu: null }); },
+      zeigeNach: (st.panelTab || 'nach') === 'nach', zeigeEinl: st.panelTab === 'einl',
+      railNachAn: !st.panelZu && !st.sel && !st.neu && (st.panelTab || 'nach') === 'nach' ? 'true' : 'false',
+      railEinlAn: !st.panelZu && !st.sel && !st.neu && st.panelTab === 'einl' ? 'true' : 'false',
       kalLayout: 'kal' + (st.panelZu ? ' kal--zu' : ''),
       scopes: ['Meins', 'Team'], scope: st.scope, setScope: function (w) { self.setState({ scope: w }); },
       istWoche: st.modus !== 'Monat', istMonat: st.modus === 'Monat',

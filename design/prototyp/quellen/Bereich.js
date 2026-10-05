@@ -2,7 +2,7 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     var B = this.bereich();
-    this.state = Object.assign(this.basisState(), this.kcState(), { suche: '', filter: B.startFilter, sel: B.startSel, wieLief: {}, wieLiefText: '', gespraechText: '', gDatum: '2026-09-30', gArt: 'Beratung', gMit: null, themaText: '', notizZeit: '' });
+    this.state = Object.assign(this.basisState(), this.kcState(), { suche: '', filter: B.startFilter, sel: B.startSel, wieLief: {}, wieLiefText: '', gespraechText: '', gDatum: '2026-09-30', gArt: 'Beratung', gMit: null, themaText: '', notizZeit: '', voll: this.bkey() === 'events', mehrUeb: false, imp: null, kanal: 'Alle', fassung: null });
   }
   bkey() { return '@@BEREICH@@'; }
   // ——— Bereiche: Spalten (max. 5), Phasen, Knöpfe ———
@@ -19,7 +19,7 @@ class Component extends DCLogic {
         extraFelder: [{ k: 'wer', l: 'zuständig', typ: 'person' }],
         phasen: [], filterWerte: ['WS 26/27', 'SS 26'], filterFeld: 'semester', neuLabel: 'Neue Veranstaltung', vorlageLabel: 'Aus letztem Semester', ungeprueft: 14, startFilter: 'WS 26/27', startSel: 'le-eb' },
       socialmedia: { titel: 'Social Media', einzahl: 'Beitrag', href: 'SocialMedia.dc.html',
-        spalten: [{ k: 'titel', l: 'Beitrag', w: '1.4fr' }, { k: 'geplant', l: 'geplant für', typ: 'text', w: '104px' }, { k: 'kanal', l: 'Kanal', typ: 'kanal', w: '96px' }, { k: 'phase', l: 'Phase', typ: 'phase', w: '92px' }],
+        spalten: [{ k: 'titel', l: 'Beitrag', w: '1.4fr' }, { k: 'geplant', l: 'geplant für', typ: 'text', w: '104px' }, { k: 'kanalText', l: 'Kanäle', typ: 'berechnet', w: '150px' }, { k: 'phase', l: 'Phase', typ: 'phase', w: '92px' }],
         extraFelder: [{ k: 'wer', l: 'zuständig', typ: 'person' }],
         phasen: ['Entwurf', 'geplant', 'veröffentlicht'], endPhase: 'veröffentlicht', endPhasen: ['veröffentlicht'], neuLabel: 'Neuer Beitrag', ungeprueft: 21, startFilter: 'alle', startSel: 'sm-ig' }
     };
@@ -47,9 +47,13 @@ class Component extends DCLogic {
       { id: 'gt-volt', b: 'gruendungsteams', ungeprueft: true, titel: 'VoltBox', phase: 'gegründet', ki: { phase: true }, wer: 'Andreas', letzter: 'vor 200 Tagen', tage: 200, naechster: '–', grund: 'zwei Termine und ein Protokoll auf dem Netzlaufwerk', quelle: 'Termin 12.03.', personen: [], gespraeche: [{ datum: '12.03.', titel: 'Beratung Finanzierung', wer: 'Andreas', punkte: ['aus Protokoll übernommen'] }], themen: [], verlauf: [['202603121000', 'Termin', 'Beratung Finanzierung', 'Kalender']] },
       { id: 'gt-lern', b: 'gruendungsteams', ungeprueft: true, titel: 'Lernwerk', phase: 'Idee', ki: { phase: true }, wer: 'Mehmet', letzter: 'vor 330 Tagen', tage: 330, naechster: '–', grund: 'Anfrage über das StartHub-Postfach', quelle: 'Mail 04.11.2025', personen: [], gespraeche: [], themen: [], verlauf: [['202511040900', 'Mail', 'Anfrage Nachhilfe-App', 'Mail', 'StartHub-Postfach']] },
       // Events
-      { id: 'ev-gn', b: 'events', titel: 'Gründungsnacht 2026', datum: 'Fr 20.11.', wer: 'Julia', phase: 'Planung', naechster: 'Einladung am 09.10. verschicken (6 Wochen vorher); Catering klären.', notiz: true,
+      { id: 'ev-gn', b: 'events', titel: 'Gründungsnacht 2026', datum: 'Fr 20.11.', wer: 'Julia', phase: 'Planung',
+        mitwirkende: [{ name: 'Prof. Dr. Martin Hartmann', rolle: 'Speaker', info: 'Keynote 19:00', status: 'zugesagt' }, { name: 'Anna Weber', org: 'IHK Schwaben', rolle: 'Partner', info: 'Grußwort', status: 'angefragt' }, { name: 'Karin Vogt', org: 'Stadtwerke Augsburg', rolle: 'Partner', info: 'Sponsor Catering', status: 'zugesagt' }, { name: 'Lisa Meier', org: 'Solaro', rolle: 'Speaker', info: 'Gründerinnen-Talk', status: 'angefragt' }],
+        teilnehmende: [['Sara Yilmaz', 'Kitchen Loop', 'angemeldet'], ['Ben Hofer', 'Kitchen Loop', 'angemeldet'], ['Jonas Berg', 'Nordlicht Analytics', 'angemeldet'], ['Nora Kim', 'Greenbyte', 'angemeldet'], ['Max Brandt', 'Uni Augsburg', 'angemeldet'], ['Tom Kraus', 'Solaro', 'abgesagt'], ['Petra Lang', 'Studierendenwerk', 'angemeldet'], ['Sven Ott', 'KLC', 'angemeldet'], ['Dr. Kerstin Albrecht', 'Albrecht Consulting', 'angemeldet'], ['Julia Roth', 'Uni Augsburg', 'angemeldet'], ['Emre Aydin', 'Uni Augsburg', 'angemeldet'], ['Fachschaft Informatik', '3 Personen', 'angemeldet']], naechster: 'Einladung am 09.10. verschicken (6 Wochen vorher); Catering klären.', notiz: true,
         verlauf: [['202609291000', 'Datei', 'Ablaufplan_Gruendungsnacht.docx geändert', 'Netzlaufwerk'], ['202609281012', 'Notiz', 'Einladung als Entwurf vorbereitet, Versand 09.10.', 'Chat']] },
-      { id: 'ev-pa', b: 'events', titel: 'Pitch-Abend', datum: 'Do 12.11.', wer: 'Julia', phase: 'Planung', tage: 9, naechster: 'Jury vollständig machen – Rückmeldung von Frau Weber fehlt.',
+      { id: 'ev-pa', b: 'events', titel: 'Pitch-Abend', datum: 'Do 12.11.', wer: 'Julia', phase: 'Planung', tage: 9,
+        mitwirkende: [{ name: 'Anna Weber', org: 'IHK Schwaben', rolle: 'Jury', info: '', status: 'angefragt' }, { name: 'Dr. Kerstin Albrecht', org: 'Albrecht Consulting', rolle: 'Jury', info: '', status: 'zugesagt' }, { name: 'Prof. Dr. Martin Hartmann', rolle: 'Jury', info: 'Vorsitz', status: 'zugesagt' }, { name: 'Solaro', org: 'Lisa Meier, Tom Kraus', rolle: 'Pitch', info: 'Slot 3', status: 'zugesagt' }, { name: 'Kitchen Loop', org: 'Sara Yilmaz', rolle: 'Pitch', info: '', status: 'angefragt' }],
+        teilnehmende: [], naechster: 'Jury vollständig machen – Rückmeldung von Frau Weber fehlt.',
         verlauf: [['202609230900', 'Mail', 'Mail von Julia an Tom Kraus · Inhalt nur für Julia', '', '', true], ['202609211000', 'Mail', 'Juryanfrage an Anna Weber (IHK)', 'Mail', 'aus Outlook']] },
       { id: 'ev-som', b: 'events', titel: 'Sommerfest 2026', datum: '10.07.', wer: 'Mehmet', phase: 'vorbei', naechster: '–', abschluss: 'Gut besucht (ca. 120); Grillstand zu klein – nächstes Jahr zwei.', verlauf: [['202607101800', 'Termin', 'Sommerfest im Innenhof', 'Kalender']] },
       { id: 'ev-hack', b: 'events', ungeprueft: true, titel: 'Hackathon Januar', datum: 'Jan. 2027', ki: { datum: true, wer: true }, wer: 'Julia', phase: 'Planung', naechster: 'Fachschaft antworten: Challenge und Mentoring?', grund: 'Kooperationsanfrage im StartHub-Postfach', quelle: 'Mail 28.09.', verlauf: [['202609280914', 'Mail', 'Fachschaft Informatik: Hackathon im Januar', 'Mail', 'StartHub-Postfach']] },
@@ -61,13 +65,14 @@ class Component extends DCLogic {
       { id: 'le-gs', b: 'lehre', titel: 'Gründungsseminar', semester: 'SS 26', sitzung: '– (beendet)', wer: 'Andreas', naechster: '–', verlauf: [['202607151000', 'Termin', 'Abschlusspräsentationen', 'Kalender']] },
       { id: 'le-iw', b: 'lehre', ungeprueft: true, titel: 'Ideenwerkstatt', semester: 'SS 26', ki: { semester: true }, sitzung: '– (beendet)', wer: 'Mehmet', naechster: '–', grund: 'Ordner „Lehre/Ideenwerkstatt“ auf dem Netzlaufwerk', quelle: 'Netzlaufwerk', verlauf: [['202606011000', 'Datei', 'Teilnehmerliste_Ideenwerkstatt.xlsx', 'Netzlaufwerk']] },
       // Social Media
-      { id: 'sm-ig', b: 'socialmedia', titel: 'Pitch-Abend ankündigen', geplant: 'Do 01.10., 12:00', kanal: 'Instagram', phase: 'Entwurf', wer: 'Mehmet', naechster: 'Freigabe bis heute 17:00 – Text und Bild liegen bereit.', notiz: true, verlauf: [['202609291000', 'Notiz', 'Entwurf angelegt', 'Mehmet']] },
-      { id: 'sm-std', b: 'socialmedia', titel: 'Save-the-Date Gründungsnacht', geplant: 'Fr 09.10.', kanal: 'Instagram + LinkedIn', phase: 'geplant', wer: 'Mehmet', naechster: '–', verlauf: [['202609281030', 'Notiz', 'Für 09.10. eingeplant', 'Mehmet']] },
-      { id: 'sm-por', b: 'socialmedia', titel: 'Porträt: Lisa Meier (Solaro)', geplant: '15.10.', kanal: 'LinkedIn', phase: 'Entwurf', wer: 'Mehmet', naechster: 'Freigabe von Lisa einholen.', verlauf: [['202609151000', 'Notiz', 'Idee: Porträtreihe Gründerinnen', 'Mehmet']] },
-      { id: 'sm-som', b: 'socialmedia', titel: 'Rückblick Sommerfest', geplant: '–', kanal: 'LinkedIn', phase: 'Entwurf', wer: 'Mehmet', tage: 25, naechster: 'Entwurf fertigstellen.', verlauf: [['202609051000', 'Datei', 'Entwurf zuletzt geändert', 'Netzlaufwerk']] },
-      { id: 'sm-rgn', b: 'socialmedia', titel: 'Rückblick Gründungsnacht 2025', geplant: '25.11.2025', kanal: 'Instagram', phase: 'veröffentlicht', wer: 'Mehmet', naechster: '–', verlauf: [['202511251000', 'Notiz', 'Veröffentlicht', 'Instagram']] },
-      { id: 'sm-hack', b: 'socialmedia', ungeprueft: true, titel: 'Aufruf Hackathon', geplant: '–', kanal: 'Instagram', ki: { kanal: true }, phase: 'Entwurf', wer: 'Mehmet', naechster: '–', grund: 'Bitte der Fachschaft um Bewerbung', quelle: 'Mail 28.09.', verlauf: [['202609280914', 'Mail', 'Fachschaft Informatik: Hackathon im Januar', 'Mail', 'StartHub-Postfach']] }
+      { id: 'sm-ig', b: 'socialmedia', titel: 'Pitch-Abend ankündigen', geplant: 'Do 01.10., 12:00', kanal: 'Instagram', kanaele: ['Instagram', 'LinkedIn'], fassungen: { Instagram: { status: 'Entwurf', geplant: 'Do 01.10., 12:00', text: 'Am 12.11. pitchen sieben Gründungsteams vor Jury und Publikum. Kommt vorbei – Eintritt frei, Anmeldung über den Link in der Bio. #Gründen #Augsburg #PitchAbend', bild: 'Foto Pitch-Abend 2025 liegt bereit' }, LinkedIn: { status: 'Entwurf', geplant: 'Do 01.10., 9:00', text: 'Am 12. November ist es wieder so weit: Beim Pitch-Abend des Gründungszentrums stellen sieben Teams ihre Ideen vor – von Energie bis Bildung. Die Jury aus Wirtschaft und Wissenschaft gibt direktes Feedback. Wir freuen uns auf Gäste aus der Region. Anmeldung: Link im Kommentar.', bild: 'Titelbild 1200×627 fehlt noch' } }, phase: 'Entwurf', wer: 'Mehmet', naechster: 'Freigabe bis heute 17:00 – Text und Bild liegen bereit.', notiz: true, verlauf: [['202609291000', 'Notiz', 'Entwurf angelegt', 'Mehmet']] },
+      { id: 'sm-std', b: 'socialmedia', titel: 'Save-the-Date Gründungsnacht', geplant: 'Fr 09.10.', kanal: 'Instagram + LinkedIn', kanaele: ['Instagram', 'LinkedIn', 'Newsletter'], fassungen: { Instagram: { status: 'geplant', geplant: 'Fr 09.10., 12:00', text: 'Save the Date: Gründungsnacht am 20.11. Mehr bald hier.', bild: 'Grafik liegt bereit' }, LinkedIn: { status: 'geplant', geplant: 'Fr 09.10., 9:00', text: 'Save the Date: Am 20. November lädt das Gründungszentrum zur Gründungsnacht – mit Talks, Teams und Netzwerk. Details folgen.', bild: 'Grafik liegt bereit' }, Newsletter: { status: 'geplant', geplant: 'Oktober-Ausgabe, 12.10.', text: 'Gründungsnacht 2026 – merkt euch den 20.11.! Programm und Anmeldung im nächsten Newsletter.', bild: '' } }, phase: 'geplant', wer: 'Mehmet', naechster: '–', verlauf: [['202609281030', 'Notiz', 'Für 09.10. eingeplant', 'Mehmet']] },
+      { id: 'sm-por', b: 'socialmedia', titel: 'Porträt: Lisa Meier (Solaro)', geplant: '15.10.', kanal: 'LinkedIn', kanaele: ['LinkedIn'], fassungen: { LinkedIn: { status: 'Entwurf', geplant: '15.10.', text: 'Gründerinnen im Porträt: Lisa Meier hat mit Solaro …', bild: 'Foto von Lisa angefragt' } }, phase: 'Entwurf', wer: 'Mehmet', naechster: 'Freigabe von Lisa einholen.', verlauf: [['202609151000', 'Notiz', 'Idee: Porträtreihe Gründerinnen', 'Mehmet']] },
+      { id: 'sm-som', b: 'socialmedia', titel: 'Rückblick Sommerfest', geplant: '–', kanal: 'LinkedIn', kanaele: ['LinkedIn'], fassungen: { LinkedIn: { status: 'Entwurf', geplant: '–', text: 'Rückblick Sommerfest: rund 120 Gäste …', bild: '3 Fotos ausgewählt' } }, phase: 'Entwurf', wer: 'Mehmet', tage: 25, naechster: 'Entwurf fertigstellen.', verlauf: [['202609051000', 'Datei', 'Entwurf zuletzt geändert', 'Netzlaufwerk']] },
+      { id: 'sm-rgn', b: 'socialmedia', titel: 'Rückblick Gründungsnacht 2025', geplant: '25.11.2025', kanal: 'Instagram', kanaele: ['Instagram'], fassungen: { Instagram: { status: 'veröffentlicht', geplant: '25.11.2025', text: 'Danke an alle, die bei der Gründungsnacht 2025 dabei waren!', bild: 'Karussell mit 6 Fotos' } }, phase: 'veröffentlicht', wer: 'Mehmet', naechster: '–', verlauf: [['202511251000', 'Notiz', 'Veröffentlicht', 'Instagram']] },
+      { id: 'sm-hack', b: 'socialmedia', titel: 'Aufruf Hackathon', geplant: '–', kanal: 'Instagram', kanaele: ['Instagram'], fassungen: { Instagram: { status: 'Entwurf', geplant: '–', text: '', bild: '' } }, ungeprueft: true, ki: { kanal: true }, phase: 'Entwurf', wer: 'Mehmet', naechster: '–', grund: 'Bitte der Fachschaft um Bewerbung', quelle: 'Mail 28.09.', verlauf: [['202609280914', 'Mail', 'Fachschaft Informatik: Hackathon im Januar', 'Mail', 'StartHub-Postfach']] }
     ];
+    I.forEach(function (x) { if (x.b === 'socialmedia') { x.kanaele = x.kanaele || []; x.kanalText = x.kanaele.join(' · ') || '–'; } });
     return this.wert('_neu', 'liste', []).concat(I);
   }
   bezuegeStart() {
@@ -84,6 +89,42 @@ class Component extends DCLogic {
   personenVon(x) { var K = this.kontaktDaten(); var oid = x.orgId, ids = x.personIds || []; return K.personen.filter(function (p) { return (oid && p.orgId === oid && !p.dublette) || ids.indexOf(p.id) >= 0; }).map(function (p) { return { name: p.name, rolle: p.rolle + (p.funktion ? ' · ' + p.funktion : ''), adresse: p.adressen[0].adresse }; }); }
   aktuell() { var self = this; return this.alle().filter(function (x) { return x.id === self.state.sel && x.b === self.bkey() && self.wert(x.id, 'geprueft', '') !== 'weg'; })[0]; }
   kcCfg() { var x = this.aktuell(); return { name: x ? this.wert(x.id, 'titel', x.titel) : this.bereich().titel, anzahl: 'Gespräche, Zusagen, Verlauf', platzhalter: 'Frag oder notiere etwas dazu', antwort: 'Stand Solaro: Pitchdeck-Entwurf kam gestern ohne Finanzteil, final ist bis Freitag zugesagt. Danach vermitteln wir Frau Weber.', belege: [{ art: 'belegt', text: 'Pitchdeck-Entwurf ohne Finanzteil', quelle: 'Mail 29.09.' }], luecke: 'Dazu habe ich hier nichts Belastbares.' }; }
+  sbBaum() {
+    // E55: Baum in der Seitenleiste – laufende Einträge des Bereichs, Zahl = offene Aufgaben (Bestand)
+    var self = this, st = this.state, B = this.bereich(), bk = this.bkey();
+    var w = function (x, k) { return self.wert(x.id, k, x[k]); };
+    if (bk === 'socialmedia') return ['Instagram', 'LinkedIn', 'Newsletter'].map(function (k) { var n = self.alle().filter(function (x) { return x.b === 'socialmedia' && !x.ungeprueft && (self.wert(x.id, 'kanaele', x.kanaele) || []).indexOf(k) >= 0 && self.wert(x.id, 'phase', x.phase) !== 'veröffentlicht'; }).length; return { titel: k, zahl: String(n), hatZahl: n > 0, tip: k + ' · ' + n + ' offene Beiträge', aktiv: st.kanal === k ? 'true' : 'false', los: function () { self.setState({ kanal: self.state.kanal === k ? 'Alle' : k }); } }; });
+    var A = this.aufgabenDaten();
+    var lauf = this.alle().filter(function (x) {
+      if (x.b !== bk || self.wert(x.id, 'geprueft', '') === 'weg' || self.wert(x.id, 'archiv', false)) return false;
+      if (x.ungeprueft && !self.wert(x.id, 'geprueft', '')) return false;
+      return (B.endPhasen || []).indexOf(w(x, 'phase')) < 0;
+    });
+    return lauf.slice(0, 5).map(function (x) {
+      var t = w(x, 'titel'), v = B.titel + ' · ' + x.titel;
+      var n = A.filter(function (a) { return a.vorgang === v && !self.wert(a.id, 'erledigt', !!a.erledigt); }).length;
+      return { titel: t, zahl: String(n), hatZahl: n > 0, tip: t + (n ? ' · ' + n + (n === 1 ? ' offene Aufgabe' : ' offene Aufgaben') : ''),
+        aktiv: x.id === st.sel && !st.zu ? 'true' : 'false',
+        los: function () { self.setState({ zu: false, sel: x.id, kcOffen: false, voll: bk === 'events', fassung: null, mehrUeb: false, mehrOffen: false }); } };
+    });
+  }
+  todosFuer(vorgang) {
+    var self = this;
+    return this.aufgabenDaten().filter(function (a) { return a.vorgang === vorgang && !a.ungeprueft && !a.privat; }).map(function (a) {
+      var erl = self.wert(a.id, 'erledigt', !!a.erledigt), g = self.faelligGruppe(a.faellig);
+      var wer = a.richtung === 'an uns' ? a.von.replace(/ \(.*\)$/, '') : a.wer;
+      return { text: a.titel + ' · ' + wer, quelle: a.quelle, sort: (erl ? '1' : '0') + (a.faellig || '9'),
+        faellig: erl ? '' : (g === 'ueber' ? 'seit ' + self.datumText(a.faellig) : g === 'ohne' ? 'ohne Datum' : g === 'heute' ? self.datumText(a.faellig, a.zeit) : 'bis ' + self.datumText(a.faellig, a.zeit)),
+        status: erl ? 'erledigt' : g === 'ueber' ? 'ueberfaellig' : 'offen' };
+    }).sort(function (a, b) { return a.sort < b.sort ? -1 : 1; });
+  }
+  importZeilen() {
+    var V = ['Lea', 'Paul', 'Mia', 'Jan', 'Sophie', 'Felix', 'Hannah', 'Luca', 'Emma', 'Noah', 'Clara', 'Ben', 'Lina', 'Elias', 'Marie', 'Tim'];
+    var N = ['Bauer', 'Huber', 'Wagner', 'Schmid', 'Fischer', 'Weber', 'Maier', 'Koch', 'Wolf', 'Schulz', 'Keller', 'Roth'];
+    var out = [];
+    for (var i = 0; i < 46; i++) out.push([V[i % V.length] + ' ' + N[(i * 7) % N.length], i % 3 === 0 ? 'Hochschule Augsburg' : 'Uni Augsburg', i % 11 === 5 ? 'abgesagt' : 'angemeldet']);
+    return out;
+  }
   renderVals() {
     var self = this, st = this.state, K = this.konfig(), B = this.bereich(), bk = this.bkey();
     var ALLE = this.alle();
@@ -103,13 +144,14 @@ class Component extends DCLogic {
       if (st.filter === 'hängt' && !haengt(x)) return false;
       if (B.phasen.indexOf(st.filter) >= 0 && w(x, 'phase') !== st.filter) return false;
       if (B.filterFeld && (B.filterWerte || []).indexOf(st.filter) >= 0 && w(x, B.filterFeld) !== st.filter) return false;
+      if (bk === 'socialmedia' && st.kanal !== 'Alle' && (w(x, 'kanaele') || []).indexOf(st.kanal) < 0) return false;
       return !q || (w(x, 'titel') + ' ' + (x.personen || []).map(function (p) { return p.name; }).join(' ')).toLowerCase().indexOf(q) >= 0;
     });
     var raster = 'grid-template-columns: ' + B.spalten.map(function (s) { return 'minmax(0, ' + s.w + ')'; }).join(' ');
     var zeilen = liste.map(function (x) {
       return { pruef: pruef, normal: !pruef, raster: raster, aktiv: x.id === st.sel ? 'true' : 'false',
         waehlenLabel: 'Auswählen: ' + w(x, 'titel'), gewaehlt: P.pruefIstGewaehlt(x.id), waehlen: P.pruefWaehle(x.id),
-        los: function () { self.setState({ zu: false, sel: x.id, kcOffen: false }); },
+        los: function () { self.setState({ zu: false, sel: x.id, kcOffen: false, voll: bk === 'events', fassung: null, mehrUeb: false, mehrOffen: false }); },
         zellen: B.spalten.map(function (s, i) {
           var t = String(w(x, s.k) || '–'), stil = '';
           if (s.k === 'letzter' && haengt(x)) { t = t + ' · hängt'; stil = 'color: var(--attention)'; }
@@ -143,6 +185,7 @@ class Component extends DCLogic {
       var finde = function (id) { return ALLE.filter(function (y) { return y.id === id; })[0]; };
       var gespraeche = this.wert(x.id, 'gespraeche', x.gespraeche || []);
       var ZU = this.zusagenFuer(B.titel + ' · ' + w(x, 'titel'));
+      var TD = this.todosFuer(B.titel + ' · ' + w(x, 'titel'));
       var themen = this.wert(x.id, 'themen', x.themen || []);
       var vl = (x.verlauf || []).slice();
       if (this.wert(x.id, 'abschluss', x.abschluss || '')) vl.unshift(['202609301600', 'Notiz', 'Wie lief’s: ' + this.wert(x.id, 'abschluss', x.abschluss), 'Abschluss']);
@@ -153,6 +196,8 @@ class Component extends DCLogic {
         titel: w(x, 'titel'), naechster: w(x, 'naechster'), wer: w(x, 'wer'), felder: felder,
         istAkte: !!B.akte, keineAkte: !B.akte,
         andere: TEAM.filter(function (n) { return n !== w(x, 'wer'); }),
+        uebergabeAn2: TEAM.filter(function (n) { return n !== w(x, 'wer'); }).map(function (n) { return { name: n, los: function () { self.setState({ mehrOffen: false, mehrUeb: false }); self.aendere([{ id: x.id, feld: 'uebergabeAn', wert: n, basis: '' }], 'Übergabe an ' + n + ' angeboten – ' + n + ' bekommt einen Kurzstand und nimmt an'); } }; }),
+        archivieren: function () { self.setState({ mehrOffen: false }); self.aendere([{ id: x.id, feld: 'archiv', wert: true, basis: false }], '„' + w(x, 'titel') + '“ archiviert'); },
         uebergeben: function (e) { var n = e.target.value; if (!n) return; self.aendere([{ id: x.id, feld: 'uebergabeAn', wert: n, basis: '' }], 'Übergabe an ' + n + ' angeboten – ' + n + ' bekommt einen Kurzstand und nimmt an'); },
         uebergabeAn: uebergabe(x), uebergabeOffen: !!uebergabe(x), keineUebergabe: !uebergabe(x),
         uebergabeText: uebergabe(x) ? 'Übergabe an ' + uebergabe(x) + ' – wartet auf Annahme. Bis dahin bleibt ' + w(x, 'wer') + ' zuständig.' : '',
@@ -184,6 +229,11 @@ class Component extends DCLogic {
         themaText: st.themaText, themaTippen: function (e) { self.setState({ themaText: e.target.value }); },
         themaDazu: function (e) { if (e && e.preventDefault) e.preventDefault(); var t = self.state.themaText.trim(); if (!t) return; self.setState({ themaText: '' }); self.aendere([{ id: x.id, feld: 'themen', wert: themen.concat([t]), basis: x.themen || [] }], 'Thema ergänzt: ' + t); },
         vonUns: ZU.vonUns, anUns: ZU.anUns, keineVonUns: !ZU.vonUns.length, keineAnUns: !ZU.anUns.length,
+        todos: TD, keineTodos: !TD.length, todoAnzahl: TD.length,
+        istEvent: bk === 'events', istSM: bk === 'socialmedia',
+        mitwirkende: (x.mitwirkende || []).map(function (m) { return Object.assign({ org: '', info: '' }, m, { pille: 'kg-pille' + (m.status === 'angefragt' ? ' kg-pille--offen' : '') }); }),
+        mitwirkendeAnzahl: (x.mitwirkende || []).length, keineMitwirkenden: !(x.mitwirkende || []).length,
+        rollenZahl: ['Jury', 'Speaker', 'Partner', 'Pitch'].map(function (r) { var n = (x.mitwirkende || []).filter(function (m) { return m.rolle === r; }).length; return n ? n + ' ' + r : ''; }).filter(Boolean).join(' · '),
         bezuege: meine.map(function (r) {
           var anderesId = r.a === x.id ? r.z : r.a, y = finde(anderesId); if (!y) return null;
           var kiOffen = !!r.ki && !r.ok;
@@ -205,6 +255,39 @@ class Component extends DCLogic {
     var filter = [fl('alle', 'alle')].concat((B.phasen.length ? B.phasen : B.filterWerte).map(function (p) { return fl(p, p); }));
     if (B.extraFilter) filter.push(fl(B.extraFilter, B.extraFilter));
     filter.push(fl('ungeprüft · ' + P.pruefGesamt, 'ungeprüft'));
+    if (x) Object.assign(d, { teilnehmende: [], tnAnzahl: 0, tnSumme: '', keineTn: true, tnMehr: false, tnMehrText: '', importOffen: false, importAuf: function () {}, importZu: function () {}, importUebernehmen: function () {},
+      fassungTabs: [], fehlend: [], hatFehlend: false, hatFassung: false, fassungKanal: '', fassungFormat: '', fassungStatus: '', fassungGeplant: '', fassungText: '', fassungBild: '', fassungKi: false, fassungZeichen: '', fassungTippen: function () {} });
+    if (x && bk === 'events') {
+      var importiert = !!this.wert(x.id, 'importiert', false);
+      var tn = (x.teilnehmende || []).concat(importiert ? this.importZeilen() : []);
+      var an = tn.filter(function (t) { return t[2] === 'angemeldet'; }).length;
+      Object.assign(d, { teilnehmende: tn.slice(0, 8).map(function (t) { return { name: t[0], org: t[1], status: t[2], pille: 'kg-pille' + (t[2] === 'abgesagt' ? ' kg-pille--weg' : '') }; }),
+        tnAnzahl: tn.length, tnSumme: tn.length ? an + ' angemeldet · ' + (tn.length - an) + ' abgesagt' : 'noch niemand', keineTn: !tn.length,
+        tnMehr: tn.length > 8, tnMehrText: 'Alle ' + tn.length + ' anzeigen',
+        importOffen: st.imp === 'vorschau',
+        importAuf: function () { self.setState({ imp: 'vorschau' }); },
+        importZu: function () { self.setState({ imp: null }); },
+        importUebernehmen: function () { self.setState({ imp: null }); self.aendere([{ id: x.id, feld: 'importiert', wert: true, basis: false }], '46 Teilnehmende aus Anmeldungen_Gruendungsnacht.xlsx übernommen · 4 zusammengeführt'); } });
+    }
+    if (x && bk === 'socialmedia') {
+      var KAN = ['Instagram', 'LinkedIn', 'Newsletter'];
+      var fs = this.wert(x.id, 'fassungen', x.fassungen || {}), ks = KAN.filter(function (k) { return fs[k]; });
+      var akt = ks.indexOf(st.fassung) >= 0 ? st.fassung : ks[0];
+      var FORMAT = { Instagram: 'Bild oder Karussell · Bildunterschrift bis 2.200 Zeichen · Hashtags', LinkedIn: 'Beitrag bis 3.000 Zeichen · Titelbild 1200×627 · Link im Kommentar', Newsletter: 'Abschnitt mit Überschrift, Teaser und Link' };
+      var fa = fs[akt] || { status: '', geplant: '', text: '', bild: '' };
+      Object.assign(d, {
+        fassungTabs: ks.map(function (k) { return { label: k + ' · ' + fs[k].status, an: k === akt ? 'true' : 'false', los: function () { self.setState({ fassung: k }); } }; }),
+        fehlend: KAN.filter(function (k) { return !fs[k]; }).map(function (k) { return { label: '+ ' + k, los: function () {
+          var quelle = fs[akt] || { text: '' }; var neu = Object.assign({}, fs); neu[k] = { status: 'Entwurf', geplant: '–', text: quelle.text, bild: '', ki: true };
+          var kan = KAN.filter(function (z) { return neu[z]; });
+          self.setState({ fassung: k });
+          self.aendere([{ id: x.id, feld: 'fassungen', wert: neu, basis: x.fassungen || {} }, { id: x.id, feld: 'kanaele', wert: kan, basis: x.kanaele }, { id: x.id, feld: 'kanalText', wert: kan.join(' · '), basis: x.kanalText }], 'Fassung für ' + k + ' angelegt – Kollege schreibt sie aus ' + akt + ' um'); } }; }),
+        hatFehlend: ks.length < KAN.length, hatFassung: !!akt, fassungKanal: akt || '', fassungFormat: FORMAT[akt] || '',
+        fassungStatus: fa.status, fassungGeplant: fa.geplant, fassungText: fa.text, fassungBild: fa.bild || 'noch kein Bild', fassungKi: !!fa.ki,
+        fassungZeichen: (fa.text || '').length + ' von ' + (akt === 'Instagram' ? '2.200' : akt === 'LinkedIn' ? '3.000' : '600') + ' Zeichen',
+        fassungTippen: function (e) { var neu = Object.assign({}, fs); neu[akt] = Object.assign({}, fa, { text: e.target.value, ki: false }); self.aendere([{ id: x.id, feld: 'fassungen', wert: neu, basis: x.fassungen || {} }], 'Fassung ' + akt + ' gespeichert'); }
+      });
+    }
     var cmd = function (c, arg) { return function () { try { document.execCommand(c, false, arg); } catch (e) {} }; };
     var neuAnlegen = function (daten, label) {
       var id = bk.slice(0, 2) + '-n' + Date.now();
@@ -212,7 +295,10 @@ class Component extends DCLogic {
       self.setState({ zu: false, sel: id, suche: '', filter: B.startFilter === 'WS 26/27' ? 'WS 26/27' : 'alle' });
       self.aendere([{ id: '_neu', feld: 'liste', wert: [n].concat(self.wert('_neu', 'liste', [])), basis: [] }], label);
     };
-    return Object.assign(this.kcVals(), this.toastVals(), this.detailVals(), P, {
+    return Object.assign(this.kcVals(), this.toastVals(), this.detailVals(), P, { sbBaum: this.sbBaum(),
+      kannVerkleinern: bk !== 'events', istSMListe: bk === 'socialmedia',
+      kanaele: ['Alle', 'Instagram', 'LinkedIn', 'Newsletter'].map(function (k) { return { label: k, an: st.kanal === k ? 'true' : 'false', los: function () { self.setState({ kanal: k }); } }; }),
+      mehrOffen: !!st.mehrOffen, mehrAria: st.mehrOffen ? 'true' : 'false', mehrToggle: function () { self.setState({ mehrOffen: !self.state.mehrOffen, mehrUeb: false }); }, mehrUeb: !!st.mehrUeb, mehrHaupt: !st.mehrUeb, mehrUebAuf: function () { self.setState({ mehrUeb: true }); }, mehrUebZu: function () { self.setState({ mehrUeb: false }); },
       sidebarChats: this.kgChats(),
       zaehler: pruef ? P.pruefGesamt + ' ungeprüft' : zeilen.length + ' von ' + lebend.filter(function (y) { return !ung(y); }).length,
       neuLabel: B.neuLabel, neu: function () { neuAnlegen(null, B.einzahl + ' angelegt – Titel rechts ändern' + (B.akte ? '; die Organisation steht damit auch in Kontakte' : '')); },

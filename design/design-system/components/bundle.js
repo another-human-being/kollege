@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"Kollege","components":[{"name":"Navigation"},{"name":"Abschnitt"},{"name":"Eingabe"},{"name":"Aussage"},{"name":"Quelle"},{"name":"Bezug"},{"name":"Etikett"},{"name":"Aktion"},{"name":"Umschalter"},{"name":"Hinweis"},{"name":"Entwurf"},{"name":"Quittung"},{"name":"Verlauf"},{"name":"Zusage"},{"name":"Klaerung"},{"name":"Anweisung"},{"name":"Leer"},{"name":"Laden"},{"name":"Nachricht"},{"name":"Karte"},{"name":"Wissensluecke"},{"name":"ChatListe"},{"name":"Privat"},{"name":"Vermutung"}]} */
+/* @ds-bundle: {"format":4,"namespace":"Kollege","components":[{"name":"Navigation"},{"name":"Abschnitt"},{"name":"Eingabe"},{"name":"Aussage"},{"name":"Quelle"},{"name":"Bezug"},{"name":"Etikett"},{"name":"Aktion"},{"name":"Umschalter"},{"name":"Hinweis"},{"name":"Entwurf"},{"name":"Quittung"},{"name":"Verlauf"},{"name":"Zusage"},{"name":"Klaerung"},{"name":"Anweisung"},{"name":"Leer"},{"name":"Laden"},{"name":"Nachricht"},{"name":"Karte"},{"name":"Wissensluecke"},{"name":"ChatListe"},{"name":"Privat"},{"name":"Vermutung"},{"name":"Icon"},{"name":"Schritte"}]} */
 (function () {
   var R = window.React, h = R.createElement, F = R.Fragment;
   function cx() { return Array.prototype.filter.call(arguments, Boolean).join(' '); }
@@ -92,6 +92,20 @@
       anteil != null ? h('div', { className: 'kg-laden-spur' }, h('div', { className: 'kg-laden-fuellung', style: { width: (anteil * 100) + '%' } })) : null);
   }
 
+
+  // Linien-Icons (E54): 16 px, Strich 1,6, Farbe wie der Text – nie ohne Wort oder Tooltip
+  var ICONS = {"hoch": "<path d=\"M12 19V5M6 11l6-6 6 6\"/>", "lesen": "<path d=\"M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z\"/>", "suche": "<circle cx=\"11\" cy=\"11\" r=\"6\"/><path d=\"M20 20l-4.5-4.5\"/>", "gefunden": "<path d=\"M5 12l4 4 10-10\"/>", "luecke": "<circle cx=\"12\" cy=\"12\" r=\"8\"/><path d=\"M12 8v5M12 16h.01\"/>"};
+  function Icon(p) { return h('svg', { className: cx('kg-ic', p.className), viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false', dangerouslySetInnerHTML: { __html: ICONS[p.name] || '' } }); }
+
+  // Arbeitsschritte von Kollege: was gelesen, gesucht, gefunden wurde – Fundstellen als Chips
+  function Schritte(p) {
+    return h('ol', { className: 'kg-schritte', 'aria-label': 'Was Kollege getan hat', style: { listStyle: 'none', margin: 0, padding: 0 } },
+      (p.schritte || []).map(function (s, i) {
+        return h('li', { key: i, className: 'kg-schritt' }, h(Icon, { name: s.art || 'lesen' }),
+          h('span', null, s.text, s.funde && s.funde.length ? h('span', { style: { display: 'block' } }, s.funde.map(function (f, j) { return h('span', { key: j, className: 'kg-fund' }, f); })) : null));
+      }));
+  }
+
   function Eingabe(p) {
     var st = R.useState(p.wert || '');
     var ref = R.useRef(null);
@@ -108,7 +122,7 @@
         zustand === 'verarbeitet'
           ? h('span', { className: 'kg-eingabe-hilfe' }, h(Laden, { inline: true, text: p.ladetext || 'Lese mit, ordne zu' }))
           : h('span', { className: 'kg-eingabe-hilfe' }, p.hilfe || '\u23CE abschicken \u00b7 \u21E7\u23CE neue Zeile \u00b7 Frage oder Notiz'),
-        h(Aktion, { variante: 'primaer', onClick: senden, disabled: zustand !== 'bereit', 'aria-label': 'Abschicken' }, p.knopf || '\u2192')));
+        h(Aktion, { variante: 'primaer', onClick: senden, disabled: zustand !== 'bereit', 'aria-label': 'Abschicken', className: 'kg-senden' }, p.knopf || Icon({ name: 'hoch' }))));
   }
 
   function Hinweis(p) {
@@ -283,5 +297,5 @@
   }
 
   var K = window.Kollege || (window.Kollege = {});
-  Object.assign(K, { Navigation: Navigation, Abschnitt: Abschnitt, Eingabe: Eingabe, Aussage: Aussage, Quelle: Quelle, Bezug: Bezug, Etikett: Etikett, Aktion: Aktion, Umschalter: Umschalter, Hinweis: Hinweis, Entwurf: Entwurf, Quittung: Quittung, Verlauf: Verlauf, Zusage: Zusage, Klaerung: Klaerung, Anweisung: Anweisung, Leer: Leer, Laden: Laden, Nachricht: Nachricht, Karte: Karte, Wissensluecke: Wissensluecke, ChatListe: ChatListe, Privat: Privat, Vermutung: Vermutung });
+  Object.assign(K, { Navigation: Navigation, Abschnitt: Abschnitt, Eingabe: Eingabe, Aussage: Aussage, Quelle: Quelle, Bezug: Bezug, Etikett: Etikett, Aktion: Aktion, Umschalter: Umschalter, Hinweis: Hinweis, Entwurf: Entwurf, Quittung: Quittung, Verlauf: Verlauf, Zusage: Zusage, Klaerung: Klaerung, Anweisung: Anweisung, Leer: Leer, Laden: Laden, Nachricht: Nachricht, Karte: Karte, Wissensluecke: Wissensluecke, ChatListe: ChatListe, Privat: Privat, Vermutung: Vermutung, Icon: Icon, Schritte: Schritte });
 })();
