@@ -9,7 +9,7 @@ async function anmelden(page: Page, name: string) {
 
 test('Ordner wählen, Datei öffnen: Zuordnung, Inhalt, Herunterladen', async ({ page }) => {
   await anmelden(page, 'Julia');
-  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'dateien', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Dateien', exact: true }).click();
   await page.waitForURL('**/dateien');
   await page.getByRole('navigation', { name: 'Ordner' }).getByRole('link', { name: /Gründungsnacht 2026/ }).click();
   await expect(page.getByRole('heading', { name: 'Gründungsnacht 2026' })).toBeVisible();

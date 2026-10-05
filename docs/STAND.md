@@ -13,7 +13,7 @@
 - [x] 7 Laufwerk (Abnahme gegen einen lokalen Ordner; am eingehängten Uni-Laufwerk offen)
 - [x] 8 Hinweise & Rat (Rat mit Ersatzmodell geprüft; mit Mistral am echten Datenbestand offen)
 
-**Aktuell:** Alle acht Stufen gebaut (03.10.2026). Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7), dazu der Rat (Stufe 8) mit Mistral. Danach: Betrieb (VM, Anmeldung per Magic-Link) und die offenen Fragen unten.
+**Aktuell:** Alle acht Stufen gebaut (03.10.2026), Design 05.10. übernommen. Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7), dazu der Rat (Stufe 8) mit Mistral. Danach: Betrieb (VM, Anmeldung per Magic-Link) und die offenen Fragen unten.
 
 ## Stufe 1 – erledigt
 
@@ -78,6 +78,26 @@
     2. `npm run eval:zuordnung`.
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
+
+## Design 05.10. – übernommen
+
+Grundlage: Merge von `claude/design-update` (`design/ENTSCHEIDUNGEN.md` E51–E62). Gebaut:
+
+- **Flächen (Variante A):** abgesenkter Grund, weiße Inhaltsfläche, Pillen-Knöpfe, Satzschreibung. Alles über Tokens.
+- **Seitenleiste** (`components/seitenleiste.tsx`, ersetzt `seitennav.tsx`): 240 px, einklappbar auf 58 px; Heute, Chat, Werkzeuge, Bereiche als Baum mit laufenden Einträgen (höchstens 5, dann „Alle n →“) und der Zahl offener Aufgaben; Konto unten mit Menü.
+- **Feld „Neuer Chat oder Suche“** (E55, ⌘K): Tippen sucht mit den Rechten der Person (`lib/views/suche.ts`, RLS) in Einträgen, Kontakten, Mails, Dateien, Terminen, Aufgaben; Enter öffnet einen neuen Chat mit der Frage.
+- **Heute** (E56/E57, `lib/views/heute.ts`): Kopfsatz, „Diese Woche“ mit Terminen und Fristen, „Offen“ (Entscheiden · Erledigen), „Ausstehend“ mit „erwartet bis“ und Wiedervorlage. Alles aus den vorhandenen Daten (`todayPage`, Hinweise), kein neues Modell.
+- **Chat:** Werkzeugaufrufe als „Schritte“; die Chatliste steht auf der Chat-Seite (E62), angepinnt und zuletzt.
+- **Bereiche:** „To-Dos“ als eine Liste statt „Zusagen von uns / an uns“ (E59; `ours|theirs` bleibt im Modell). ⋯-Menü mit „Übergeben an …“ (E58). Vollbild für Detailansichten (E52), auch in Mail, Dateien, Kontakte, Aufgaben.
+- **Kalender:** Termin-Ansicht und Formular in Gruppen (Wann, Wo, Wer, Gehört zu, Weitere Angaben; E53), Zeiten in 5-Minuten-Schritten.
+- **Prüfung:** `tsc` sauber, Vitest 222 Tests (neu `tests/design0510.test.ts`: Suche hält RLS, Baum, Heute widerspricht Aufgaben nicht), Playwright 14, Simulation 8 Läufe mit 188 Prüfschritten ohne Befund.
+
+Entscheidungen beim Bau:
+
+- Entscheidung 43: Das Design bestimmt das Aussehen. Wo es neue Daten oder Abläufe verlangt, gilt die Bauvorlage, und die Frage steht unten.
+- Entscheidung 44: Die Suche gibt dem Chat keine Treffer als Kontext mit. Der Chat sucht selbst mit seinen Werkzeugen, damit Zahlen und Belege aus Werkzeugen kommen.
+- Entscheidung 45: „Jetzt erinnern“ bei Ausstehendem öffnet einen Mail-Entwurf aus einer Vorlage (`erinnerungVorlage`). Versenden bleibt ein Klick der Person; das Modell sendet nie.
+- Entscheidung 46: Mails, die auf Antwort warten, zeigen ihr Datum neutral. Rot ist nur, was eine Frist überschritten hat.
 
 ## Simulation (03.10.2026)
 
@@ -404,12 +424,14 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 
 ## Offene Fragen an Andreas
 
-- Design-Stand 05.10. (`design/ENTSCHEIDUNGEN.md` E51–E62, Details unter „Hinweise für den Bau“) geht weiter über die Bauvorlage hinaus. Übernehmen?
-  - Seitenleiste: ein Feld für „Neuer Chat“ und Suche (Suche beim Tippen, Enter = neuer Chat); Bereiche als Baum mit laufenden Einträgen und Zahl offener Aufgaben (E55)
-  - Heute: „Diese Woche · Offen · Ausstehend“; „Offen“ umfasst neben Aufgaben auch Freigeben, Klären, Zuordnen, Antworten, Nachfassen, Prüfen – braucht ein gemeinsames Modell „wartet auf mich“ (E56)
-  - Wiedervorlage für Ausstehendes: Werktag nach der Frist bzw. 5 Werktage Stille → „Nachfassen“ mit Entwurf (E57)
-  - „To-Dos“ statt „Zusagen von uns / an uns“ in den Bereichen (E59; Bauvorlage: `ours|theirs` bleibt im Modell, nur die Darstellung ändert sich)
-  - Events: Mitwirkende mit Rolle und Teilnehmende mit Excel-Import (E60); Social Media: Beitrag mit Fassungen je Kanal (E61)
+- **Design 05.10.** (E51–E62). Das Aussehen ist übernommen; was darüber hinaus neue Funktion wäre, ist nicht gebaut:
+  - Events: Mitwirkende mit Rolle und Teilnehmende mit Excel-Import (E60). Braucht neue Tabellen und einen Import.
+  - Social Media: ein Beitrag mit Fassungen je Kanal (E61); der Baum würde dann Beiträge statt Kanäle zeigen.
+  - „Nachfassen“ mit einem Entwurf des Modells (E57). Jetzt schreibt „Jetzt erinnern“ eine feste Vorlage ohne Modell. Reicht das?
+  - Wiedervorlage: Sollen Feiertage (Bayern) zählen? Jetzt nur Wochenenden.
+  - Suche: „Zuletzt geöffnet“ braucht ein Protokoll, wer was geöffnet hat. Gewollt? Tippfehler-Toleranz (Trigramme) dazu?
+  - „Nacheinander durchgehen“ für Entscheiden, „Archivieren“ im ⋯-Menü, Kontomenü-Punkte Profil und Benachrichtigungen (die Seiten gibt es nicht).
+  - Kalender: Erinnerung, Wiederholung und Meeting-Link im Formular (E53); Feld „Was kam raus?“ in der Termin-Ansicht.
 - **Hinweise** (Stufe 8):
   - Sollen vergangene Events von selbst als erledigt gelten (Datum vorbei), damit sie als frühere Fälle zählen und „Wie lief’s?“ fragen? Jetzt schließt sie ein Mensch.
   - Sollen Hinweise auch außerhalb der App ankommen (morgendliche Mail, Handy)? Nicht in der Bauvorlage.

@@ -52,3 +52,29 @@ describe('Berlin time for the calendar', async () => {
     expect(berlinWeekStart(new Date('2026-10-05T08:00:00Z'))).toBe('2026-10-05');
   });
 });
+
+describe('werktagPlus (Wiedervorlage, E57)', () => {
+  it('skips the weekend', async () => {
+    const { werktagPlus } = await import('@/lib/time');
+    expect(werktagPlus('2026-10-02', 1)).toBe('2026-10-05'); // Friday → Monday
+    expect(werktagPlus('2026-09-30', 5)).toBe('2026-10-07'); // Wednesday + 5 working days
+    expect(werktagPlus('2026-10-03', 1)).toBe('2026-10-05'); // Saturday → Monday
+  });
+});
+
+describe('Heute: Datum rechts (E56)', () => {
+  it('today, weekday, overdue, another year', async () => {
+    const { datumLabel } = await import('@/lib/views/heute');
+    const h = '2026-10-05';
+    expect(datumLabel('2026-10-05T10:00:00Z', h)).toEqual({ f: 'heute', fArt: 'h' });
+    expect(datumLabel('2026-10-08T10:00:00Z', h)).toEqual({ f: 'Do' });
+    expect(datumLabel('2026-09-30T10:00:00Z', h)).toEqual({ f: 'seit Mi', fArt: 'ue' });
+    expect(datumLabel('2025-11-28T10:00:00Z', h)).toEqual({ f: 'seit 28.11.25', fArt: 'ue' });
+    expect(datumLabel(null, h)).toEqual({ f: '–' });
+  });
+  it('Wiedervorlage: working day after the deadline, else 5 working days of silence (E57)', async () => {
+    const { wiedervorlage } = await import('@/lib/views/heute');
+    expect(wiedervorlage('2026-10-02T15:00:00Z', '2026-09-20T10:00:00Z')).toBe('2026-10-05');
+    expect(wiedervorlage(null, '2026-09-30T10:00:00Z')).toBe('2026-10-07');
+  });
+});

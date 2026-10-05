@@ -11,7 +11,7 @@ import { zuordnungsziele } from '@/lib/views/mail';
 
 export const dynamic = 'force-dynamic';
 
-type Search = { o?: string; f?: string; q?: string; d?: string };
+type Search = { o?: string; f?: string; q?: string; d?: string; voll?: string };
 const FILTER: [DateiFilter, string][] = [['zugeordnet', 'Zugeordnet'], ['ohne_zuordnung', 'Ohne Zuordnung']];
 
 function groesse(n: number | null): string | null {
@@ -39,7 +39,7 @@ export default async function Dateien({ searchParams }: { searchParams: Promise<
   const ordnerName = sp.o === 'mail' ? 'Aus Mails' : sp.o ? sp.o.split('/').at(-1)! : 'Alle Dateien';
 
   return (
-    <div className={d ? 'ld' : 'ld ld--zu'}>
+    <div className={d ? (sp.voll ? 'ld ld--voll' : 'ld') : 'ld ld--zu'}>
       <nav className="baum-spalte" aria-label="Ordner">
         <div className="mono" style={{ color: 'var(--ink-muted)' }}>Laufwerk</div>
         <div className="baum">
@@ -87,7 +87,7 @@ export default async function Dateien({ searchParams }: { searchParams: Promise<
 
       {d ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ d: undefined })} aria-label="Schließen">×</a></div>
+          <div className="ld-zu"><a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a><a className="x-knopf" href={url({ d: undefined, voll: undefined })} aria-label="Schließen">×</a></div>
           <div style={{ display: 'grid', gap: 8 }}>
             <h2 style={{ margin: 0, overflowWrap: 'anywhere' }}>{d.name}</h2>
             {d.pfad ? <div className="pfad">{d.netzpfad ?? d.pfad}</div> : null}

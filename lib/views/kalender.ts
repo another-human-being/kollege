@@ -24,6 +24,8 @@ export interface KalenderTermin {
   konflikt: string | null;
   fehler: string | null;
   bezug: string | null;
+  /** where "Gehört zu" leads (E53: "Öffnen →") */
+  bezugHref: string | null;
 }
 
 export async function kalenderVerbunden(userId: string): Promise<boolean> {
@@ -36,7 +38,7 @@ export async function kalenderVerbunden(userId: string): Promise<boolean> {
 export async function termine(userId: string, von: Date, bis: Date): Promise<KalenderTermin[]> {
   return withUser(userId, async (tx) => {
     const r = await tx.execute<{
-      id: string; title: string | null; body_text: string | null; meta: Record<string, unknown>; eigen: boolean; besitzer: string[]; bezug: string | null;
+      id: string; title: string | null; body_text: string | null; meta: Record<string, unknown>; eigen: boolean; besitzer: string[]; bezug: string | null; bezug_href: string | null;
     }>(sql`
       SELECT e.id, e.title, e.body_text, e.meta,
              EXISTS (SELECT 1 FROM event_copies ec JOIN connections c ON c.id = ec.connection_id
@@ -44,7 +46,9 @@ export async function termine(userId: string, von: Date, bis: Date): Promise<Kal
              ARRAY(SELECT u.name FROM users u WHERE u.id = ANY (e.visible_to) AND u.id <> ${userId} ORDER BY u.name) AS besitzer,
              (SELECT coalesce(m.title, o.name) FROM links l LEFT JOIN matters m ON l.target_type = 'matter' AND m.id = l.target_id
                 LEFT JOIN orgs o ON l.target_type = 'org' AND o.id = l.target_id
-              WHERE l.entry_id = e.id AND l.target_type IN ('matter', 'org') ORDER BY (l.target_type = 'matter') DESC LIMIT 1) AS bezug
+              WHERE l.entry_id = e.id AND l.target_type IN ('matter', 'org') ORDER BY (l.target_type = 'matter') DESC LIMIT 1) AS bezug,
+             (SELECT CASE l.target_type WHEN 'matter' THEN '/m/' ELSE '/o/' END || l.target_id FROM links l
+              WHERE l.entry_id = e.id AND l.target_type IN ('matter', 'org') ORDER BY (l.target_type = 'matter') DESC LIMIT 1) AS bezug_href
       FROM entries e
       WHERE e.kind = 'event' AND coalesce(e.meta->>'status', '') <> 'CANCELLED'
         AND (e.meta->>'recurrence' IS NOT NULL
@@ -58,7 +62,7 @@ export async function termine(userId: string, von: Date, bis: Date): Promise<Kal
         out.push({
           id: e.id, key: `${e.id}:${v.start}`, title: e.title ?? '(ohne Titel)', start: v.start, end: v.end, allDay: m.all_day === true,
           location: m.location ?? null, notes: e.body_text, versand: m.versand ?? null, serie: !!m.recurrence, eigen: e.eigen,
-          besitzer: e.eigen ? [] : e.besitzer, teilnahme: m.teilnahme ?? [], konflikt: m.konflikt ?? null, fehler: m.send?.error ?? null, bezug: e.bezug,
+          besitzer: e.eigen ? [] : e.besitzer, teilnahme: m.teilnahme ?? [], konflikt: m.konflikt ?? null, fehler: m.send?.error ?? null, bezug: e.bezug, bezugHref: e.bezug_href,
         });
       }
     }

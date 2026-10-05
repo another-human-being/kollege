@@ -11,9 +11,10 @@ async function anmelden(page: Page, name: string) {
 
 const karte = (page: Page, text: string | RegExp) => page.getByRole('group', { name: /Erledigt|Anweisung gespeichert/ }).filter({ hasText: text });
 
-test('Eingabe auf Heute: Notiz, Zusage, Aufgabe – Karten mit Rückgängig', async ({ page }) => {
+test('Eingabe im Feld der Seitenleiste: Notiz, Zusage, Aufgabe – Karten mit Rückgängig', async ({ page }) => {
   await anmelden(page, 'Andreas');
-  const eingabe = page.getByLabel('Was ist passiert oder soll passieren?');
+  // E55: one field "Neuer Chat oder Suche" – Enter asks Kollege in a new chat
+  const eingabe = page.getByLabel('Neuer Chat oder Suche');
   await eingabe.fill('Gerade Beratung mit Solaro, Pitchdeck bis Freitag, wir vermitteln Frau Weber');
   await eingabe.press('Enter');
   await page.waitForURL(/\/chat\/[0-9a-f-]{36}$/);
@@ -24,8 +25,11 @@ test('Eingabe auf Heute: Notiz, Zusage, Aufgabe – Karten mit Rückgängig', as
   await expect(aufgabe).toBeVisible();
   await expect(page.getByText('Notiert.')).toBeVisible();
 
-  // the chat is in the history, titled by the first sentence
-  await expect(page.getByRole('link', { name: /Gerade Beratung mit Solaro/ })).toBeVisible();
+  // the chat is in the list on the chat page, titled by the first sentence (E62)
+  const chatUrl = page.url();
+  await page.goto('/chat');
+  await expect(page.getByRole('region', { name: 'Deine Chats' }).getByRole('link', { name: /Gerade Beratung mit Solaro/ })).toBeVisible();
+  await page.goto(chatUrl);
 
   await aufgabe.getByRole('button', { name: /Rückgängig/ }).click();
   await expect(aufgabe).toContainText('Rückgängig gemacht');
@@ -35,7 +39,8 @@ test('Eingabe auf Heute: Notiz, Zusage, Aufgabe – Karten mit Rückgängig', as
 
   // the record: the commitment is there, the undone task is not
   await page.goto('/b/founding_teams?id=' + (await solaroId(page)));
-  await expect(page.getByText('Pitchdeck', { exact: true })).toBeVisible();
+  // E59: one list "To-Dos", each row says who does it
+  await expect(page.getByRole('region', { name: /To-Dos/ }).getByText(/^Pitchdeck( ·|$)/)).toBeVisible();
   await expect(page.getByText('Frau Weber vermitteln')).toHaveCount(0);
 });
 
@@ -70,5 +75,7 @@ test('Anweisung per Chat', async ({ page }) => {
   await eingabe.press('Enter');
   await expect(karte(page, 'Social-Media-Hinweise für mich nur montags.')).toContainText('Persönlich');
   await page.goto('/einstellungen?reiter=Anweisungen');
-  await expect(page.getByText(/Social-Media-Hinweise für mich nur montags/)).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Anweisung', exact: true })).toHaveValue(/Social-Media-Hinweise für mich nur montags/);
+  // how the sentence was understood (decision 42)
+  await expect(page.getByText('Wirkt auf alle Hinweise in Social Media: nur Mo')).toBeVisible();
 });

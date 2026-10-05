@@ -5,10 +5,12 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { terminSpeichern, terminVersand } from '@/app/actions';
+import { Icon } from '@/components/icon';
 import { Aktion } from '@/components/kg';
 import { useAktion } from '@/components/rueckgaengig';
 
-const zeiten = Array.from({ length: 48 }, (_, i) => `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
+// E53: times in 5-minute steps
+const zeiten = Array.from({ length: 288 }, (_, i) => `${String(Math.floor(i / 12)).padStart(2, '0')}:${String((i % 12) * 5).padStart(2, '0')}`);
 
 export interface FormDaten {
   id?: string;
@@ -44,46 +46,64 @@ export function TerminFormular({ d, zurueck }: { d: FormDaten; zurueck: string }
   return (
     <section className="schreibfeld" aria-label={d.id ? 'Termin bearbeiten' : 'Neuer Termin'}>
       <h2 style={{ margin: 0 }}>{d.id ? 'Termin bearbeiten' : 'Neuer Termin'}</h2>
+      {/* E53: clusters – Titel · Wann · Wo · Wer · Weitere Angaben (folded) */}
       <div className="felder">
         <label htmlFor="t-titel">Titel</label>
         <input id="t-titel" className="feld" value={v.title} onChange={(e) => set({ title: e.target.value })} autoFocus />
-        <label htmlFor="t-ganz">Ganztägig</label>
-        <input id="t-ganz" type="checkbox" checked={v.allDay} onChange={(e) => set({ allDay: e.target.checked })} style={{ justifySelf: 'start' }} />
-        <label htmlFor="t-beginn">Beginn</label>
-        <div className="feldzeile">
-          <input id="t-beginn" type="date" className="feld" value={v.datum} onChange={(e) => set({ datum: e.target.value, bisDatum: e.target.value > v.bisDatum ? e.target.value : v.bisDatum })} />
-          {v.allDay ? null : (
-            <select aria-label="Beginn Uhrzeit" className="feld" value={v.von} onChange={(e) => set({ von: e.target.value })}>
-              {zeiten.map((z) => <option key={z}>{z}</option>)}
-            </select>
-          )}
-        </div>
-        <label htmlFor="t-ende">Ende</label>
-        <div>
+      </div>
+      <section className="cluster" aria-label="Wann">
+        <h3 className="cluster-kopf"><Icon name="kalender" />Wann</h3>
+        <div className="felder">
+          <label htmlFor="t-ganz">Ganztägig</label>
+          <input id="t-ganz" type="checkbox" checked={v.allDay} onChange={(e) => set({ allDay: e.target.checked })} style={{ justifySelf: 'start' }} />
+          <label htmlFor="t-beginn">Beginn</label>
           <div className="feldzeile">
-            <input id="t-ende" type="date" className="feld" value={v.bisDatum} onChange={(e) => set({ bisDatum: e.target.value })} aria-invalid={endeVorBeginn} />
+            <input id="t-beginn" type="date" className="feld" value={v.datum} onChange={(e) => set({ datum: e.target.value, bisDatum: e.target.value > v.bisDatum ? e.target.value : v.bisDatum })} />
             {v.allDay ? null : (
-              <select aria-label="Ende Uhrzeit" className="feld" value={v.bis} onChange={(e) => set({ bis: e.target.value })} aria-invalid={endeVorBeginn}>
+              <select aria-label="Beginn Uhrzeit" className="feld" value={v.von} onChange={(e) => set({ von: e.target.value })}>
                 {zeiten.map((z) => <option key={z}>{z}</option>)}
               </select>
             )}
           </div>
-          {endeVorBeginn ? <div role="alert" className="mono" style={{ color: 'var(--attention)' }}>Das Ende liegt vor dem Beginn.</div> : null}
+          <label htmlFor="t-ende">Ende</label>
+          <div>
+            <div className="feldzeile">
+              <input id="t-ende" type="date" className="feld" value={v.bisDatum} onChange={(e) => set({ bisDatum: e.target.value })} aria-invalid={endeVorBeginn} />
+              {v.allDay ? null : (
+                <select aria-label="Ende Uhrzeit" className="feld" value={v.bis} onChange={(e) => set({ bis: e.target.value })} aria-invalid={endeVorBeginn}>
+                  {zeiten.map((z) => <option key={z}>{z}</option>)}
+                </select>
+              )}
+            </div>
+            {endeVorBeginn ? <div role="alert" className="mono" style={{ color: 'var(--attention)' }}>Das Ende liegt vor dem Beginn.</div> : null}
+          </div>
         </div>
-        <label htmlFor="t-ort">Ort</label>
-        <input id="t-ort" className="feld" value={v.location} onChange={(e) => set({ location: e.target.value })} />
-        <label htmlFor="t-mit">Mit</label>
-        <input id="t-mit" className="feld" value={v.mit} placeholder="Adressen, durch Komma getrennt" onChange={(e) => set({ mit: e.target.value })} />
-        <label htmlFor="t-notiz">Notiz</label>
-        <textarea id="t-notiz" className="feld" rows={4} value={v.notes} onChange={(e) => set({ notes: e.target.value })} />
-      </div>
+      </section>
+      <section className="cluster" aria-label="Wo">
+        <h3 className="cluster-kopf"><Icon name="heute" />Wo</h3>
+        <div className="felder">
+          <label htmlFor="t-ort">Ort</label>
+          <input id="t-ort" className="feld" value={v.location} placeholder="Raum oder Meeting-Link" onChange={(e) => set({ location: e.target.value })} />
+        </div>
+      </section>
+      <section className="cluster" aria-label="Wer">
+        <h3 className="cluster-kopf"><Icon name="kontakte" />Wer</h3>
+        <div className="felder">
+          <label htmlFor="t-mit">Mit</label>
+          <input id="t-mit" className="feld" value={v.mit} placeholder="Adressen, durch Komma getrennt" onChange={(e) => set({ mit: e.target.value })} />
+        </div>
+      </section>
+      <details className="cluster" open={!!v.notes}>
+        <summary className="cluster-kopf">Weitere Angaben</summary>
+        <div className="felder">
+          <label htmlFor="t-notiz">Notiz</label>
+          <textarea id="t-notiz" className="feld" rows={4} value={v.notes} onChange={(e) => set({ notes: e.target.value })} />
+        </div>
+      </details>
       {fehler ? <div role="alert" className="mono" style={{ color: 'var(--attention)' }}>{fehler}</div> : null}
       <div className="kg-aktionen">
         <Aktion variante="primaer" onClick={() => void speichern()} disabled={endeVorBeginn}>{d.id ? 'Speichern' : 'Anlegen'}</Aktion>
         <a className="kg-aktion kg-aktion--text" href={zurueck}>Abbrechen</a>
-      </div>
-      <div className="mono" style={{ color: 'var(--ink-muted)' }}>
-        Mit Teilnehmenden bleibt der Termin ein Entwurf, bis du „Einladung senden“ drückst. Ohne steht er gleich in deinem Kalender.
       </div>
     </section>
   );

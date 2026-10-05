@@ -27,7 +27,7 @@ export async function settings(userId: string) {
         area: (i.area as string) ?? null,
         // personal > area > team (§9.1)
         scope: i.personal ? 'persönlich' : i.area_id ? 'Bereich' : 'Team',
-        hinweise: regelText(i.hinweise),
+        hinweise: regelText(i.hinweise, new Map(areas.rows.map((a) => [a.key as string, a.name_plural as string]))),
       })),
       sources: sources.rows.map((s) => ({
         id: s.id as string,
@@ -50,11 +50,11 @@ const ART: Record<string, string> = {
 const TAG = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 /** how the rule behind an instruction about hints was understood (decision 42) – shown, so it can be checked */
-function regelText(v: unknown): string | null {
+function regelText(v: unknown, bereiche: Map<string, string>): string | null {
   const r = HinweisRegel.safeParse(v);
   if (!r.success) return null;
   const was = r.data.arten ? r.data.arten.map((a) => ART[a] ?? a).join(', ') : 'alle Hinweise';
-  const wo = r.data.bereiche ? ` in ${r.data.bereiche.join(', ')}` : '';
+  const wo = r.data.bereiche ? ` in ${r.data.bereiche.map((b) => bereiche.get(b) ?? b).join(', ')}` : '';
   const wann = r.data.aus ? 'nie' : `nur ${r.data.wochentage!.map((d) => TAG[d - 1]).join(', ')}`;
   return `Wirkt auf ${was}${wo}: ${wann}`;
 }

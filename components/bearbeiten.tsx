@@ -68,17 +68,6 @@ export function Tu({ type, payload, text, variante = 'sekundaer', children }: { 
   );
 }
 
-/** Übergeben an … (E45): select a person, the handover waits for acceptance */
-export function Uebergeben({ kind, id, andere }: { kind: 'matter' | 'org'; id: string; andere: { id: string; name: string }[] }) {
-  const { run } = useAktion();
-  return (
-    <select className="fe" value="" aria-label="Übergeben an" style={{ fontSize: 13 }}
-      onChange={(e) => e.target.value && run(`${kind}.handover`, { id, to_user_id: e.target.value }, 'Übergabe angefragt')}>
-      <option value="">Übergeben an …</option>
-      {andere.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-    </select>
-  );
-}
 
 /** "Wie lief's?" when marking done (E15) – one line, can be skipped */
 export function Erledigen({ id, offen, titel }: { id: string; offen: boolean; titel: string }) {
@@ -261,5 +250,31 @@ export function Pruefen({ typ, raster, zeilen }: { typ: 'matter' | 'org' | 'pers
         </div>
       ))}
     </>
+  );
+}
+
+/** E58: rare actions behind "⋯" – "Übergeben an …" opens the team as a submenu */
+export function MehrMenue({ kind, id, andere }: { kind: 'matter' | 'org'; id: string; andere: { id: string; name: string }[] }) {
+  const { run } = useAktion();
+  const [unter, setUnter] = useState(false);
+  return (
+    <details className="ld-mehr" onToggle={(e) => { if (!(e.target as HTMLDetailsElement).open) setUnter(false); }}>
+      <summary aria-label="Mehr" title="Mehr">⋯</summary>
+      <div className="ld-menue" role="menu">
+        {unter ? (
+          <>
+            <button type="button" role="menuitem" className="ld-menue-k" onClick={() => setUnter(false)}>‹ Übergeben an</button>
+            {andere.map((u) => (
+              <button key={u.id} type="button" role="menuitem" onClick={async (e) => {
+                (e.currentTarget.closest('details') as HTMLDetailsElement | null)?.removeAttribute('open');
+                await run(`${kind}.handover`, { id, to_user_id: u.id }, 'Übergabe angefragt');
+              }}>{u.name}</button>
+            ))}
+          </>
+        ) : (
+          <button type="button" role="menuitem" onClick={() => setUnter(true)}>Übergeben an … ›</button>
+        )}
+      </div>
+    </details>
   );
 }

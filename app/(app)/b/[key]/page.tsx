@@ -2,6 +2,7 @@
 // Founding teams list organisations; their detail is the "Beratungsakte" (§4.3, E30).
 import { notFound } from 'next/navigation';
 import { currentUserId } from '@/auth';
+import { MehrMenue } from '@/components/bearbeiten';
 import { AusVorjahr, NeuAnlegen, Pruefen, type Zeile as ListZeile } from '@/components/bearbeiten';
 import { Leer } from '@/components/kg';
 import { tag } from '@/lib/format';
@@ -12,7 +13,7 @@ import { MatterAnsicht, OrgAnsicht } from './detail';
 
 export const dynamic = 'force-dynamic';
 
-type Search = { id?: string; thema?: string; phase?: string; zustaendig?: string; status?: string; ungeprueft?: string; haengt?: string; q?: string; zu?: string };
+type Search = { id?: string; thema?: string; phase?: string; zustaendig?: string; status?: string; ungeprueft?: string; haengt?: string; q?: string; zu?: string; voll?: string };
 
 interface Spalte {
   label: string;
@@ -103,7 +104,7 @@ export default async function Bereich({ params, searchParams }: { params: Promis
     : { type: 'matter.create', base: { area_key: key, owner_user_id: userId }, key: 'title' };
 
   return (
-    <div className={detail ? 'ld' : 'ld ld--zu'}>
+    <div className={detail ? (sp.voll ? 'ld ld--voll' : 'ld') : 'ld ld--zu'}>
       <div className="ld-liste ld-liste--breit">
         <div className="ld-kopf">
           <div className="ld-kopfzeile">
@@ -158,7 +159,14 @@ export default async function Bereich({ params, searchParams }: { params: Promis
 
       {detail ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ zu: '1' })} aria-label="Detailansicht schließen" title="Schließen">×</a></div>
+          <div className="ld-zu">
+            {/* E58: rare actions behind "⋯"; E52: the detail as full screen over its list */}
+            {detail.owner?.id === userId && !detail.handoverTo
+              ? <MehrMenue kind={orgBased && !thema ? 'org' : 'matter'} id={detail.id} andere={nav.team.filter((u) => u.id !== userId)} />
+              : null}
+            <a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a>
+            <a className="x-knopf" href={url({ zu: '1', voll: undefined })} aria-label="Detailansicht schließen" title="Schließen">×</a>
+          </div>
           {thema ? <a className="kg-bezug" href={url({ thema: undefined })} style={{ fontSize: 14 }}>← zur Beratungsakte</a> : null}
           {orgBased && !thema
             ? <OrgAnsicht d={detail as NonNullable<Awaited<ReturnType<typeof orgDetail>>>} area={area} team={nav.team} me={userId} now={now} />

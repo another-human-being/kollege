@@ -11,7 +11,7 @@ import { StatusWahl, Verantwortlich } from './client';
 
 export const dynamic = 'force-dynamic';
 
-type Search = { ansicht?: string; richtung?: string; wer?: string; status?: string; id?: string };
+type Search = { ansicht?: string; richtung?: string; wer?: string; status?: string; id?: string; voll?: string };
 
 const STATUS = { open: 'offen', in_progress: 'in Arbeit', done: 'erledigt' } as const;
 
@@ -63,7 +63,7 @@ export default async function Aufgaben({ searchParams }: { searchParams: Promise
   ];
 
   return (
-    <div className={sel ? 'ld' : 'ld ld--zu'}>
+    <div className={sel ? (sp.voll ? 'ld ld--voll' : 'ld') : 'ld ld--zu'}>
       <div className="ld-liste">
         <div className="ld-kopf">
           <div className="ld-kopfzeile">
@@ -108,7 +108,7 @@ export default async function Aufgaben({ searchParams }: { searchParams: Promise
       </div>
       {sel ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ id: undefined })} aria-label="Detailansicht schließen">×</a></div>
+          <div className="ld-zu"><a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a><a className="x-knopf" href={url({ id: undefined, voll: undefined })} aria-label="Detailansicht schließen">×</a></div>
           <div className="label" style={{ color: 'var(--ink-muted)' }}>{sel.direction === 'ours' ? 'Aufgabe · von uns' : 'Zusage · an uns'} · {STATUS[sel.status]}</div>
           <Feld id="t-titel" gross wert={sel.title} label="Titel" change={{ type: 'task.update', base: { id: sel.id }, key: 'title' }} />
           <div className="felder">

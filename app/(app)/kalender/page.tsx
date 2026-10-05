@@ -1,8 +1,9 @@
 // Kalender (§11.3, E41, E48): week with 7 columns (7–21 h or 0–24 h), all-day events in a bar,
 // overlaps side by side, unsent ones dashed; month view; detail and form on the right.
 import { currentUserId } from '@/auth';
+import { Icon } from '@/components/icon';
 import { TerminAktionen, TerminFormular, type FormDaten } from '@/components/kalender';
-import { Abschnitt, Etikett, Leer, Umschalter } from '@/components/kg';
+import { Etikett, Leer, Umschalter } from '@/components/kg';
 import { uhrzeit } from '@/lib/format';
 import { addDays, berlinDate, berlinMinutes, berlinWeekStart } from '@/lib/time';
 import { kalenderVerbunden, termine, type KalenderTermin } from '@/lib/views/kalender';
@@ -178,24 +179,43 @@ export default async function Kalender({ searchParams }: { searchParams: Promise
       ) : offen ? (
         <div className="ld-detail">
           <div className="ld-zu"><a className="x-knopf" href={url({ t: undefined, s: undefined })} aria-label="Schließen">×</a></div>
-          <h2 style={{ margin: 0 }}>{offen.title}</h2>
-          {zustand(offen) ? <Etikett>{zustand(offen)}</Etikett> : null}
+          <div style={{ display: 'grid', gap: 8 }}>
+            <h2 style={{ margin: 0, overflowWrap: 'anywhere' }}>{offen.title}</h2>
+            {zustand(offen) ? <div><Etikett>{zustand(offen)}</Etikett></div> : null}
+          </div>
           {offen.konflikt ? <div role="alert" className="mono" style={{ color: 'var(--attention)' }}>{offen.konflikt}</div> : null}
           {offen.fehler ? <div role="alert" className="mono" style={{ color: 'var(--attention)' }}>{offen.fehler}</div> : null}
-          <div className="felder">
-            <span className="fl">Wann</span>
-            <span>{offen.allDay ? tagLabel(berlinDate(new Date(offen.start))) : `${tagLabel(berlinDate(new Date(offen.start)))} ${uhrzeit(offen.start)}–${uhrzeit(offen.end)}`}{offen.serie ? ' · wiederholt sich' : ''}</span>
-            {offen.location ? <><span className="fl">Ort</span><span>{offen.location}</span></> : null}
-            {offen.bezug ? <><span className="fl">Gehört zu</span><span>{offen.bezug}</span></> : null}
-            {!offen.eigen && offen.besitzer.length ? <><span className="fl">Gehört</span><span>{offen.besitzer.join(', ')} – nur lesbar</span></> : null}
-          </div>
-          {offen.notes ? <div style={{ whiteSpace: 'pre-wrap' }}>{offen.notes}</div> : null}
+          {/* E53: clusters – Wann · Wo · Wer · Gehört zu · Weitere Angaben (folded) */}
+          <section className="cluster" aria-label="Wann">
+            <h3 className="cluster-kopf"><Icon name="kalender" />Wann</h3>
+            <span>{offen.allDay ? `${tagLabel(berlinDate(new Date(offen.start)))} · ganztägig` : `${tagLabel(berlinDate(new Date(offen.start)))} ${uhrzeit(offen.start)}–${uhrzeit(offen.end)}`}{offen.serie ? ' · wiederholt sich' : ''}</span>
+          </section>
+          {offen.location ? (
+            <section className="cluster" aria-label="Wo">
+              <h3 className="cluster-kopf"><Icon name="heute" />Wo</h3>
+              <span>{offen.location}</span>
+            </section>
+          ) : null}
           {offen.teilnahme.length ? (
-            <Abschnitt id="k-teilnahme" titel="Teilnehmende" anzahl={offen.teilnahme.length}>
+            <section className="cluster" aria-label="Wer">
+              <h3 className="cluster-kopf"><Icon name="kontakte" />Wer <span className="mono">{offen.teilnahme.length}</span></h3>
               {offen.teilnahme.map((p) => (
                 <div key={p.email} className="kal-person"><span>{p.name ?? p.email}</span><span className="mono">{TEILNAHME[p.status] ?? p.status}</span></div>
               ))}
-            </Abschnitt>
+            </section>
+          ) : null}
+          {offen.bezug ? (
+            <section className="cluster" aria-label="Gehört zu">
+              <h3 className="cluster-kopf"><Icon name="dateien" />Gehört zu</h3>
+              <span>{offen.bezug}{offen.bezugHref ? <> · <a className="kg-bezug" href={offen.bezugHref}>Öffnen →</a></> : null}</span>
+            </section>
+          ) : null}
+          {offen.notes || (!offen.eigen && offen.besitzer.length) ? (
+            <details className="cluster cluster--weiteres">
+              <summary className="cluster-kopf">Weitere Angaben</summary>
+              {!offen.eigen && offen.besitzer.length ? <span>Kalender von {offen.besitzer.join(', ')} – nur lesbar</span> : null}
+              {offen.notes ? <div style={{ whiteSpace: 'pre-wrap' }}>{offen.notes}</div> : null}
+            </details>
           ) : null}
           {offen.eigen ? (
             <>

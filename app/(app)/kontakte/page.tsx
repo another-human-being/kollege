@@ -9,7 +9,7 @@ import { Fragen, ROLLE } from '../b/[key]/detail';
 
 export const dynamic = 'force-dynamic';
 
-type Search = { typ?: string; id?: string; art?: string; ungeprueft?: string; q?: string };
+type Search = { typ?: string; id?: string; art?: string; ungeprueft?: string; q?: string; voll?: string };
 
 const ORG_ROLLE: Record<string, string> = { founding_team: 'Gründungsteam', partner: 'Partner', university: 'Universität', other: 'Sonstige' };
 const ART: Record<string, VerlaufEintrag['art']> = { mail: 'Mail', event: 'Termin', note: 'Notiz', file: 'Datei' };
@@ -50,7 +50,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
       : { key: `s${i}`, monat: monat(t.at), datum: tag(t.at, now), art: ART[t.kind] ?? 'Mail', text: `Inhalt nur für ${t.owners.join(', ')}`, privat: true, privatFuer: t.owners.join(', ') }).reverse();
 
   return (
-    <div className={offen ? 'ld' : 'ld ld--zu'}>
+    <div className={offen ? (sp.voll ? 'ld ld--voll' : 'ld') : 'ld ld--zu'}>
       <div className="ld-liste">
         <div className="ld-kopf">
           <div className="ld-kopfzeile"><h1>Kontakte</h1><span className="mono">{rows.length}</span></div>
@@ -82,7 +82,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
 
       {person ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ id: undefined, typ: undefined })} aria-label="Detailansicht schließen">×</a></div>
+          <div className="ld-zu"><a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a><a className="x-knopf" href={url({ id: undefined, typ: undefined, voll: undefined })} aria-label="Detailansicht schließen">×</a></div>
           {person.unreviewed ? (
             <div className="ungeprueft-banner"><Vermutung /><span>Von Kollege angelegt – gibt es diese Person so?</span><span style={{ flexGrow: 1 }} />
               <Tu type="review.accept" payload={{ items: [{ type: 'person', id: person.id }] }} text="Übernommen">Übernehmen</Tu>
@@ -117,7 +117,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
         </div>
       ) : org ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ id: undefined, typ: undefined })} aria-label="Detailansicht schließen">×</a></div>
+          <div className="ld-zu"><a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a><a className="x-knopf" href={url({ id: undefined, typ: undefined, voll: undefined })} aria-label="Detailansicht schließen">×</a></div>
           {org.unreviewed ? (
             <div className="ungeprueft-banner"><Vermutung /><span>Von Kollege angelegt – gibt es diese Organisation so?</span><span style={{ flexGrow: 1 }} />
               <Tu type="review.accept" payload={{ items: [{ type: 'org', id: org.id }] }} text="Übernommen">Übernehmen</Tu>

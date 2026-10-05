@@ -3,6 +3,7 @@
 // Server- und Client-Komponenten funktionieren. Abweichungen vom Bundle (Befunde, STAND.md):
 // - Navigation ohne Zähler (Regel „keine Zähler“, M2)
 // - Verlauf: Systemschritte ohne „Rückgängig“ (korrigieren statt rückgängig, Entscheidung 7)
+import { Icon } from '@/components/icon';
 import type { ReactNode } from 'react';
 
 export type Herkunft = 'belegt' | 'berechnet' | 'einschaetzung';
@@ -241,5 +242,22 @@ export function Anweisung({
         {aktionen}
       </div>
     </div>
+  );
+}
+
+// --- Schritte (E54): what Kollege did – read, searched with hits, found or a gap ---------------
+
+export interface SchrittT { art: 'lesen' | 'suche' | 'gefunden' | 'luecke'; text: ReactNode; funde?: string[] }
+
+export function Schritte({ schritte }: { schritte: SchrittT[] }) {
+  return (
+    <ol className="kg-schritte" aria-label="Was Kollege getan hat" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+      {schritte.map((s, i) => (
+        <li key={i} className="kg-schritt">
+          <Icon name={s.art} />
+          <span>{s.text}{s.funde?.length ? <span style={{ display: 'block' }}>{s.funde.map((f, j) => <span key={j} className="kg-fund">{f}</span>)}</span> : null}</span>
+        </li>
+      ))}
+    </ol>
   );
 }

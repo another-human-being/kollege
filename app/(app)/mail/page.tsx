@@ -9,7 +9,7 @@ import { entwurf, mailThread, postfaecher, threadListe, zuordnungsziele, type Ma
 
 export const dynamic = 'force-dynamic';
 
-type Search = { p?: string; o?: string; f?: string; q?: string; t?: string; entwurf?: string };
+type Search = { p?: string; o?: string; f?: string; q?: string; t?: string; entwurf?: string; voll?: string };
 const ORDNER: [Ordner, string][] = [['eingang', 'Eingang'], ['gesendet', 'Gesendet'], ['archiv', 'Archiv'], ['entwuerfe', 'Entwürfe']];
 const FILTER: [MailFilter, string][] = [['ungelesen', 'Ungelesen'], ['anhang', 'Mit Anhang'], ['ohne_zuordnung', 'Ohne Zuordnung']];
 const adr = (a: { name?: string; email: string }) => (a.name ? `${a.name} <${a.email}>` : a.email);
@@ -39,7 +39,7 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
   const offen = Boolean(thread || d);
 
   return (
-    <div className={offen ? 'ld' : 'ld ld--zu'}>
+    <div className={offen ? (sp.voll ? 'ld ld--voll' : 'ld') : 'ld ld--zu'}>
       <div className="ld-liste ld-liste--breit">
         <div className="ld-kopf">
           <div className="ld-kopfzeile">
@@ -89,7 +89,7 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
 
       {d ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ entwurf: undefined })} aria-label="Schließen">×</a></div>
+          <div className="ld-zu"><a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a><a className="x-knopf" href={url({ entwurf: undefined, voll: undefined })} aria-label="Schließen">×</a></div>
           <Schreibfeld key={d.id} postfaecher={absender} zurueck={url({ entwurf: undefined, o: undefined })} d={(() => {
             const m = EntwurfMeta.parse(d.meta);
             return {
@@ -101,7 +101,7 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
         </div>
       ) : thread ? (
         <div className="ld-detail">
-          <div className="ld-zu"><a className="x-knopf" href={url({ t: undefined })} aria-label="Schließen">×</a></div>
+          <div className="ld-zu"><a className="ld-wort" href={url({ voll: sp.voll ? undefined : '1' })}>{sp.voll ? 'Verkleinern' : 'Vollbild'}</a><a className="x-knopf" href={url({ t: undefined, voll: undefined })} aria-label="Schließen">×</a></div>
           <GelesenBeimOeffnen ids={thread.nachrichten.filter((n) => n.ungelesen).map((n) => n.id)} />
           <h2 style={{ margin: 0 }}>{thread.betreff || '(ohne Betreff)'}</h2>
           <ThreadKopf letzteId={thread.nachrichten.at(-1)!.id} eingangIds={thread.nachrichten.filter((n) => n.imEingang).map((n) => n.id)}

@@ -1,17 +1,15 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { auth, signOut } from '@/auth';
-import { ChatListe } from '@/components/chat';
 import { MobilKopf } from '@/components/menue';
 import { RueckgaengigProvider } from '@/components/rueckgaengig';
-import { SeitenNav } from '@/components/seitennav';
-import { chatListe } from '@/lib/views/chats';
+import { Seitenleiste } from '@/components/seitenleiste';
 import { navigation } from '@/lib/views/nav';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await auth();
   if (!session?.user?.id) redirect('/anmelden');
-  const [nav, chats] = await Promise.all([navigation(session.user.id), chatListe(session.user.id)]);
+  const nav = await navigation(session.user.id);
 
   async function abmelden() {
     'use server';
@@ -22,18 +20,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <RueckgaengigProvider>
       <div className="app">
         <MobilKopf />
-        <aside className="seite" id="seitenleiste">
-          <div className="seite-marke">Kollege</div>
-          <SeitenNav areas={nav.areas} />
-          {/* §11: below the navigation, the chat history */}
-          <ChatListe chats={chats} now={new Date().toISOString()} />
-          <div className="seite-fuss">
-            <span>{nav.me} · Gründungszentrum</span>
-            <form action={abmelden}>
-              <button type="submit" className="kg-aktion kg-aktion--text">Abmelden</button>
-            </form>
-          </div>
-        </aside>
+        {/* E51/E55: no chat history in the sidebar – earlier chats live on the chat page (E40, E62) */}
+        <Suspense><Seitenleiste areas={nav.areas} me={nav.me} abmelden={abmelden} /></Suspense>
         <div className="inhalt">{children}</div>
       </div>
     </RueckgaengigProvider>

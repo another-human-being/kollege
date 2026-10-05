@@ -1,7 +1,7 @@
 // Detail of a matter or of a founding team ("Beratungsakte"). Server components; editing
 // parts are client components that run actions (components/bearbeiten.tsx).
 import { Fragment } from 'react';
-import { Auswahl, Erledigen, Feld, Gespraech, Tu, Uebergeben, Zeile } from '@/components/bearbeiten';
+import { Auswahl, Erledigen, Feld, Gespraech, Tu, Zeile } from '@/components/bearbeiten';
 import { EingabeStart } from '@/components/chat';
 import { Abschnitt, Privat, Quelle, Vermutung, Verlauf, Zusage, type VerlaufEintrag } from '@/components/kg';
 import { faellig, monat, tag } from '@/lib/format';
@@ -30,26 +30,22 @@ function verlauf(items: TimelineItem[], systemSteps: number, now: Date): Verlauf
   return out.reverse();
 }
 
-function Zusagen({ c, now, href }: { c: { ours: Commitment[]; theirs: Commitment[] }; now: Date; href: string }) {
-  const spalte = (xs: Commitment[], titel: string) => (
-    <div>
-      <h3 className="kg-zusagen-titel">{titel}</h3>
-      {xs.filter((x) => x.status !== 'done').map((x) => (
+/** E59: "To-Dos" – one list by due date; each row says who does it (the model keeps ours|theirs) */
+function Zusagen({ c, now }: { c: { ours: Commitment[]; theirs: Commitment[] }; now: Date; href?: string }) {
+  const offen = [...c.ours, ...c.theirs].filter((x) => x.status !== 'done')
+    .sort((a, b) => (a.due_at ?? '9999').localeCompare(b.due_at ?? '9999'));
+  const erledigt = [...c.ours, ...c.theirs].filter((x) => x.status === 'done').length;
+  return (
+    <Abschnitt id="d-zusagen" titel="To-Dos" anzahl={offen.length}>
+      {offen.map((x) => (
         <Zusage key={x.id} status={x.overdue ? 'ueberfaellig' : 'offen'} faellig={x.due_at ? faellig(x.due_at, now) : undefined}
-          quelle={x.source && !x.source.readable ? `aus ${x.source.owners.join(', ')}s Mail` : x.owner ?? undefined}
+          quelle={x.source && !x.source.readable ? `aus ${x.source.owners.join(', ')}s Mail` : undefined}
           aktion={<> <Tu type="task.complete" payload={{ id: x.id }} text="Erledigt" variante="text">abhaken</Tu></>}>
-          {x.title}{x.status === 'in_progress' ? ' · in Arbeit' : ''}
+          {x.title}{x.status === 'in_progress' ? ' · in Arbeit' : ''}{x.owner ? <span className="mono"> · {x.owner}</span> : null}
         </Zusage>
       ))}
-      {!xs.some((x) => x.status !== 'done') ? <span style={{ fontSize: 14, color: 'var(--ink-muted)' }}>Keine offenen.</span> : null}
-      {xs.filter((x) => x.status === 'done').length ? (
-        <span className="mono">{xs.filter((x) => x.status === 'done').length} erledigt</span>
-      ) : null}
-    </div>
-  );
-  return (
-    <Abschnitt id="d-zusagen" titel="Zusagen" aside={<>beider Seiten · <a className="kg-bezug" href={href}>in Aufgaben bearbeiten</a></>}>
-      <div className="kg-zusagen">{spalte(c.ours, 'von uns')}{spalte(c.theirs, 'an uns')}</div>
+      {!offen.length ? <span style={{ fontSize: 14, color: 'var(--ink-muted)' }}>Nichts offen.</span> : null}
+      {erledigt ? <span className="mono">{erledigt} erledigt</span> : null}
     </Abschnitt>
   );
 }
@@ -84,13 +80,8 @@ function Zustaendig({ kind, id, owner, handoverTo, team, me }: { kind: 'matter' 
   return (
     <span className="feldzeile">
       <span style={{ fontSize: 14, lineHeight: '28px' }}>{owner.name}</span>
-      {handoverTo ? (
-        <span role="status" className="mono">Übergabe an {handoverTo.name} – wartet auf Annahme</span>
-      ) : owner.id === me ? (
-        <Uebergeben kind={kind} id={id} andere={team.filter((u) => u.id !== me)} />
-      ) : (
-        <span className="mono">ändern über „Übergeben an“</span>
-      )}
+      {/* handing over sits in "⋯" above (E58) */}
+      {handoverTo ? <span role="status" className="mono">Übergabe an {handoverTo.name} – wartet auf Annahme</span> : null}
       {handoverTo && (owner.id === me || handoverTo.id === me) ? (
         <>
           {handoverTo.id === me ? <Tu type={`${kind}.handover_accept`} payload={{ id }} text="Übernommen">Annehmen</Tu> : null}

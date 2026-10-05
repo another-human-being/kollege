@@ -23,6 +23,14 @@ async function schritt(page: Page, name: string, fn: () => Promise<void>) {
 const sichtbar = (page: Page, text: string | RegExp) => page.getByText(text).first().isVisible().catch(() => false);
 const abschnitt = (page: Page, id: string) => page.locator(`section[aria-labelledby="${id}"]`);
 const zahl = async (page: Page, id: string) => Number((await abschnitt(page, id).locator('.kg-abschnitt-zahl').first().textContent().catch(() => '0')) ?? 0);
+/** Heute (E56): a row under Entscheiden / Erledigen / Ausstehend, opened */
+const gruppe = (page: Page, name: 'Entscheiden' | 'Erledigen') => page.getByRole('group', { name: new RegExp(name) });
+async function oeffnen(page: Page, wo: ReturnType<typeof gruppe> | ReturnType<typeof abschnitt>, text: string | RegExp) {
+  const zeile = wo.locator('.hx-p').filter({ hasText: text }).first();
+  await zeile.locator('.hx-t').click();
+  return zeile;
+}
+const liste = (page: Page) => page.locator('.ld-liste');
 
 test.afterAll(() => p.speichern());
 
@@ -32,7 +40,8 @@ test('Vormittag Andreas: Heute, Klären, Eingabe nach der Beratung, Frage mit Qu
   await anmelden(page, 'Andreas');
 
   await schritt(page, 'A1 Heute: Kurz klären – Lisa vom privaten Konto', async () => {
-    await page.getByRole('button', { name: 'Ja, das ist Lisa Meier' }).click();
+    const z = await oeffnen(page, gruppe(page, 'Entscheiden'), /Lisa Meier von Solaro/);
+    await z.getByRole('button', { name: 'Ja, das ist Lisa Meier' }).click();
     await expect(toast(page)).toContainText('Gemerkt');
     await page.goto('/kontakte?q=gmx');
     p.pruefe(await sichtbar(page, 'Lisa Meier'), 'Kohärenz', wo, 'Nach „Ja“ steht die private Adresse bei Lisa Meier in Kontakte.');
@@ -40,8 +49,9 @@ test('Vormittag Andreas: Heute, Klären, Eingabe nach der Beratung, Frage mit Qu
 
   await schritt(page, 'A2 Klärfrage ohne passende Knöpfe', async () => {
     await page.goto('/heute');
-    const frage = page.locator('.kg-klaerung').filter({ hasText: 'Stadtwerke' });
+    const frage = gruppe(page, 'Entscheiden').locator('.hx-p').filter({ hasText: 'Stadtwerke' });
     if (await frage.count()) {
+      await frage.locator('.hx-t').click();
       const knoepfe = await frage.getByRole('button').allTextContents();
       const links = await frage.getByRole('link').count();
       p.pruefe(knoepfe.length > 1 || links > 0, 'Kohärenz', wo,
@@ -51,7 +61,8 @@ test('Vormittag Andreas: Heute, Klären, Eingabe nach der Beratung, Frage mit Qu
 
   await schritt(page, 'A3 Eingabe nach der Beratung (Notiz, Zusage, Aufgabe)', async () => {
     await page.goto('/heute');
-    const eingabe = page.getByLabel('Was ist passiert oder soll passieren?');
+    // E55: the field in the sidebar – Enter asks Kollege in a new chat
+    const eingabe = page.getByLabel('Neuer Chat oder Suche');
     await eingabe.fill('Gerade Beratung mit Solaro, Pitchdeck bis Freitag, wir vermitteln Frau Weber');
     await eingabe.press('Enter');
     await page.waitForURL(/\/chat\/[0-9a-f-]{36}$/);
@@ -65,7 +76,7 @@ test('Vormittag Andreas: Heute, Klären, Eingabe nach der Beratung, Frage mit Qu
     const teamAufgaben = await page.locator('body').innerText();
     p.pruefe(/Pitchdeck/.test(teamAufgaben), 'Kohärenz', wo, 'Die Zusage „Pitchdeck“ von Solaro steht in Aufgaben (Team).');
     await page.goto('/b/founding_teams');
-    await page.getByRole('link', { name: /^Solaro/ }).first().click();
+    await liste(page).getByRole('link', { name: /^Solaro/ }).first().click();
     await page.waitForLoadState('networkidle');
     const akte = await page.locator('body').innerText();
     p.pruefe(/Beratung mit Solaro/.test(akte), 'Kohärenz', wo, 'Die Gesprächsnotiz steht in der Akte von Solaro.');
@@ -92,20 +103,20 @@ test('Vormittag Andreas: Heute, Klären, Eingabe nach der Beratung, Frage mit Qu
   await schritt(page, 'A5 Später auf Heute – die Mail bleibt im Postfach', async () => {
     hinweiseLauf();
     await page.goto('/heute');
-    const zeile = abschnitt(page, 'h-wartet').locator('article').filter({ hasText: 'Finanzplan v2' });
+    const zeile = await oeffnen(page, gruppe(page, 'Erledigen'), 'Tom Kraus antworten');
     await zeile.getByRole('button', { name: 'Später' }).click();
     await expect(toast(page)).toContainText('Verschoben auf morgen');
     await page.reload();
-    p.pruefe(await zeile.count() === 0, 'Bedienbarkeit', wo, 'Nach „Später“ ist der Punkt bis morgen weg (auch nach Neuladen).');
+    p.pruefe(await gruppe(page, 'Erledigen').locator('.hx-p').filter({ hasText: 'Tom Kraus antworten' }).count() === 0, 'Bedienbarkeit', wo, 'Nach „Später“ ist der Punkt bis morgen weg (auch nach Neuladen).');
     await page.goto('/mail');
     p.pruefe(await sichtbar(page, 'Finanzplan v2'), 'Kohärenz', wo, '„Später“ versteckt nur auf Heute – die Mail steht weiter im Postfach.');
   });
 
   await schritt(page, 'A6 Zeitspalte auf Heute: Mails mit Datum, nicht mit Uhrzeit', async () => {
     await page.goto('/heute');
-    const zeiten = await abschnitt(page, 'h-wartet').locator('.kg-hinweis-zeit').allTextContents();
+    const zeiten = await gruppe(page, 'Erledigen').locator('.hx-p').filter({ hasText: 'antworten' }).locator('.hx-f').allTextContents();
     const uhr = zeiten.filter((z) => /^\d{2}:\d{2}$/.test(z.trim()));
-    p.pruefe(uhr.length === 0, 'Kohärenz', wo, `„Wartet auf uns“ zeigt Uhrzeiten (${uhr.join(', ')}) statt Tage – eine Mail vom 25.09. sieht aus wie von heute.`);
+    p.pruefe(zeiten.length > 0 && uhr.length === 0, 'Kohärenz', wo, `Mails zum Antworten zeigen Tage, keine Uhrzeiten (${zeiten.join(', ')}).`);
   });
 });
 
@@ -177,7 +188,7 @@ test('Mittag Andreas: Mail, Kalender, Dateien', async ({ page }) => {
     await page.getByLabel('Zuordnen zu').selectOption({ label: 'Event: Pitch-Abend 19.11.' });
     await expect(toast(page)).toContainText('Zugeordnet');
     await page.goto('/b/events');
-    await page.getByRole('link', { name: /Pitch-Abend 19.11./ }).first().click();
+    await liste(page).getByRole('link', { name: /Pitch-Abend 19.11./ }).first().click();
     await page.waitForLoadState('networkidle');
     p.pruefe(await sichtbar(page, 'Rueckblick.docx'), 'Kohärenz', wo, 'Die zugeordnete Datei steht beim Event unter „Dateien“.');
   });
@@ -190,20 +201,21 @@ test('Nachmittag Julia und Mehmet: Übergabe, Abschluss, Rat aus dem Vorjahr, An
   await schritt(page, 'C1 Julia übergibt den Pitch-Abend an Andreas', async () => {
     await anmelden(page, 'Julia');
     await page.goto('/b/events');
-    await page.getByRole('link', { name: /Pitch-Abend 19.11./ }).first().click();
-    await page.getByLabel('Übergeben an').selectOption({ label: 'Andreas' });
+    await liste(page).getByRole('link', { name: /Pitch-Abend 19.11./ }).first().click();
+    await page.getByRole('button', { name: 'Mehr' }).or(page.locator('summary[aria-label="Mehr"]')).first().click();
+    await page.getByRole('menuitem', { name: /Übergeben an/ }).click();
+    await page.getByRole('menuitem', { name: 'Andreas' }).click();
     await expect(toast(page)).toContainText('Übergabe angefragt');
     hinweiseLauf();
     await anmelden(page, 'Andreas');
-    const ueb = abschnitt(page, 'h-uebergabe');
-    await expect(ueb).toBeVisible();
+    const ueb = await oeffnen(page, gruppe(page, 'Entscheiden'), /Übergabe von Julia annehmen/);
     const text = await ueb.innerText();
     p.pruefe(/Nächster Schritt|offene Zusagen/.test(text), 'Intelligenz', wo,
       'Die Übergabe auf Heute zeigt den Kurzstand (nächster Schritt, offene Zusagen) – Denkweise 7.');
     await ueb.getByRole('button', { name: 'Übernehmen' }).click();
     await expect(toast(page)).toContainText('Übernommen');
     await page.goto('/b/events');
-    await page.getByRole('link', { name: /Pitch-Abend 19.11./ }).first().click();
+    await liste(page).getByRole('link', { name: /Pitch-Abend 19.11./ }).first().click();
     await page.waitForLoadState('networkidle');
     p.pruefe(/ZUSTÄNDIG\s*Andreas/i.test(await page.locator('body').innerText()), 'Kohärenz', wo, 'Nach der Annahme ist Andreas zuständig.');
   });
@@ -212,7 +224,7 @@ test('Nachmittag Julia und Mehmet: Übergabe, Abschluss, Rat aus dem Vorjahr, An
     await anmelden(page, 'Julia');
     await page.goto('/b/events?status=erledigt');
     await page.goto('/b/events');
-    await page.getByRole('link', { name: /Gründungsnacht 2025/ }).first().click();
+    await liste(page).getByRole('link', { name: /Gründungsnacht 2025/ }).first().click();
     await page.getByRole('button', { name: 'Als erledigt markieren' }).click();
     await page.getByLabel(/Wie lief/).fill('18 von 60 Plätzen, zu spät eingeladen.');
     await page.getByRole('button', { name: 'Ablegen' }).click();
@@ -224,21 +236,23 @@ test('Nachmittag Julia und Mehmet: Übergabe, Abschluss, Rat aus dem Vorjahr, An
     await expect(page.locator('#d-titel')).toHaveValue('Gründungsnacht 2027');
     hinweiseLauf();
     await page.goto('/heute');
-    const frage = page.locator('.kg-klaerung').filter({ hasText: 'Vorgänger' });
+    const frage = gruppe(page, 'Entscheiden').locator('.hx-p').filter({ hasText: 'Vorgänger von „Gründungsnacht 2027“' });
     const n = await frage.count();
     p.pruefe(n > 0, 'Intelligenz', wo, 'Kollege fragt „Ist … der Vorgänger von Gründungsnacht 2027?“ (ein vergleichbarer Fall).');
     if (n) {
       const welche = await frage.first().innerText();
       p.pruefe(/Gründungsnacht 2025/.test(welche), 'Intelligenz', wo, `Vorgeschlagen wird der abgeschlossene Fall 2025 (${welche.split('\n')[0]}).`);
+      await frage.first().locator('.hx-t').click();
       await frage.first().getByRole('button', { name: 'Ja, Vorgänger' }).click();
       await expect(toast(page)).toContainText('Gemerkt');
       hinweiseLauf();
       await page.goto('/heute');
-      const rat = abschnitt(page, 'h-rat');
+      const rat = gruppe(page, 'Entscheiden').locator('.hx-p').filter({ hasText: /Gründungsnacht 2025/ }).filter({ hasNotText: 'Vorgänger' });
       const da = await rat.count();
-      p.pruefe(da > 0, 'Intelligenz', wo, 'Nach „Ja“ erscheint ein Rat unter „Aus früheren Fällen“.');
+      p.pruefe(da > 0, 'Intelligenz', wo, 'Nach „Ja“ erscheint ein Rat unter „Entscheiden“.');
       if (da) {
-        const r = await rat.innerText();
+        await rat.first().locator('.hx-t').click();
+        const r = await rat.first().innerText();
         p.pruefe(/„.+“/.test(r), 'Intelligenz', wo, 'Der Rat nennt einen wörtlichen Beleg.');
         p.pruefe(/früher einladen|Save-the-Date|18 von 60/.test(r), 'Intelligenz', wo, `Der Rat passt zum Rückblick 2025 (${r.replace(/\s+/g, ' ').slice(0, 160)}).`);
       }
@@ -249,18 +263,17 @@ test('Nachmittag Julia und Mehmet: Übergabe, Abschluss, Rat aus dem Vorjahr, An
   await schritt(page, 'C3 Mehmet schließt den Redaktionsplan ohne Rückblick – „Wie lief’s?“ kommt auf Heute', async () => {
     await anmelden(page, 'Mehmet');
     await page.goto('/b/social');
-    await page.getByRole('link', { name: /Redaktionsplan Q4/ }).first().click();
+    await liste(page).getByRole('link', { name: /Redaktionsplan Q4/ }).first().click();
     await page.getByRole('button', { name: 'Als erledigt markieren' }).click();
     await page.getByRole('button', { name: 'Überspringen' }).click();
     hinweiseLauf();
     await page.goto('/heute');
-    const fest = abschnitt(page, 'h-festhalten');
-    await expect(fest).toBeVisible();
+    const fest = await oeffnen(page, gruppe(page, 'Erledigen'), /Wie lief „Redaktionsplan Q4“/);
     await fest.getByLabel(/Wie lief/).fill('Zu viele Beiträge im Dezember, nächstes Mal verteilen.');
     await fest.getByRole('button', { name: 'Festhalten' }).click();
     await expect(toast(page)).toContainText('Festgehalten');
     await page.goto('/b/social?status=erledigt');
-    await page.getByRole('link', { name: /Redaktionsplan Q4/ }).first().click();
+    await liste(page).getByRole('link', { name: /Redaktionsplan Q4/ }).first().click();
     p.pruefe(await sichtbar(page, 'Zu viele Beiträge im Dezember'), 'Kohärenz', wo, 'Der Rückblick aus Heute steht beim Beitrag unter „Wie lief’s“.');
   });
 
@@ -281,7 +294,8 @@ test('Quer geprüft: Zahlen und Listen stimmen überein', async ({ page }) => {
   await anmelden(page, 'Andreas');
   await schritt(page, 'D1 „Prüfen“ auf Heute = Summe der ungeprüften in Bereichen und Kontakten', async () => {
     await page.goto('/heute');
-    const heute = await zahl(page, 'h-pruefen');
+    const pz = await gruppe(page, 'Erledigen').locator('.hx-p').filter({ hasText: 'Vom System Angelegtes prüfen' }).locator('.hx-bz').textContent().catch(() => '0');
+    const heute = Number(pz?.match(/\d+/)?.[0] ?? 0);
     let summe = 0;
     for (const b of ['founding_teams', 'events', 'teaching', 'social']) {
       await page.goto(`/b/${b}`);
@@ -293,11 +307,16 @@ test('Quer geprüft: Zahlen und Listen stimmen überein', async ({ page }) => {
   });
   await schritt(page, 'D2 Überfälliges: Heute und Aufgaben zeigen dasselbe', async () => {
     await page.goto('/heute');
-    // ours under "Heute", theirs under "Wir warten auf" – together what Aufgaben calls overdue
-    const titel = async (id: string) => (await abschnitt(page, id).locator('article').filter({ hasText: /überfällig/ }).locator('.kg-hinweis-titel').allTextContents()).map((t) => t.trim());
-    const heute = [...await titel('h-heute'), ...await titel('h-wir')].sort();
+    // E56: overdue tasks and follow-ups ("nachfassen") under Erledigen – together what Aufgaben calls overdue
+    const ueber = gruppe(page, 'Erledigen').locator('.hx-p').filter({ has: page.locator('.hx-f--ue') });
+    const titel = (await ueber.filter({ has: page.locator('.hx-kreis') }).or(ueber.filter({ hasText: 'nachfassen' })).locator('.hx-ti').allTextContents())
+      .map((t) => t.replace(/^Bei .*? nachfassen: /, '').trim()).sort();
     await page.goto('/aufgaben');
     const aufgaben = (await page.locator('a').filter({ hasText: /seit \d+ Tag/ }).allTextContents()).map((a) => a.split('seit')[0]!.trim()).sort();
-    p.pruefe(JSON.stringify(heute) === JSON.stringify(aufgaben), 'Kohärenz', wo, `Überfällig auf Heute ${JSON.stringify(heute)} vs. Aufgaben ${JSON.stringify(aufgaben)}.`);
+    p.pruefe(JSON.stringify(titel) === JSON.stringify(aufgaben), 'Kohärenz', wo, `Überfällig auf Heute ${JSON.stringify(titel)} vs. Aufgaben ${JSON.stringify(aufgaben)}.`);
+    await page.goto('/heute');
+    const roteMails = await gruppe(page, 'Erledigen').locator('.hx-p').filter({ hasText: 'antworten' }).locator('.hx-f--ue').count();
+    p.pruefe(roteMails === 0, 'Darstellung', wo, 'Rot (attention) nur für Überfälliges – Mails zum Antworten sind nicht rot.');
   });
+
 });

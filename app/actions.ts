@@ -7,7 +7,7 @@ import { currentUserId } from '@/auth';
 import { ActionError, answerHint, answerHintText, runAction, undoAction } from '@/lib/actions';
 import { ZURUECKHOLBAR_S } from '@/lib/actions/mail';
 import { einreihen } from '@/lib/jobs/queue';
-import { entwurfVorlage } from '@/lib/mail/vorlage';
+import { entwurfVorlage, erinnerungVorlage } from '@/lib/mail/vorlage';
 import { putBlob } from '@/lib/pipeline/blobs';
 import { addDays, berlinInstant } from '@/lib/time';
 import { chatTitel } from '@/lib/views/chats';
@@ -38,6 +38,7 @@ const MESSAGES: [RegExp, string][] = [
   [/Bitte kurz etwas eintragen/, 'Bitte kurz etwas eintragen.'],
   [/noch nichts zugeordnet/, 'Der Termin ist noch nichts zugeordnet – bitte erst zuordnen.'],
   [/no longer open/, 'Das ist schon erledigt.'],
+  [/commitment not found/, 'Diese Zusage gibt es nicht mehr.'],
 ];
 
 function message(e: unknown): string {
@@ -116,6 +117,18 @@ export async function entwurfFuer(art: 'neu' | 'antwort' | 'allen' | 'weiterleit
   try {
     const userId = await currentUserId();
     const payload = await entwurfVorlage(userId, art, bezugId);
+    const { actionId, result } = await runAction({ type: 'user', userId }, 'mail.draft', payload);
+    return { ok: true, actionId, result };
+  } catch (e) {
+    return { ok: false, error: message(e) };
+  }
+}
+
+/** "Jetzt erinnern" (E57): a reminder draft for a commitment of others, from a template */
+export async function erinnerung(taskId: string): Promise<Result> {
+  try {
+    const userId = await currentUserId();
+    const payload = await erinnerungVorlage(userId, taskId);
     const { actionId, result } = await runAction({ type: 'user', userId }, 'mail.draft', payload);
     return { ok: true, actionId, result };
   } catch (e) {

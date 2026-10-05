@@ -9,14 +9,15 @@ import { DefaultChatTransport, type UIMessage } from 'ai';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { chatAnlegen, mailSenden, perform, undo } from '@/app/actions';
-import { Aktion, Aussage, Etikett, Laden, Privat, Quelle } from '@/components/kg';
+import { Icon } from '@/components/icon';
+import { Aktion, Aussage, Etikett, Laden, Privat, Quelle, Schritte, type SchrittT } from '@/components/kg';
 import { useAktion } from '@/components/rueckgaengig';
 import type { Karte } from '@/lib/model/werkzeuge/karten';
 import type { Quelle as QuelleT } from '@/lib/model/werkzeuge/quellen';
 import { zeitpunkt } from '@/lib/format';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
-const ausstehend = (chatId: string) => `kollege:frage:${chatId}`;
+export const ausstehend = (chatId: string) => `kollege:frage:${chatId}`;
 
 export function Eingabe({
   onSenden, kontext, platzhalter, verarbeitet, id = 'kg-eingabe', autoFocus,
@@ -46,7 +47,7 @@ export function Eingabe({
         <span className="kg-eingabe-hilfe">
           {verarbeitet ? <Laden inline text="Lese mit, ordne zu" /> : '⏎ abschicken · ⇧⏎ neue Zeile · Frage oder Notiz'}
         </span>
-        <Aktion variante="primaer" onClick={senden} disabled={zustand !== 'bereit'} aria-label="Abschicken">→</Aktion>
+        <Aktion variante="primaer" onClick={senden} disabled={zustand !== 'bereit'} aria-label="Abschicken"><Icon name="hoch" /></Aktion>
       </div>
     </div>
   );
@@ -75,7 +76,34 @@ export function EingabeStart({ bezug, kontext, platzhalter }: { bezug?: { type: 
 
 // --- messages ---------------------------------------------------------------------------
 
-type ToolPart = { type: string; state: string; output?: { karte?: Karte; quellen?: QuelleT[] } };
+type ToolPart = { type: string; state: string; input?: Record<string, unknown>; output?: { karte?: Karte; quellen?: QuelleT[]; error?: string } & Record<string, unknown> };
+
+/**
+ * What Kollege did for an answer (E54, Schritte): read, searched (with hits), found – or that there is
+ * nothing reliable. Only real steps from the tools of this answer, at most four; actions show as cards.
+ */
+function schritteAus(teile: ToolPart[], text: string, quellen: number): SchrittT[] {
+  const namen = (xs: unknown, key: string) => (Array.isArray(xs) ? xs.map((x) => (x as Record<string, unknown>)[key]).filter((v): v is string => typeof v === 'string') : []);
+  const out: SchrittT[] = [];
+  for (const p of teile) {
+    if (p.output?.karte || p.state !== 'output-available') continue;
+    const o = p.output ?? {};
+    const name = p.type.slice('tool-'.length);
+    if (name === 'search') {
+      const funde = [...namen(o.matters, 'title'), ...namen(o.orgs, 'name'), ...namen(o.people, 'name'), ...namen(o.entries, 'title')];
+      out.push({ art: 'suche', text: `Gesucht: „${String(p.input?.query ?? '')}“`, funde: funde.slice(0, 4) });
+    } else if (name === 'get_matter' && !o.error) out.push({ art: 'lesen', text: `Gelesen: ${String(o.title ?? 'Akte')} – Felder, Zusagen, Verlauf` });
+    else if (name === 'get_contact' && !o.error) out.push({ art: 'lesen', text: `Gelesen: ${String(o.name ?? 'Kontakt')}` });
+    else if (name === 'list_tasks') out.push({ art: 'lesen', text: 'Aufgaben gelesen' });
+    else if (name === 'get_area_items' && !o.error) out.push({ art: 'lesen', text: `Gelesen: ${String(o.area ?? 'Bereich')}` });
+    else if (name === 'stats') out.push({ art: 'lesen', text: 'Gezählt (aus den Daten, nicht geschätzt)' });
+  }
+  if (!out.length) return [];
+  const schritte = out.slice(0, 3);
+  if (/zu wenig Erfahrung|nichts Belastbares/i.test(text)) schritte.push({ art: 'luecke', text: 'Nichts Belastbares gefunden' });
+  else if (quellen) schritte.push({ art: 'gefunden', text: `${quellen} ${quellen === 1 ? 'Beleg' : 'Belege'} gefunden` });
+  return schritte;
+}
 const toolTeile = (m: UIMessage) => m.parts.filter((p) => p.type.startsWith('tool-')) as unknown as ToolPart[];
 
 /** text with citations [[id]] → Quelle; only ids a tool of this answer returned are shown */
@@ -165,11 +193,14 @@ function Nachricht({ m, streamt, stand, now }: { m: UIMessage; streamt: boolean;
   const text = m.parts.filter((p) => p.type === 'text').map((p) => (p as { text: string }).text).join('');
   const karten = teile.map((p) => p.output?.karte).filter((k): k is Karte => !!k);
   const arbeitet = streamt && teile.some((p) => p.state === 'input-streaming' || p.state === 'input-available');
+  const schritte = du ? [] : schritteAus(teile, text, quellen.size);
   return (
     <>
       <div className={cx('kg-nachricht', du ? 'kg-nachricht--du' : 'kg-nachricht--kollege')}>
         <div className="kg-nachricht-wer"><span>{du ? 'Du' : 'Kollege'}</span>{at ? <span>{zeitpunkt(at, now)}</span> : null}</div>
         <div className="kg-nachricht-text">
+          {/* E54: what Kollege did, directly before the answer */}
+          {!du && schritte.length ? <div style={{ marginBottom: 'var(--space-3)', whiteSpace: 'normal' }}><Schritte schritte={schritte} /></div> : null}
           {text ? <Text text={text} quellen={quellen} /> : null}
           {arbeitet ? <Laden inline text="Lese mit, ordne zu" /> : null}
           {streamt && !arbeitet ? <span className="kg-caret" aria-hidden="true" /> : null}
@@ -239,6 +270,7 @@ export function ChatAnsicht({
 // --- sidebar --------------------------------------------------------------------------------
 
 export function ChatListe({ chats, now }: { chats: { id: string; title: string; at: string; pinned: boolean; etikett: string | null }[]; now: string }) {
+  // E62: like Claude/ChatGPT – search, "Angepinnt", "Zuletzt", one row per chat, "⋯" only on hover
   const aktiv = /^\/chat\/([0-9a-f-]{36})/.exec(usePathname())?.[1];
   const [q, setQ] = useState('');
   const router = useRouter();
@@ -256,19 +288,22 @@ export function ChatListe({ chats, now }: { chats: { id: string; title: string; 
         <span className="kg-chat-titel">{c.title}</span>
         <span className="kg-chat-meta">{c.etikett ? <span className="kg-chat-etikett">{c.etikett}</span> : null}<span>{zeitpunkt(c.at, new Date(now))}</span></span>
       </a>
-      <span className="kg-chat-aktionen">
-        <button type="button" onClick={() => pin(c.id, !c.pinned)}>{c.pinned ? 'Lösen' : 'Anpinnen'}</button>
-      </span>
+      <details className="ld-mehr kg-chat-mehr">
+        <summary aria-label={`Mehr zu „${c.title}“`} title="Mehr">⋯</summary>
+        <div className="ld-menue" role="menu">
+          <button type="button" role="menuitem" onClick={() => pin(c.id, !c.pinned)}>{c.pinned ? 'Lösen' : 'Anpinnen'}</button>
+        </div>
+      </details>
     </li>
   );
   return (
-    <div className="kg-chatliste">
-      <a className="kg-aktion kg-aktion--sekundaer kg-chat-neu" href="/chat" style={{ textDecoration: 'none' }}>+ Neuer Chat</a>
-      {chats.length > 5 ? <input type="search" className="kg-chat-suche" placeholder="Chats durchsuchen" value={q} aria-label="Chats durchsuchen" onChange={(e) => setQ(e.target.value)} /> : null}
+    <section className="kg-chatliste" aria-labelledby="deine-chats">
+      <h2 id="deine-chats" className="kg-abschnitt-titel" style={{ margin: 0 }}>Deine Chats</h2>
+      {chats.length ? <input type="search" className="such" placeholder="Chats durchsuchen" value={q} aria-label="Chats durchsuchen" onChange={(e) => setQ(e.target.value)} /> : null}
       {pins.length ? <><div className="kg-chat-gruppe">Angepinnt</div><ul className="kg-chat-ul">{pins.map(item)}</ul></> : null}
-      <div className="kg-chat-gruppe">Chats</div>
-      {rest.length ? <ul className="kg-chat-ul">{rest.map(item)}</ul> : <div className="kg-chat-leer">{term ? 'Kein Chat passt.' : 'Noch keine Chats.'}</div>}
+      {rest.length ? <><div className="kg-chat-gruppe">Zuletzt</div><ul className="kg-chat-ul">{rest.map(item)}</ul></> : null}
+      {!pins.length && !rest.length ? <div className="kg-chat-leer">{term ? 'Kein Chat passt.' : 'Noch keine Chats.'}</div> : null}
       <div className="kg-chat-hinweis"><Privat>Chats sind persönlich</Privat></div>
-    </div>
+    </section>
   );
 }

@@ -53,3 +53,28 @@ export async function entwurfVorlage(userId: string, art: 'neu' | 'antwort' | 'a
     };
   });
 }
+
+/**
+ * "Jetzt erinnern" (E57) for a commitment of others: a draft to the person who owes it, from a
+ * fixed template – no model. The person reads, changes and sends it themselves (E43).
+ */
+export async function erinnerungVorlage(userId: string, taskId: string) {
+  const basis = await entwurfVorlage(userId, 'neu');
+  return withUser(userId, async (tx) => {
+    const t = (await tx.execute<{ title: string; due_at: string | null; name: string | null; email: string | null; me: string | null }>(sql`
+      SELECT t.title, t.due_at, p.name,
+             (SELECT pe.email FROM person_emails pe WHERE pe.person_id = p.id ORDER BY pe.email LIMIT 1) AS email,
+             (SELECT u.name FROM users u WHERE u.id = ${userId}) AS me
+      FROM tasks t LEFT JOIN people p ON p.id = t.owner_person_id
+      WHERE t.id = ${taskId} AND t.direction = 'theirs'`)).rows[0];
+    if (!t) throw new Error('commitment not found');
+    const vorname = t.name?.split(/\s+/)[0];
+    const bis = t.due_at ? ` (zugesagt bis ${new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }).format(new Date(t.due_at))})` : '';
+    return {
+      ...basis,
+      to: t.email ? [t.email] : [],
+      subject: `Kurze Erinnerung: ${t.title}`,
+      body: `${vorname ? `Hallo ${vorname},` : 'Hallo,'}\n\nkurze Erinnerung an „${t.title}“${bis}. Passt das noch, oder braucht ihr etwas von uns?\n\nViele Grüße\n${t.me ?? ''}`,
+    };
+  });
+}

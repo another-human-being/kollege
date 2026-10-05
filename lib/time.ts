@@ -47,3 +47,14 @@ export function addDays(date: string, n: number): string {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
+
+/** n working days after a day (YYYY-MM-DD), Saturdays and Sundays skipped; public holidays not (yet) known */
+export function werktagPlus(day: string, n: number): string {
+  let d = day;
+  for (let i = 0; i < n;) {
+    d = addDays(d, 1);
+    const wd = new Date(`${d}T12:00:00Z`).getUTCDay();
+    if (wd !== 0 && wd !== 6) i++;
+  }
+  return d;
+}

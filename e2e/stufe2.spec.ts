@@ -17,7 +17,7 @@ test('Event anlegen, Feld ändern, Rückgängig', async ({ page }) => {
   await page.getByLabel('Titel').fill('Pitch-Training Oktober');
   await page.getByRole('button', { name: 'Anlegen' }).click();
   await expect(page.locator('#d-titel')).toHaveValue('Pitch-Training Oktober');
-  await expect(page.getByRole('link', { name: /Pitch-Training Oktober/ })).toBeVisible();
+  await expect(page.locator('.ld-liste').getByRole('link', { name: /Pitch-Training Oktober/ })).toBeVisible();
 
   // change a field: type, leave the field – saved
   await page.locator('#f-location').fill('Raum 2.14');
@@ -88,6 +88,8 @@ test('Ungeprüftes gesammelt übernehmen, Rückgängig, einzeln verwerfen', asyn
 
 test('Kurz klären auf Heute beantworten', async ({ page }) => {
   await anmelden(page, 'Andreas');
+  // E56: a row under "Entscheiden"; reasons and answers when opened
+  await page.getByRole('group', { name: /Entscheiden/ }).getByRole('button', { name: /Lisa Meier von Solaro/ }).click();
   await page.getByRole('button', { name: 'Ja, das ist Lisa Meier' }).click();
   await expect(toast(page)).toContainText('Gemerkt');
   await page.reload();
@@ -97,7 +99,7 @@ test('Kurz klären auf Heute beantworten', async ({ page }) => {
 test('Sichtbarkeit: Andreas sieht Julias Mail nur als Platzhalter, ihre Zusage aber schon', async ({ page }) => {
   await anmelden(page, 'Andreas');
   await page.goto('/b/events');
-  await page.getByRole('link', { name: /Pitch-Abend 19.11./ }).click();
+  await page.locator('.ld-liste').getByRole('link', { name: /Pitch-Abend 19.11./ }).click();
   await expect(page.getByText('Rückmeldung zur Jury-Anfrage')).toBeVisible();
   await expect(page.getByText(/aus Julias Mail/).first()).toBeVisible();
   await expect(page.getByText(/Inhalt nur für Julia/).first()).toBeVisible();

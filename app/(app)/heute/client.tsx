@@ -9,7 +9,7 @@ export function HinweisAntworten({ hintId, optionen }: { hintId: string; optione
   const { show } = useAktion();
   const [busy, setBusy] = useState(false);
   return (
-    <div className="kg-aktionen">
+    <>
       {optionen.map((o, i) => (
         <Aktion key={o} disabled={busy} onClick={async () => {
           setBusy(true);
@@ -18,7 +18,7 @@ export function HinweisAntworten({ hintId, optionen }: { hintId: string; optione
           setBusy(false);
         }}>{o}</Aktion>
       ))}
-    </div>
+    </>
   );
 }
 
@@ -47,24 +47,6 @@ export function Uebernehmen({ matterId, team, me }: { matterId: string; team: { 
         <Aktion variante="text" onClick={() => setWahl(true)}>Zuweisen an …</Aktion>
       )}
     </>
-  );
-}
-
-export function ImTeam({ anzahl, children }: { anzahl: number; children: ReactNode }) {
-  const [offen, setOffen] = useState(false);
-  return (
-    <section className="kg-abschnitt" aria-labelledby="h-team">
-      <div className="kg-abschnitt-kopf">
-        <h2 className="kg-abschnitt-titel" id="h-team">
-          <button type="button" onClick={() => setOffen(!offen)} aria-expanded={offen} style={{ all: 'unset', cursor: 'pointer' }}>
-            Im Team {offen ? '▴' : '▾'}
-          </button>
-        </h2>
-        <span className="kg-abschnitt-zahl">{anzahl}</span>
-        <span className="kg-abschnitt-aside">nur, was eine Handlung braucht: Neues ohne Zuständigkeit, Hängendes bei anderen</span>
-      </div>
-      {offen ? <div className="kg-abschnitt-liste">{children}</div> : null}
-    </section>
   );
 }
 
