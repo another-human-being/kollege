@@ -404,6 +404,12 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
 
 ## Offene Fragen an Andreas
 
+- Design-Stand 05.10. (`design/ENTSCHEIDUNGEN.md` E51–E62, Details unter „Hinweise für den Bau“) geht weiter über die Bauvorlage hinaus. Übernehmen?
+  - Seitenleiste: ein Feld für „Neuer Chat“ und Suche (Suche beim Tippen, Enter = neuer Chat); Bereiche als Baum mit laufenden Einträgen und Zahl offener Aufgaben (E55)
+  - Heute: „Diese Woche · Offen · Ausstehend“; „Offen“ umfasst neben Aufgaben auch Freigeben, Klären, Zuordnen, Antworten, Nachfassen, Prüfen – braucht ein gemeinsames Modell „wartet auf mich“ (E56)
+  - Wiedervorlage für Ausstehendes: Werktag nach der Frist bzw. 5 Werktage Stille → „Nachfassen“ mit Entwurf (E57)
+  - „To-Dos“ statt „Zusagen von uns / an uns“ in den Bereichen (E59; Bauvorlage: `ours|theirs` bleibt im Modell, nur die Darstellung ändert sich)
+  - Events: Mitwirkende mit Rolle und Teilnehmende mit Excel-Import (E60); Social Media: Beitrag mit Fassungen je Kanal (E61)
 - **Hinweise** (Stufe 8):
   - Sollen vergangene Events von selbst als erledigt gelten (Datum vorbei), damit sie als frühere Fälle zählen und „Wie lief’s?“ fragen? Jetzt schließt sie ein Mensch.
   - Sollen Hinweise auch außerhalb der App ankommen (morgendliche Mail, Handy)? Nicht in der Bauvorlage.

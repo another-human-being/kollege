@@ -23,7 +23,7 @@ Mail|1280|1000|.nachricht{display:flex;flex-direction:column;gap:6px;padding-blo
 </div>
 
 <div class="ld-detail">
-<div class="ld-zu"><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
+<div class="ld-zu"><button type="button" class="ld-wort" onClick="{{vollToggle}}" aria-pressed="{{vollAn}}" title="{{vollTitel}}">{{vollText}}</button><button type="button" onClick="{{detailZu}}" aria-label="Detailansicht schließen" title="Schließen">×</button></div>
 <sc-if value="{{zeigeThread}}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 500">{{th.betreff}}</h2>

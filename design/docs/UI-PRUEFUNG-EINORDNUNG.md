@@ -1,6 +1,6 @@
 # UI-Prüfung: Mockup-Fehler, Design-Fehler, fehlende Funktionen
 
-Stand 01.10.2026 · Grundlage: `UI-PRUEFUNG.md` (drei Prüfberichte). IDs verweisen auf diesen Bericht; Doppelfunde aus mehreren Berichten sind zusammengelegt.
+Stand 01.10.2026 · Grundlage: `docs/UI-PRUEFUNG.md` (drei Prüfberichte). IDs verweisen auf diesen Bericht; Doppelfunde aus mehreren Berichten sind zusammengelegt.
 
 ## Kriterium
 
@@ -18,7 +18,7 @@ Wo ein Mockup-Fehler eine **offene Designfrage** sichtbar macht, steht das in de
 
 ## 1 · Design-Fehler
 
-> **Stand 01.10.2026: umgesetzt.** Alle Zeilen dieses Abschnitts sind im Prototyp und im Design System behoben; die Regeln dahinter stehen in `../ENTSCHEIDUNGEN.md` als E42–E50. MO3b ist nur zur Hälfte erledigt: Mobil heißt der Link jetzt ehrlich „+ Neuer Chat“, eine mobile Chatliste fehlt noch (→ Abschnitt 3). Nebenbei behoben, obwohl als Mockup-Fehler geführt: KA1 (Monat um einen Tag verschoben), KA3, KA5a, KA6, Kal-X4, Kal-X7b, B3, H4.
+> **Stand 01.10.2026: umgesetzt.** Alle Zeilen dieses Abschnitts sind im Prototyp und im Design System behoben; die Regeln dahinter stehen in `ENTSCHEIDUNGEN.md` als E42–E50. MO3b ist nur zur Hälfte erledigt: Mobil heißt der Link jetzt ehrlich „+ Neuer Chat“, eine mobile Chatliste fehlt noch (→ Abschnitt 3). Nebenbei behoben, obwohl als Mockup-Fehler geführt: KA1 (Monat um einen Tag verschoben), KA3, KA5a, KA6, Kal-X4, Kal-X7b, B3, H4.
 
 ### 1a · Versand und Entwürfe (Grenze nach außen)
 
