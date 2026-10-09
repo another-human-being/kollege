@@ -90,7 +90,7 @@
 - **Rat auch auf den anderen Seiten:** auf der Seite des Themas („Aus früheren Fällen“, mit Belegen und Knöpfen, auch die Frage nach dem Vorgänger), im Termin, der zum Thema gehört, und im Chat-Werkzeug `get_matter` (damit „Kollege fragen“ auf der Seite denselben Rat kennt).
 - **Einrichtung vorbereitet:** `npm run einrichten` legt `.env` an und erzeugt `APP_SECRET`, `AUTH_SECRET` und die Push-Schlüssel, ohne sie anzuzeigen (Datei nur für den Besitzer lesbar). `npm run modell:pruefen` prüft MODEL_FAST und MODEL_THINK mit einem erfundenen Satz: Antwort, strukturierte Ausgabe, Werkzeugaufruf, Dauer, Tokens.
 - **Befund bei der Simulation:** Ein vergangener Termin bot „Einladung senden“ an, aber kein „Entwurf verwerfen“. Jetzt geht für Vergangenes keine Einladung mehr raus (auch in der Aktion geprüft), ein Entwurf lässt sich weiter verwerfen. Dazu drei Tests mit festen Daten, die mit der Zeit in die Vergangenheit gerutscht wären, auf relative bzw. spätere Daten umgestellt.
-- **Prüfung:** `tsc` sauber, Vitest 233 Tests (neu `tests/push.test.ts`, Ergänzungen in `hinweise.test.ts` und `kalender.test.ts`), Playwright 15, Simulation 8 Läufe mit 189 Prüfschritten ohne Befund. Nicht prüfbar hier: die Zustellung an ein echtes Gerät (der Browser im Container lehnt Push-Anmeldungen ab) – dafür „Probe senden“.
+- **Prüfung:** `tsc` sauber, Vitest 234 Tests (neu `tests/push.test.ts`, Ergänzungen in `hinweise.test.ts` und `kalender.test.ts`), Playwright 15, Simulation 8 Läufe mit 189 Prüfschritten ohne Befund. Nicht prüfbar hier: die Zustellung an ein echtes Gerät (der Browser im Container lehnt Push-Anmeldungen ab) – dafür „Probe senden“.
 
 Entscheidungen:
 
@@ -99,6 +99,7 @@ Entscheidungen:
 - Entscheidung 49: Die Anmeldung eines Geräts ist ein Zugang zu diesem Gerät. Sie wird verschlüsselt gespeichert (wie Postfach-Passwörter), auch im Aktionsprotokoll nie im Klartext. Nur die Person selbst schaltet ein, nie das Modell. Inhalte gehen Ende-zu-Ende-verschlüsselt über den Push-Dienst von Apple, Google oder Mozilla; der Dienst sieht weder Text noch Link.
 - Entscheidung 50: Der Rat bleibt auf der Seite des Themas, auch nach „Danke, gemerkt“ (auf Heute verschwindet er). Der Merker „zu wenig Erfahrung“ ist kein Rat und erscheint nirgends.
 - Entscheidung 51: Für vergangene Termine geht keine Einladung mehr raus; einen nie gesendeten Entwurf kann man immer verwerfen.
+- PostgreSQL 18 geprüft (09.10.): Vitest 234 und Playwright 15 laufen auf 18 wie auf 16. Postgres.app bietet nur noch 18 an; auf dem Mac läuft der Test damit.
 
 ## Design 05.10. – übernommen
 
