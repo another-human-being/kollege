@@ -45,6 +45,5 @@ chmodSync(datei, 0o600); // secrets: readable only by the owner
 const fehlt = [
   leer('VAPID_SUBJECT') ? 'VAPID_SUBJECT (Kontakt für die Push-Dienste: npm run einrichten -- --kontakt mailto:deine@adresse)' : null,
   /^MODEL_(FAST|THINK)=mistral:/m.test(text) && leer('MISTRAL_API_KEY') ? 'MISTRAL_API_KEY (von console.mistral.ai, selbst in .env eintragen)' : null,
-  leer('TEAM_DOMAIN') ? 'TEAM_DOMAIN (z. B. gruendung.uni-augsburg.de)' : null,
 ].filter(Boolean);
 console.log(fehlt.length ? `Noch offen in ${datei}:\n${fehlt.map((f) => `  - ${f}`).join('\n')}` : `${datei} ist vollständig. Weiter: npm run modell:pruefen`);

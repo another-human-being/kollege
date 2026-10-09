@@ -3,6 +3,7 @@
 // history): it is asked for, or read from IMAP_PASSWORT. The login is tested before anything
 // is stored; the password is stored encrypted (§4.2). Like the seed, connections are
 // infrastructure (decision 1) – the first sync is the import (§7.3).
+import { hauptadresse } from '@/lib/config';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -48,7 +49,7 @@ export async function postfachVerbinden(p: NeuesPostfach): Promise<{ id: string;
   return withSystem(async (tx) => {
     let userId: string | null = null;
     if (p.ownerEmail) {
-      const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, p.ownerEmail.toLowerCase()));
+      const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, hauptadresse(p.ownerEmail)));
       if (!u) throw new Error(`kein Teammitglied mit ${p.ownerEmail}`);
       userId = u.id;
     }

@@ -3,6 +3,7 @@
 // infrastructure writes outside runAction (decision 2026-10-01, STAND.md):
 // they record what arrived, they do not decide anything.
 import { eq, inArray, sql } from 'drizzle-orm';
+import { hauptadresse } from '@/lib/config';
 import { fixtureConnector } from '@/lib/connectors/fixture';
 import { caldavConnector } from '@/lib/connectors/caldav';
 import { laufwerkConnector } from '@/lib/connectors/laufwerk';
@@ -120,7 +121,8 @@ async function storeItem(tx: Tx, conn: Connection, item: RawItem, historical: bo
     : item.kind === 'event' ? (item.meta.organizer as string)
     : (item.meta.modified_by as string | null);
   const [author] = authorEmail
-    ? await tx.select({ id: users.id }).from(users).where(eq(users.email, authorEmail))
+    // any address of a team member, in any spelling
+    ? await tx.select({ id: users.id }).from(users).where(eq(users.email, hauptadresse(authorEmail)))
     : [];
 
   const [row] = await tx

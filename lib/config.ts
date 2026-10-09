@@ -1,5 +1,6 @@
 // Configuration.
-//  - team domain: env TEAM_DOMAIN; freemail list: JSON file (env FREEMAIL_FILE,
+//  - team: the addresses in the team configuration (users, aliases, team_adressen), optionally a
+//    domain of its own (env TEAM_DOMAIN); freemail list: JSON file (env FREEMAIL_FILE,
 //    default config/freemail.json) – decision 2026-10-01
 //  - seed data (team, start areas): env KOLLEGE_CONFIG, default fixtures/config.json (the made-up
 //    test team with its fixture sources, "testdaten": true). A real team: config/team.json (not in git).
@@ -27,14 +28,22 @@ export const AreaConfig = z.object({
   actions: z.array(z.string()).default([]),
 });
 
+const adresse = z.email().transform((e) => e.trim().toLowerCase());
+
 const TeamConfig = z.object({
   // addresses in lower case: login and mailbox owner compare them that way
-  users: z.array(z.object({ key: z.string(), name: z.string(), email: z.email().transform((e) => e.trim().toLowerCase()), is_admin: z.boolean() })),
+  users: z.array(z.object({
+    key: z.string(), name: z.string(), email: adresse, is_admin: z.boolean(),
+    /** further addresses of the same person (e.g. name@uni-a.de and name@uni-augsburg.de) */
+    aliases: z.array(adresse).default([]),
+  })),
   /** fixture mailboxes (test data only); real mailboxes are connected with npm run quelle:imap */
   mailboxes: z.array(
     z.object({ key: z.string(), owner: z.string().nullable(), address: z.email(), team: z.boolean().optional() }),
   ).default([]),
   areas: z.array(AreaConfig),
+  /** shared addresses of the team (e.g. the StartHub mailbox) – team, but no person */
+  team_adressen: z.array(adresse).default([]),
   /** the made-up test data: the seed adds the fixture sources, dev:reset may wipe the database */
   testdaten: z.boolean().default(false),
 });
@@ -55,10 +64,31 @@ export function emailDomain(email: string): string {
   return email.slice(email.lastIndexOf('@') + 1).toLowerCase();
 }
 
-export function teamDomain(): string {
-  const d = process.env.TEAM_DOMAIN?.trim().toLowerCase();
-  if (!d) throw new Error('TEAM_DOMAIN is not set');
-  return d;
+/**
+ * Optional: a domain that belongs to the team alone (its own subdomain). Not for a domain the whole
+ * university shares – then everyone there would count as team (finding 09.10.).
+ */
+export function teamDomain(): string | null {
+  return process.env.TEAM_DOMAIN?.trim().toLowerCase() || null;
+}
+
+let adressen: Map<string, string> | undefined;
+
+/** every team address → the person's main address (null for shared ones like the StartHub mailbox) */
+function teamAdressen(): Map<string, string> {
+  if (!adressen) {
+    const cfg = teamConfig();
+    adressen = new Map();
+    for (const a of cfg.team_adressen) adressen.set(a, '');
+    for (const u of cfg.users) for (const a of [u.email, ...u.aliases]) adressen.set(a, u.email);
+  }
+  return adressen;
+}
+
+/** the main address of a team member for any of their addresses; otherwise the address itself */
+export function hauptadresse(email: string): string {
+  const e = email.trim().toLowerCase();
+  return teamAdressen().get(e) || e;
 }
 
 let freemail: Set<string> | undefined;
@@ -73,8 +103,10 @@ function freemailDomains(): Set<string> {
   return freemail;
 }
 
+/** team = the addresses in the team configuration, plus the team domain if one is set */
 export function isTeamAddress(email: string): boolean {
-  return emailDomain(email) === teamDomain();
+  const e = email.trim().toLowerCase();
+  return teamAdressen().has(e) || (teamDomain() !== null && emailDomain(e) === teamDomain());
 }
 
 export function isFreemailDomain(domain: string): boolean {

@@ -9,7 +9,7 @@ import { ActionError } from './types';
 /** domains are used for fixed assignment: never freemail, never the team itself (§7.2.2) */
 function checkOrgDomain(d: string) {
   if (isFreemailDomain(d)) throw new ActionError(`freemail domain ${d} cannot belong to an organisation`);
-  if (d === teamDomain()) throw new ActionError('the team domain cannot belong to an organisation');
+  if (teamDomain() !== null && d === teamDomain()) throw new ActionError('the team domain cannot belong to an organisation');
 }
 
 const email = z.email().transform((e) => e.toLowerCase());

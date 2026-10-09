@@ -3,9 +3,15 @@
     {
       "key": "andreas",
       "name": "Andreas",
-      "email": "DEINE-ADRESSE@uni-augsburg.de",
+      "email": "vorname.nachname@uni-a.de",
+      "aliases": [
+        "vorname.nachname@uni-augsburg.de"
+      ],
       "is_admin": true
     }
+  ],
+  "team_adressen": [
+    "starthub@uni-augsburg.de"
   ],
   "areas": [
     {

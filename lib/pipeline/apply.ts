@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { eq, inArray, sql } from 'drizzle-orm';
 import { runAction } from '@/lib/actions';
 import type { HintOption } from '@/lib/actions/hint';
-import { emailDomain, isFreemailDomain, isTeamAddress } from '@/lib/config';
+import { emailDomain, hauptadresse, isFreemailDomain, isTeamAddress } from '@/lib/config';
 import type { Tx } from '@/lib/db/client';
 import { areas, connections, entries, matters, orgs, people, personEmails, users } from '@/lib/db/schema';
 import type { FastOutput } from '@/lib/model/schemas';
@@ -186,7 +186,7 @@ async function ownerOf(tx: Tx, entry: Entry): Promise<string | undefined> {
   if (entry.kind === 'file') {
     const by = (entry.meta as { modified_by?: string | null }).modified_by;
     if (!by) return undefined;
-    const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, by));
+    const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, hauptadresse(by)));
     return u?.id;
   }
   if (entry.kind === 'mail') {

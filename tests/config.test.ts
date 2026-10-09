@@ -31,8 +31,26 @@ describe('Team-Konfiguration', () => {
     const test = (await import('@/lib/config')).teamConfig();
     expect(echt.testdaten).toBe(false);
     expect(echt.mailboxes).toEqual([]);
-    expect(echt.users[0]!.email).toBe('deine-adresse@uni-augsburg.de');
+    expect(echt.users[0]!.email).toBe('vorname.nachname@uni-a.de');
+    expect(echt.team_adressen).toEqual(['starthub@uni-augsburg.de']);
     expect(echt.areas.map((a) => a.key)).toEqual(test.areas.map((a) => a.key));
     expect(test.testdaten).toBe(true);
+  });
+});
+
+describe('Team an Adressen statt an einer Domain (09.10.)', () => {
+  it('a person with two addresses and the shared mailbox are team; the rest of the university is not', async () => {
+    vi.stubEnv('KOLLEGE_CONFIG', 'config/team.example.json');
+    vi.stubEnv('TEAM_DOMAIN', '');
+    vi.resetModules();
+    const { hauptadresse, isTeamAddress } = await import('@/lib/config');
+    expect(isTeamAddress('Vorname.Nachname@uni-a.de')).toBe(true);
+    expect(isTeamAddress('vorname.nachname@uni-augsburg.de')).toBe(true);
+    expect(isTeamAddress('StartHub@uni-augsburg.de')).toBe(true);
+    expect(isTeamAddress('prof.hartmann@uni-augsburg.de')).toBe(false);
+    expect(hauptadresse('Vorname.Nachname@Uni-Augsburg.de')).toBe('vorname.nachname@uni-a.de');
+    expect(hauptadresse('starthub@uni-augsburg.de')).toBe('starthub@uni-augsburg.de');
+    vi.unstubAllEnvs();
+    vi.resetModules();
   });
 });

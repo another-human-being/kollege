@@ -3,6 +3,7 @@
 //   (appleid.apple.com → Anmeldung und Sicherheit → App-spezifische Passwörter)
 // Password as with mail: asked for or IMAP_PASSWORT/KALENDER_PASSWORT, tested before storing, encrypted.
 // --kalender limits which calendars are read (names) – private calendars stay out of Kollege.
+import { hauptadresse } from '@/lib/config';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -35,7 +36,7 @@ export async function kalenderVerbinden(p: NeuerKalender): Promise<{ id: string;
   if (!schreib) throw new Error(`Kalender „${p.schreibkalender}“ ist nicht unter den gelesenen`);
   const config = CaldavConfig.parse({ ...base, calendars: gewaehlt.map((c) => c.url), write_calendar: schreib.url });
   return withSystem(async (tx) => {
-    const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, p.ownerEmail.toLowerCase()));
+    const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.email, hauptadresse(p.ownerEmail)));
     if (!u) throw new Error(`kein Teammitglied mit ${p.ownerEmail}`);
     const since = p.importSince ?? new Date(Date.now() - 365 * 86_400_000).toISOString().slice(0, 10);
     const [c] = await tx
