@@ -43,7 +43,7 @@ export async function settings(userId: string) {
   });
 }
 
-const ART: Record<string, string> = {
+export const HINWEIS_ART: Record<string, string> = {
   overdue: 'Überfällig', waiting: 'Wartet', stale: 'Hängt', handover: 'Übergabe', after_event: 'Was kam raus?',
   outcome: 'Wie lief’s?', advice: 'Rat', clarify: 'Kurz klären', review_batch: 'Prüfen',
 };
@@ -53,7 +53,7 @@ const TAG = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 function regelText(v: unknown, bereiche: Map<string, string>): string | null {
   const r = HinweisRegel.safeParse(v);
   if (!r.success) return null;
-  const was = r.data.arten ? r.data.arten.map((a) => ART[a] ?? a).join(', ') : 'alle Hinweise';
+  const was = r.data.arten ? r.data.arten.map((a) => HINWEIS_ART[a] ?? a).join(', ') : 'alle Hinweise';
   const wo = r.data.bereiche ? ` in ${r.data.bereiche.map((b) => bereiche.get(b) ?? b).join(', ')}` : '';
   const wann = r.data.aus ? 'nie' : `nur ${r.data.wochentage!.map((d) => TAG[d - 1]).join(', ')}`;
   return `Wirkt auf ${was}${wo}: ${wann}`;

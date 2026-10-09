@@ -121,6 +121,7 @@ export function lesewerkzeuge(k: WerkzeugKontext): ToolSet {
           files: d.files.map((f) => ({ id: f.id, date: tagIso(f.at), title: f.title, summary: f.summary })),
           timeline: verlauf(d.timeline),
           references: d.references,
+          advice: d.rat.filter((r) => !r.frage).map((r) => ({ text: r.text, evidence: r.belege })),
           href: hrefFor('matter', d.id),
           quellen: await withUser(userId, (tx) => quellenFuer(tx, ids, now)),
         };

@@ -183,10 +183,10 @@ async function ratFuer(m: Neu, now: Date, opts: { model?: LanguageModel }, lauf:
     const geprueft = pruefen(await ratVomModell(neu, faelle, opts.model), faelle, neu);
     const id = crypto.randomUUID();
     if (!geprueft) {
-      // remembered, so that the next run does not ask again: a hint that is closed at once
+      // remembered, so that the next run does not ask again: a hint that is put aside at once (dismissed: it is no advice and shows nowhere)
       await runAction(SYSTEM, 'hint.create', { id, kind: 'advice', ...user, area_id: m.area_id, target_type: 'matter', target_id: m.id,
         dedupe_key: schluessel.rat(m.id), text: 'Dazu habe ich noch zu wenig Erfahrung.', reason: `verglichen mit ${faelle.map((f) => `„${f.titel}“`).join(', ')}` });
-      await runAction(SYSTEM, 'hint.resolve', { hint_id: id });
+      await runAction(SYSTEM, 'hint.dismiss', { hint_id: id });
       lauf.ohne++;
       return;
     }

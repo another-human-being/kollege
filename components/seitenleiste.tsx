@@ -180,6 +180,7 @@ export function Seitenleiste({ areas, me, abmelden }: { areas: NavBereich[]; me:
         <div className="sb-menue" role="menu">
           <Link role="menuitem" href="/einstellungen?reiter=Quellen">Meine Postfächer und Kalender</Link>
           <Link role="menuitem" href="/einstellungen?reiter=Anweisungen">Meine Anweisungen</Link>
+          <Link role="menuitem" href="/einstellungen?reiter=Benachrichtigungen">Benachrichtigungen</Link>
           <form action={abmelden}><button type="submit" role="menuitem">Abmelden</button></form>
         </div>
       </details>

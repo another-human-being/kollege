@@ -22,3 +22,15 @@ test('Später: aus den Augen bis morgen, Rückgängig holt es zurück', async ({
   await toast(page).getByRole('button', { name: /Rückgängig/ }).click();
   await expect(zeile).toBeVisible();
 });
+
+test('Benachrichtigungen: eigener Reiter, über das Kontomenü erreichbar, ehrlich über den Stand', async ({ page }) => {
+  await anmelden(page, 'Andreas');
+  await page.locator('.sb-konto summary').click();
+  await page.getByRole('menuitem', { name: 'Benachrichtigungen' }).click();
+  await expect(page.getByRole('tab', { name: 'Benachrichtigungen', selected: true })).toBeVisible();
+  await expect(page.getByText('als Mitteilung, nicht als Mail')).toBeVisible();
+  // the e2e server has no VAPID keys: it says so instead of offering a switch that cannot work
+  await expect(page.getByText(/noch nicht eingerichtet/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Einschalten' })).toHaveCount(0);
+  await expect(page.getByText('Noch kein Gerät.')).toBeVisible();
+});

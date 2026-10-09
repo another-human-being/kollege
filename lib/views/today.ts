@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 import { vorkommen } from '@/lib/connectors/ical';
 import { withUser } from '@/lib/db/client';
 import { berlinDate } from '@/lib/time';
-import { HinweisRegel } from '@/lib/actions/instruction';
+import { HinweisRegel, verborgen } from '@/lib/actions/instruction';
 import { kurzstand } from '@/lib/hinweise/kurzstand';
 import { schluessel } from '@/lib/hinweise/schluessel';
 import { STALE_DAYS } from './areas';
@@ -299,9 +299,7 @@ export async function todayPage(userId: string, now = new Date(), areaKey?: stri
     .rows.flatMap((x) => { const r = HinweisRegel.safeParse(x.r); return r.success ? [r.data] : []; });
   const wochentag = ((new Date(`${berlinDate(now)}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
   const zeigen = <T extends { area_key: string | null }>(art: string, xs: T[], gilt: (x: T) => boolean = () => true) =>
-    xs.filter((x) => !gilt(x) || !regeln.some((r) =>
-      (!r.arten || r.arten.includes(art as never)) && (!r.bereiche || (x.area_key !== null && r.bereiche.includes(x.area_key)))
-      && (r.aus || (r.wochentage && !r.wochentage.includes(wochentag)))));
+    xs.filter((x) => !gilt(x) || !verborgen(regeln, art, x.area_key, wochentag));
   const hinweisArt = <T extends { kind: string; area_key: string | null }>(xs: T[]) => xs.filter((x) => zeigen(x.kind, [x]).length > 0);
 
   return {

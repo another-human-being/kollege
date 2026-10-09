@@ -120,9 +120,10 @@ export function TerminAktionen({ id, versand, kommend, hatEingeladene, zurueck }
   };
   return (
     <div className="kg-aktionen">
-      {versand === 'entwurf' ? <Aktion variante="primaer" onClick={() => versenden('event.send', 'Einladung wird gesendet')}>Einladung senden</Aktion> : null}
-      {versand === 'aenderung_offen' ? <Aktion variante="primaer" onClick={() => versenden('event.send', 'Änderung wird gesendet')}>Änderung senden</Aktion> : null}
-      {kommend ? (
+      {/* nothing goes out for what is over; a draft can still be discarded */}
+      {kommend && versand === 'entwurf' ? <Aktion variante="primaer" onClick={() => versenden('event.send', 'Einladung wird gesendet')}>Einladung senden</Aktion> : null}
+      {kommend && versand === 'aenderung_offen' ? <Aktion variante="primaer" onClick={() => versenden('event.send', 'Änderung wird gesendet')}>Änderung senden</Aktion> : null}
+      {kommend || (versand === 'entwurf' && !hatEingeladene) ? (
         <Aktion variante="text" onClick={() => versenden('event.cancel', versand === 'entwurf' && !hatEingeladene ? 'Entwurf verworfen' : hatEingeladene ? 'Absage wird gesendet' : 'Termin abgesagt')}>
           {versand === 'entwurf' && !hatEingeladene ? 'Entwurf verwerfen' : 'Absagen'}
         </Aktion>

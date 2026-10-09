@@ -104,7 +104,7 @@ export async function seitePruefen(page: Page, p: Protokoll, wo: string, bild: s
     })
     .map((el) => (el as HTMLElement).innerText.trim().slice(0, 30)).slice(0, 4));
   if (raus.length) p.befund('fehler', 'Darstellung', wo, `Inhalt ragt über den rechten Rand hinaus (abgeschnitten) bei ${page.viewportSize()?.width} px: ${raus.join(' | ')}`);
-  await page.screenshot({ path: `${AUSGABE}/bilder/${bild}.png`, fullPage: true });
+  await page.screenshot({ path: `${AUSGABE}/bilder/${bild}.png`, fullPage: true, caret: 'initial' }); // 'hide' injects a style that can race hydration
 }
 
 /** a CalDAV calendar for Andreas, as `npm run quelle:kalender` would store it (never synced in the simulation) */

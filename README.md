@@ -12,3 +12,12 @@ docker compose restart worker   # importiert die Fixture-Quellen
 ```
 
 Tests brauchen ein Postgres 16 mit Superuser `kollege`/`kollege` auf `localhost:5432` (oder `TEST_DATABASE_URL`). Die Testdatenbank wird bei jedem Lauf neu angelegt: `npm test`, `npm run typecheck`.
+
+## Einrichten mit echten Schlüsseln
+
+```
+npm run einrichten -- --kontakt mailto:deine@adresse   # .env anlegen; APP_SECRET, AUTH_SECRET, Push-Schlüssel erzeugen (nie angezeigt)
+# MISTRAL_API_KEY und TEAM_DOMAIN von Hand in .env eintragen – nie in einen Chat oder eine Befehlszeile
+npm run modell:liste                                    # welche Modelle der Schlüssel im EU-Endpunkt darf
+npm run modell:pruefen                                  # MODEL_FAST/MODEL_THINK: Antwort, strukturierte Ausgabe, Werkzeuge
+```

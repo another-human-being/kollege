@@ -173,6 +173,23 @@ export interface MatterDetail {
   notes: NoteRef[];
   files: EntryRef[];
   references: { type: 'org' | 'matter' | 'person'; id: string; title: string; relation: string }[];
+  /** advice from earlier cases (§9.3) and the question for the predecessor – also here, not only on Heute */
+  rat: RatHinweis[];
+}
+
+export interface RatHinweis { id: string; frage: boolean; text: string; belege: string[]; offen: boolean; optionen: string[] }
+
+/** advice stays on the topic's page after "Danke, gemerkt"; the predecessor question only while open */
+export async function ratZu(tx: Tx, matterId: string): Promise<RatHinweis[]> {
+  const r = await tx.execute<{ id: string; dedupe_key: string; text: string; reason: string | null; status: string; options: { label: string }[] }>(sql`
+    SELECT id, dedupe_key, text, reason, status, options FROM hints
+    WHERE target_type = 'matter' AND target_id = ${matterId}
+      AND ((dedupe_key = ${`advice:${matterId}`} AND status <> 'dismissed') OR (dedupe_key = ${`vorgaenger:${matterId}`} AND status = 'open'))
+    ORDER BY created_at`);
+  return r.rows.map((h) => ({
+    id: h.id, frage: h.dedupe_key.startsWith('vorgaenger:'), text: h.text, belege: h.reason ? h.reason.split(' · ') : [],
+    offen: h.status === 'open', optionen: h.status === 'open' ? h.options.map((o) => o.label) : [],
+  }));
 }
 
 export type TaskStatus = 'open' | 'in_progress' | 'done';
@@ -276,6 +293,7 @@ export async function matterDetail(userId: string, matterId: string, now = new D
       notes: tl.notes,
       files: tl.files,
       references: refs.rows as unknown as MatterDetail['references'],
+      rat: await ratZu(tx, matterId),
     };
   });
 }

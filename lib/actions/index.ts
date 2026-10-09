@@ -12,6 +12,7 @@ import './link';
 import './mail';
 import './matter';
 import './note';
+import './push';
 import './review';
 import './task';
 

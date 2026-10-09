@@ -3,6 +3,7 @@
 // No worker runs here, so nothing reaches a calendar server – writing is tested against Radicale
 // in tests/kalender.test.ts.
 import { expect, test, type Page } from '@playwright/test';
+import { addDays, berlinDate, berlinWeekStart } from '../lib/time';
 import pg from 'pg';
 
 const DB = process.env.E2E_DATABASE_URL ?? 'postgres://kollege:kollege@localhost:5432/kollege_e2e';
@@ -32,7 +33,9 @@ test('Woche zeigt Termine, neuer Termin mit Teilnehmenden bleibt Entwurf', async
   await expect(page.getByRole('link', { name: /Beratung Solaro/ }).first()).toBeVisible();
   await page.screenshot({ path: 'test-results/kalender-woche.png', fullPage: true });
 
-  await page.goto('/kalender?w=2026-09-21&neu=2026-09-24T14:00');
+  // the new event lies next week: an invitation only goes out for what is still to come
+  const woche = berlinWeekStart(new Date(`${addDays(berlinDate(new Date()), 7)}T12:00:00Z`));
+  await page.goto(`/kalender?w=${woche}&neu=${addDays(woche, 3)}T14:00`);
   await page.getByLabel('Titel').fill('Pitch-Probe Solaro');
   await page.getByLabel('Mit').fill('lisa@solaro.example');
   // end before start: caught at the field, nothing saved
@@ -52,7 +55,7 @@ test('Woche zeigt Termine, neuer Termin mit Teilnehmenden bleibt Entwurf', async
   await expect(page.getByText('lisa@solaro.example')).toBeVisible();
   await page.screenshot({ path: 'test-results/kalender-detail.png', fullPage: true });
 
-  await page.goto('/kalender?ansicht=monat&m=2026-09');
+  await page.goto(`/kalender?ansicht=monat&m=${addDays(woche, 3).slice(0, 7)}`);
   await expect(page.getByRole('link', { name: 'Pitch-Probe Solaro' })).toBeVisible();
   await page.screenshot({ path: 'test-results/kalender-monat.png', fullPage: true });
 });

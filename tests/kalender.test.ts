@@ -43,7 +43,7 @@ describe.skipIf(!RADICALE)('Stufe 6: Termine schreiben und einladen', () => {
   const objekte = async () => (await dav.fetchCalendarObjects({ calendar: arbeit })).map((o) => ({ url: o.url, etag: o.etag, data: unfold(String(o.data)) }));
   const meta = async (id: string) => (await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, id))))[0]!.meta as Record<string, unknown>;
   const termin = (extra: Record<string, unknown> = {}) =>
-    runAction<{ id: string }>(andreas(), 'event.create', { title: 'Beratung', start: '2026-10-12T08:00:00Z', end: '2026-10-12T09:00:00Z', ...extra });
+    runAction<{ id: string }>(andreas(), 'event.create', { title: 'Beratung', start: '2027-10-12T08:00:00Z', end: '2027-10-12T09:00:00Z', ...extra });
 
   beforeAll(async () => {
     fx = await importFixtures();
@@ -55,7 +55,7 @@ describe.skipIf(!RADICALE)('Stufe 6: Termine schreiben und einladen', () => {
     // an Apple event with an alarm Kollege does not know about
     await dav.createCalendarObject({ calendar: arbeit, filename: 'apple.ics', iCalString: [
       'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Apple//', 'BEGIN:VEVENT', 'UID:apple-2@icloud', 'DTSTAMP:20260930T080000Z',
-      'DTSTART:20261014T080000Z', 'DTEND:20261014T090000Z', 'SUMMARY:Lehrplanung',
+      'DTSTART:20271014T080000Z', 'DTEND:20271014T090000Z', 'SUMMARY:Lehrplanung',
       'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:-PT15M', 'DESCRIPTION:x', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR', ''].join('\r\n') });
     ({ id: kalId } = await kalenderVerbinden({ url: srv.url, user: srv.user, password: srv.password, ownerEmail: 'andreas@gruendung.uni-augsburg.example', importSince: '2026-01-01' }));
     // invitations go over Andreas' mailbox (SMTP only is needed here)
@@ -85,11 +85,11 @@ describe.skipIf(!RADICALE)('Stufe 6: Termine schreiben und einladen', () => {
 
   it('a change keeps what Apple stored (the alarm) and goes to the server', async () => {
     const [e] = await withSystem((tx) => tx.select().from(entries).where(eq(entries.dedupe_key, 'apple-2@icloud')));
-    await runAction(andreas(), 'event.update', { id: e!.id, title: 'Lehrplanung WS', start: '2026-10-14T09:00:00Z', end: '2026-10-14T10:00:00Z' });
+    await runAction(andreas(), 'event.update', { id: e!.id, title: 'Lehrplanung WS', start: '2027-10-14T09:00:00Z', end: '2027-10-14T10:00:00Z' });
     expect((await kalenderSchreiben(kalId)).fehler).toEqual([]);
     const o = (await objekte()).find((x) => x.data.includes('UID:apple-2@icloud'))!;
     expect(o.data).toContain('SUMMARY:Lehrplanung WS');
-    expect(o.data).toContain('DTSTART:20261014T090000Z');
+    expect(o.data).toContain('DTSTART:20271014T090000Z');
     expect(o.data).toContain('BEGIN:VALARM');
   });
 
@@ -119,6 +119,13 @@ describe.skipIf(!RADICALE)('Stufe 6: Termine schreiben und einladen', () => {
     await expectRejects(runAction(model(), 'event.send', { id: result.id }), /actor model may not run external action event.send/);
     // a draft that was never sent the model may discard
     await runAction(model(), 'event.cancel', { id: result.id });
+    expect(await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)))).toHaveLength(0);
+  });
+
+  it('over is over: no invitation for a past event, but its draft can still be discarded (09.10.)', async () => {
+    const { result } = await termin({ title: 'Schon vorbei', start: '2026-09-01T08:00:00Z', end: '2026-09-01T09:00:00Z', teilnahme: [{ email: 'lisa@solaro.example' }] });
+    await expectRejects(runAction(andreas(), 'event.send', { id: result.id }), /only coming events can be sent/);
+    await runAction(andreas(), 'event.cancel', { id: result.id });
     expect(await withSystem((tx) => tx.select().from(entries).where(eq(entries.id, result.id)))).toHaveLength(0);
   });
 
@@ -152,13 +159,13 @@ describe.skipIf(!RADICALE)('Stufe 6: Termine schreiben und einladen', () => {
     expect(a!.inverse).toBeNull();
 
     // a change now waits for "Änderung senden" (E48) and is not written by itself
-    await runAction(andreas(), 'event.update', { id: result.id, start: '2026-10-12T10:00:00Z', end: '2026-10-12T11:00:00Z' });
+    await runAction(andreas(), 'event.update', { id: result.id, start: '2027-10-12T10:00:00Z', end: '2027-10-12T11:00:00Z' });
     expect(await meta(result.id)).toMatchObject({ versand: 'aenderung_offen' });
     await kalenderSchreiben(kalId);
-    expect((await objekte()).find((x) => x.data.includes('SUMMARY:Pitch-Probe'))!.data).toContain('DTSTART:20261012T080000Z');
+    expect((await objekte()).find((x) => x.data.includes('SUMMARY:Pitch-Probe'))!.data).toContain('DTSTART:20271012T080000Z');
     const { actionId: aenderung } = await runAction(andreas(), 'event.send', { id: result.id });
     expect(await sendeTermin(aenderung)).toMatchObject({ ergebnis: 'gesendet' });
-    expect((await objekte()).find((x) => x.data.includes('SUMMARY:Pitch-Probe'))!.data).toContain('DTSTART:20261012T100000Z');
+    expect((await objekte()).find((x) => x.data.includes('SUMMARY:Pitch-Probe'))!.data).toContain('DTSTART:20271012T100000Z');
     expect(smtp.empfangen.at(-1)!.raw).toContain('Subject: =?UTF-8?Q?Ge=C3=A4ndert');
 
     // cancellation with invited people: a person's click, CANCEL to them, gone from the calendar

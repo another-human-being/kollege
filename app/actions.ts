@@ -31,6 +31,7 @@ const MESSAGES: [RegExp, string][] = [
   [/not in your inbox/, 'Liegt nicht mehr im Eingang.'],
   [/no calendar connected/, 'Es ist kein Kalender verbunden.'],
   [/end before start/, 'Das Ende liegt vor dem Beginn.'],
+  [/only coming events can be sent/, 'Für vergangene Termine geht keine Einladung mehr raus.'],
   [/only coming events/, 'Absagen gibt es nur für kommende Termine.'],
   [/read only/, 'Termin von jemand anderem – nur lesbar.'],
   [/nothing to send/, 'Es gibt nichts zu senden.'],

@@ -26,6 +26,8 @@ export interface KalenderTermin {
   bezug: string | null;
   /** where "Gehört zu" leads (E53: "Öffnen →") */
   bezugHref: string | null;
+  /** advice from earlier cases for the topic the event belongs to (§9.3, also outside Heute) */
+  rat: string | null;
 }
 
 export async function kalenderVerbunden(userId: string): Promise<boolean> {
@@ -38,7 +40,7 @@ export async function kalenderVerbunden(userId: string): Promise<boolean> {
 export async function termine(userId: string, von: Date, bis: Date): Promise<KalenderTermin[]> {
   return withUser(userId, async (tx) => {
     const r = await tx.execute<{
-      id: string; title: string | null; body_text: string | null; meta: Record<string, unknown>; eigen: boolean; besitzer: string[]; bezug: string | null; bezug_href: string | null;
+      id: string; title: string | null; body_text: string | null; meta: Record<string, unknown>; eigen: boolean; besitzer: string[]; bezug: string | null; bezug_href: string | null; rat: string | null;
     }>(sql`
       SELECT e.id, e.title, e.body_text, e.meta,
              EXISTS (SELECT 1 FROM event_copies ec JOIN connections c ON c.id = ec.connection_id
@@ -48,7 +50,9 @@ export async function termine(userId: string, von: Date, bis: Date): Promise<Kal
                 LEFT JOIN orgs o ON l.target_type = 'org' AND o.id = l.target_id
               WHERE l.entry_id = e.id AND l.target_type IN ('matter', 'org') ORDER BY (l.target_type = 'matter') DESC LIMIT 1) AS bezug,
              (SELECT CASE l.target_type WHEN 'matter' THEN '/m/' ELSE '/o/' END || l.target_id FROM links l
-              WHERE l.entry_id = e.id AND l.target_type IN ('matter', 'org') ORDER BY (l.target_type = 'matter') DESC LIMIT 1) AS bezug_href
+              WHERE l.entry_id = e.id AND l.target_type IN ('matter', 'org') ORDER BY (l.target_type = 'matter') DESC LIMIT 1) AS bezug_href,
+             (SELECT h.text FROM links l JOIN hints h ON h.dedupe_key = 'advice:' || l.target_id::text AND h.status <> 'dismissed'
+              WHERE l.entry_id = e.id AND l.target_type = 'matter' LIMIT 1) AS rat
       FROM entries e
       WHERE e.kind = 'event' AND coalesce(e.meta->>'status', '') <> 'CANCELLED'
         AND (e.meta->>'recurrence' IS NOT NULL
@@ -62,7 +66,7 @@ export async function termine(userId: string, von: Date, bis: Date): Promise<Kal
         out.push({
           id: e.id, key: `${e.id}:${v.start}`, title: e.title ?? '(ohne Titel)', start: v.start, end: v.end, allDay: m.all_day === true,
           location: m.location ?? null, notes: e.body_text, versand: m.versand ?? null, serie: !!m.recurrence, eigen: e.eigen,
-          besitzer: e.eigen ? [] : e.besitzer, teilnahme: m.teilnahme ?? [], konflikt: m.konflikt ?? null, fehler: m.send?.error ?? null, bezug: e.bezug, bezugHref: e.bezug_href,
+          besitzer: e.eigen ? [] : e.besitzer, teilnahme: m.teilnahme ?? [], konflikt: m.konflikt ?? null, fehler: m.send?.error ?? null, bezug: e.bezug, bezugHref: e.bezug_href, rat: e.rat,
         });
       }
     }

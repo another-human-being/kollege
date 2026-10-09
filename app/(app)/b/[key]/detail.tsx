@@ -3,9 +3,10 @@
 import { Fragment } from 'react';
 import { Auswahl, Erledigen, Feld, Gespraech, Tu, Zeile } from '@/components/bearbeiten';
 import { EingabeStart } from '@/components/chat';
-import { Abschnitt, Privat, Quelle, Vermutung, Verlauf, Zusage, type VerlaufEintrag } from '@/components/kg';
+import { HinweisAntworten } from '@/app/(app)/heute/client';
+import { Abschnitt, Aussage, Privat, Quelle, Vermutung, Verlauf, Zusage, type VerlaufEintrag } from '@/components/kg';
 import { faellig, monat, tag } from '@/lib/format';
-import type { AreaInfo, Commitment, MatterDetail } from '@/lib/views/areas';
+import type { AreaInfo, Commitment, MatterDetail, RatHinweis } from '@/lib/views/areas';
 import type { OrgDetail } from '@/lib/views/contacts';
 import type { NoteRef, TimelineItem } from '@/lib/views/timeline';
 import { berlinDate } from '@/lib/time';
@@ -120,6 +121,22 @@ function FeldWert({ f, wert, ziel, ki }: { f: AreaInfo['fields'][number]; wert: 
   );
 }
 
+/** advice from earlier cases (§9.3) on the topic's own page – the same hint as on Heute */
+export function Rat({ rat }: { rat: RatHinweis[] }) {
+  if (!rat.length) return null;
+  return (
+    <Abschnitt id="d-rat" titel="Aus früheren Fällen">
+      {rat.map((r) => (
+        <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+          <Aussage art="einschaetzung">{r.text}</Aussage>
+          {r.belege.map((b, i) => <Aussage key={i} art="belegt">{b}</Aussage>)}
+          {r.optionen.length ? <div className="kg-aktionen"><HinweisAntworten hintId={r.id} optionen={r.optionen} /></div> : null}
+        </div>
+      ))}
+    </Abschnitt>
+  );
+}
+
 /** §11: the one input field, preloaded with this page (chat with context) */
 export function Fragen({ bezug, kontext }: { bezug: { type: 'matter' | 'org' | 'person'; id: string }; kontext: string }) {
   return (
@@ -157,6 +174,8 @@ export function MatterAnsicht({ d, team, me, now }: { d: MatterDetail; team: Tea
         </div>
         {d.outcome_note ? <div className="gz"><span className="mono">Wie lief’s</span><span>{d.outcome_note}</span></div> : null}
       </div>
+
+      <Rat rat={d.rat} />
 
       <Fragen bezug={{ type: 'matter', id: d.id }} kontext={`${d.area.name_singular} · ${d.title} · ${d.timeline.length} Einträge`} />
 

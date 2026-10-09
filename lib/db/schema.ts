@@ -268,6 +268,20 @@ export const hints = pgTable('hints', {
   status: hintStatus('status').notNull().default('open'),
   show_from: ts('show_from'),
   dedupe_key: text('dedupe_key').notNull().unique(),
+  /** sent as a push notification (or found not to be sent: no device, rule hides it) */
+  notified_at: ts('notified_at'),
+});
+
+// push notifications (answer of 09.10.2026): one row per device of a person. The subscription
+// (endpoint and keys) is a credential to reach the device – encrypted like connections.config.
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: id(),
+  ...stamps(),
+  user_id: uuid('user_id').notNull().references(() => users.id),
+  /** sha-256 of the endpoint: the same device subscribes once */
+  endpoint_hash: text('endpoint_hash').notNull().unique(),
+  subscription: text('subscription').notNull(),
+  label: text('label').notNull(),
 });
 
 // §9: every model call, for costs and debugging only (no content)

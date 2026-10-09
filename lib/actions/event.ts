@@ -166,12 +166,13 @@ export const eventSend = defineAction({
     if (!copy) throw new ActionError('event of someone else – read only');
     if (m.versand !== 'entwurf' && m.versand !== 'aenderung_offen') throw new ActionError('nothing to send');
     if (!m.teilnahme.length) throw new ActionError('no attendees');
+    if (new Date(m.end) < new Date()) throw new ActionError('only coming events can be sent');
     const next = { ...m, versand: 'sendet' as const, send: { art: 'einladung' as const, send_after: new Date(Date.now() + ZURUECKHOLBAR_S * 1000).toISOString() } };
     return { result: { id, art: 'einladung' }, inverse: [await updateWithInverse(tx, entries, 'entries', id, { meta: next })] };
   },
 });
 
-/** cancel a coming event; a draft never sent is simply discarded (E48) */
+/** cancel a coming event; a draft never sent is simply discarded (E48), also after its date */
 export const eventCancel = defineAction({
   type: 'event.cancel',
   schema: z.object({ id: z.uuid() }),
@@ -181,7 +182,6 @@ export const eventCancel = defineAction({
     userOf(ctx);
     const { e, m, copy } = await loadEvent(tx, id);
     if (!copy) throw new ActionError('event of someone else – read only');
-    if (new Date(m.end) < new Date()) throw new ActionError('only coming events can be cancelled');
     if (m.versand === 'sendet') throw new ActionError('being sent');
     if (m.versand === 'entwurf' && !eingeladen(m).length && !copy.etag) {
       // never sent: discarded (E48); undo brings back the event and its place in the calendar
@@ -189,6 +189,8 @@ export const eventCancel = defineAction({
       const termin = await deleteWithInverse(tx, entries, 'entries', id);
       return { result: { id, verworfen: true }, inverse: [termin, kopie] };
     }
+    // a draft is discarded any time; cancelling is only for what is still to come
+    if (new Date(m.end) < new Date()) throw new ActionError('only coming events can be cancelled');
     if (eingeladen(m).length) {
       // the hard rule for a cancellation that goes out: never the model (CLAUDE.md)
       if (ctx.actor.type === 'model') throw new ActionError('actor model may not run external action event.cancel');

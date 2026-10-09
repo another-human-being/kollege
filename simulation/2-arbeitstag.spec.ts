@@ -2,6 +2,7 @@
 // the other views are asked whether they tell the same story (coherence). A step that breaks is
 // recorded and the day goes on. The worker is simulated by `hinweiseLauf()` where it would run.
 import { expect, test, type Page } from '@playwright/test';
+import { addDays, berlinDate, berlinWeekStart } from '../lib/time';
 import { anmelden, hinweiseLauf, kalenderVerbinden, lauscher, Protokoll, seitePruefen, toast } from './hilfe';
 
 test.describe.configure({ mode: 'serial' });
@@ -161,14 +162,16 @@ test('Mittag Andreas: Mail, Kalender, Dateien', async ({ page }) => {
 
   await schritt(page, 'B3 Termin ohne und mit Gästen, Entwurf verwerfen, Rückgängig', async () => {
     kalenderVerbinden();
-    await page.goto('/kalender?w=2026-10-05&neu=2026-10-07T10:00');
+    // next week, so that the events are still to come whenever the simulation runs
+    const wo_ = berlinWeekStart(new Date(`${addDays(berlinDate(new Date()), 7)}T12:00:00Z`));
+    await page.goto(`/kalender?w=${wo_}&neu=${addDays(wo_, 2)}T10:00`);
     await page.getByLabel('Titel').fill('Fokuszeit Förderanträge');
     await page.getByRole('button', { name: 'Anlegen' }).click();
     await expect(toast(page)).toContainText('Termin angelegt');
     const fokus = page.getByRole('link', { name: /Fokuszeit Förderanträge/ }).first();
     await expect(fokus).toBeVisible();
     p.pruefe(!(await fokus.getAttribute('class'))?.includes('offen'), 'Kohärenz', wo, 'Termin ohne Gäste ist nicht gestrichelt (gilt als im Kalender).');
-    await page.goto('/kalender?w=2026-10-05&neu=2026-10-08T14:00');
+    await page.goto(`/kalender?w=${wo_}&neu=${addDays(wo_, 3)}T14:00`);
     await page.getByLabel('Titel').fill('Nachgespräch Solaro');
     await page.getByLabel('Mit').fill('lisa@solaro.example');
     await page.getByRole('button', { name: 'Anlegen' }).click();
@@ -178,7 +181,7 @@ test('Mittag Andreas: Mail, Kalender, Dateien', async ({ page }) => {
     await expect(toast(page)).toContainText('Entwurf verworfen');
     await toast(page).getByRole('button', { name: /Rückgängig/ }).click();
     await expect(toast(page)).toContainText('Rückgängig gemacht');
-    await page.goto('/kalender?w=2026-10-05');
+    await page.goto(`/kalender?w=${wo_}`);
     p.pruefe(await sichtbar(page, 'Nachgespräch Solaro'), 'Bedienbarkeit', wo, 'Rückgängig holt den verworfenen Entwurf zurück.');
   });
 
@@ -255,6 +258,14 @@ test('Nachmittag Julia und Mehmet: Übergabe, Abschluss, Rat aus dem Vorjahr, An
         const r = await rat.first().innerText();
         p.pruefe(/„.+“/.test(r), 'Intelligenz', wo, 'Der Rat nennt einen wörtlichen Beleg.');
         p.pruefe(/früher einladen|Save-the-Date|18 von 60/.test(r), 'Intelligenz', wo, `Der Rat passt zum Rückblick 2025 (${r.replace(/\s+/g, ' ').slice(0, 160)}).`);
+        // 09.10.: the same advice on the topic's own page
+        await page.goto('/b/events');
+        await liste(page).getByRole('link', { name: /Gründungsnacht 2027/ }).first().click();
+        const seite = page.getByRole('region', { name: 'Aus früheren Fällen' });
+        await expect(seite).toBeVisible();
+        const titel = r.split('\n')[0]!.trim().slice(0, 40);
+        p.pruefe((await seite.innerText()).includes(titel), 'Kohärenz', wo,
+          'Der Rat auf der Seite des Events ist derselbe wie auf Heute.');
       }
       await seitePruefen(page, p, wo, 'tag-C2-rat');
     }

@@ -9,7 +9,9 @@ import { closeDb, withSystem } from '@/lib/db/client';
 import { entries, hints, links, matters, tasks } from '@/lib/db/schema';
 import { pruefen, ratAnwenden, titelWoerter } from '@/lib/hinweise/rat';
 import { regelnAnwenden } from '@/lib/hinweise/regeln';
+import { matterDetail } from '@/lib/views/areas';
 import { settings } from '@/lib/views/settings';
+import { vergangeneSchliessen } from '@/lib/hinweise/abschluss';
 import { todayPage } from '@/lib/views/today';
 import { createEntry, expectRejects, importFixtures, NOW } from './helpers';
 
@@ -149,6 +151,31 @@ describe('Stufe 8: Hinweise & Rat', () => {
     });
   });
 
+  describe('Vergangene Events (09.10.)', () => {
+    it('close themselves the day after their date, once; "Wie lief’s?" follows', async () => {
+      const vorbei = (await runAction<{ id: string }>(user(andreas), 'matter.create', { area_key: 'events', title: 'Workshop Pitch-Training', fields: { date: '2026-09-30' } })).result.id;
+      const heute = (await runAction<{ id: string }>(user(andreas), 'matter.create', { area_key: 'events', title: 'Sprechstunde Oktober', fields: { date: '2026-10-01' } })).result.id;
+      const ohne = (await runAction<{ id: string }>(user(andreas), 'matter.create', { area_key: 'events', title: 'Demo Day', date_start: '2026-09-25T18:00:00+02:00', date_end: '2026-09-25T22:00:00+02:00' })).result.id;
+      const status = async (id: string) => (await withSystem((tx) => tx.select().from(matters).where(eq(matters.id, id))))[0]!.status;
+      await runAction(user(andreas), 'matter.assign', { id: vorbei, owner_user_id: andreas });
+
+      expect(await vergangeneSchliessen(NOW)).toBe(2);
+      expect([await status(vorbei), await status(heute), await status(ohne)]).toEqual(['done', 'open', 'done']);
+      // without a date nothing is decided
+      expect(await status(await matterId('Gründungsnacht 2026'))).toBe('open');
+      expect(await vergangeneSchliessen(NOW)).toBe(0);
+
+      await regelnAnwenden(NOW);
+      const [h] = await hint(sql`${hints.kind} = 'outcome' AND ${hints.target_id} = ${vorbei}`);
+      expect(h).toMatchObject({ text: 'Wie lief „Workshop Pitch-Training“?', user_id: andreas, status: 'open' });
+
+      // opened again by a person: it stays open
+      await runAction(user(andreas), 'matter.set_status', { id: ohne, status: 'open' });
+      expect(await vergangeneSchliessen(tage(3))).toBe(1); // only "Sprechstunde Oktober", now past as well
+      expect(await status(ohne)).toBe('open');
+    });
+  });
+
   describe('Anweisungen zu Hinweisen', () => {
     it('"Wartet-Hinweise nur montags" – applied without a model, on Mondays they show', async () => {
       const zahl = async (now: Date) => (await todayPage(julia, now)).weWaitFor.length + (await todayPage(julia, now)).waitingOnUs.length;
@@ -200,6 +227,18 @@ describe('Stufe 8: Hinweise & Rat', () => {
       let nochmal = 0;
       expect((await ratAnwenden(NOW, { model: think(() => { nochmal++; return { rat: null, belege: [] }; }) })).rat).toBe(0);
       expect(nochmal).toBe(0);
+    });
+
+    it('advice also on the topic’s page and in the chat tool – it stays there after "Danke, gemerkt" (09.10.)', async () => {
+      const gn = await matterId('Gründungsnacht 2026');
+      const d = (await matterDetail(julia, gn, NOW))!;
+      expect(d.rat).toHaveLength(1);
+      expect(d.rat[0]).toMatchObject({ frage: false, offen: true, optionen: ['Danke, gemerkt'], belege: ['„Einladung ging 12 Tage vor dem Termin raus“ – Datei „Rueckblick.docx“'] });
+      await answerHint(julia, d.rat[0]!.id, 0);
+      expect((await todayPage(julia, NOW)).momente.map((m) => m.id)).not.toContain(d.rat[0]!.id);
+      expect((await matterDetail(julia, gn, NOW))!.rat[0]).toMatchObject({ offen: false, optionen: [], text: expect.stringContaining('früher ein') });
+      // advice is the owner's hint: others do not see it (RLS)
+      expect((await matterDetail(andreas, gn, NOW))!.rat).toEqual([]);
     });
 
     it('guards: a quote not in its source or a number not in the data – no advice', () => {

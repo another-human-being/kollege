@@ -28,6 +28,13 @@ export const HinweisRegel = z.object({
 }).refine((r) => r.aus || r.wochentage, { message: 'aus or wochentage' });
 export type HinweisRegel = z.infer<typeof HinweisRegel>;
 
+/** does one of the person's rules hide a hint of this kind and area today? (Heute and push alike) */
+export function verborgen(regeln: HinweisRegel[], art: string, areaKey: string | null, wochentag: number): boolean {
+  return regeln.some((r) =>
+    (!r.arten || r.arten.includes(art as never)) && (!r.bereiche || (areaKey !== null && r.bereiche.includes(areaKey)))
+    && (r.aus || (r.wochentage !== undefined && !r.wochentage.includes(wochentag))));
+}
+
 /** personal (only for me) > area > team (§9.1) */
 export const instructionCreate = defineAction({
   type: 'instruction.create',

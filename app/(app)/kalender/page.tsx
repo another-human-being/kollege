@@ -3,7 +3,7 @@
 import { currentUserId } from '@/auth';
 import { Icon } from '@/components/icon';
 import { TerminAktionen, TerminFormular, type FormDaten } from '@/components/kalender';
-import { Etikett, Leer, Umschalter } from '@/components/kg';
+import { Aussage, Etikett, Leer, Umschalter } from '@/components/kg';
 import { uhrzeit } from '@/lib/format';
 import { addDays, berlinDate, berlinMinutes, berlinWeekStart } from '@/lib/time';
 import { kalenderVerbunden, termine, type KalenderTermin } from '@/lib/views/kalender';
@@ -208,6 +208,7 @@ export default async function Kalender({ searchParams }: { searchParams: Promise
             <section className="cluster" aria-label="Gehört zu">
               <h3 className="cluster-kopf"><Icon name="dateien" />Gehört zu</h3>
               <span>{offen.bezug}{offen.bezugHref ? <> · <a className="kg-bezug" href={offen.bezugHref}>Öffnen →</a></> : null}</span>
+              {offen.rat ? <Aussage art="einschaetzung">Aus früheren Fällen: {offen.rat}</Aussage> : null}
             </section>
           ) : null}
           {offen.notes || (!offen.eigen && offen.besitzer.length) ? (

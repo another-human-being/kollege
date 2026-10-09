@@ -83,6 +83,8 @@ export async function startJobs(boss: PgBoss): Promise<void> {
 
   await boss.work('hinweise', async () => hinweiseLauf());
   await boss.schedule('hinweise', '30 6 * * *', {}, { tz: 'Europe/Berlin' });
+  // push notifications wait for 07:00 on working days (lib/hinweise/push.ts): what came up overnight goes out then
+  await boss.schedule('hinweise', '1 7 * * 1-5', {}, { tz: 'Europe/Berlin', key: 'morgens' });
 
   await boss.work<{ entryId: string }>('process', async ([job]) => {
     const r = await processEntry(job!.data.entryId);

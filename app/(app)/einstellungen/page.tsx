@@ -4,12 +4,14 @@ import { currentUserId } from '@/auth';
 import { Feld, NeuAnlegen, Tu } from '@/components/bearbeiten';
 import { Abschnitt, Anweisung, Leer } from '@/components/kg';
 import { zeitpunkt } from '@/lib/format';
+import { benachrichtigungen } from '@/lib/views/push';
 import { settings } from '@/lib/views/settings';
+import { PushGeraet } from '@/components/push';
 import { BereichFelder, Phasen } from './client';
 
 export const dynamic = 'force-dynamic';
 
-const REITER = ['Quellen', 'Bereiche', 'Anweisungen'] as const;
+const REITER = ['Quellen', 'Bereiche', 'Anweisungen', 'Benachrichtigungen'] as const;
 const QUELLE: Record<string, string> = { mail: 'Postfach', calendar: 'Kalender', drive: 'Laufwerk' };
 
 export default async function Einstellungen({ searchParams }: { searchParams: Promise<{ reiter?: string; id?: string }> }) {
@@ -18,6 +20,7 @@ export default async function Einstellungen({ searchParams }: { searchParams: Pr
   const userId = await currentUserId();
   const now = new Date();
   const s = await settings(userId);
+  const push = reiter === 'Benachrichtigungen' ? await benachrichtigungen(userId) : null;
   const area = reiter === 'Bereiche' ? (s.areas.find((a) => a.id === sp.id) ?? s.areas[0]) : null;
 
   return (
@@ -74,6 +77,32 @@ export default async function Einstellungen({ searchParams }: { searchParams: Pr
           </Abschnitt>
           <Abschnitt id="e-felder" titel="Spalten" anzahl={area.fields.length} aside="höchstens 5">
             <BereichFelder id={area.id} felder={area.fields} />
+          </Abschnitt>
+        </>
+      ) : null}
+
+      {push ? (
+        <>
+          <Abschnitt id="e-push" titel="Benachrichtigungen" aside="werktags 7 bis 20 Uhr">
+            <p style={{ margin: 0 }}>
+              Kollege meldet sich auf deinen Geräten, wenn ein Hinweis für dich neu ist – als Mitteilung, nicht als Mail.
+              Sie sagt in einer Zeile, worum es geht; Tippen öffnet die Stelle in Kollege, an der die Einzelheiten stehen (die Mail, das Thema, die Aufgabe).
+              Was nachts oder am Wochenende aufkommt, kommt am nächsten Werktag um 7 Uhr. Welche Hinweise kommen, regelst du mit Anweisungen.
+            </p>
+            {push.schluessel ? <PushGeraet schluessel={push.schluessel} />
+              : <p className="mono">Auf diesem Server sind Benachrichtigungen noch nicht eingerichtet (VAPID-Schlüssel fehlen).</p>}
+          </Abschnitt>
+          <Abschnitt id="e-geraete" titel="Deine Geräte" anzahl={push.geraete.length}
+            leer={<Leer titel="Noch kein Gerät." text="Auf jedem Gerät, das Hinweise bekommen soll, hier einschalten." />}>
+            {push.geraete.map((g) => (
+              <div key={g.id} className="gz">
+                <span className="mono">seit {zeitpunkt(g.seit, now)}</span>
+                <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span>{g.label}</span>
+                  <Tu type="push.unsubscribe" payload={{ id: g.id }} text="Gerät entfernt" variante="text">Entfernen</Tu>
+                </div>
+              </div>
+            ))}
           </Abschnitt>
         </>
       ) : null}

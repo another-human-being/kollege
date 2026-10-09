@@ -18,6 +18,8 @@
     "dev:reset": "tsx lib/db/dev-reset.ts",
     "e2e": "playwright test",
     "modell:liste": "tsx --env-file-if-exists=.env lib/model/liste.ts",
+    "modell:pruefen": "tsx --env-file-if-exists=.env lib/model/pruefen.ts",
+    "einrichten": "tsx lib/einrichten.ts",
     "eval:chat": "vitest run --config vitest.eval.config.ts",
     "quelle:imap": "tsx --env-file-if-exists=.env lib/connectors/einrichten.ts",
     "eval:zuordnung": "EVAL=zuordnung vitest run --config vitest.eval.config.ts",
@@ -50,6 +52,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tsdav": "^2.3.5",
+    "web-push": "^3.6.7",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -60,6 +63,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/smtp-server": "^3.5.13",
+    "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.11",
     "smtp-server": "^3.19.16",
     "tsx": "^4.23.15",

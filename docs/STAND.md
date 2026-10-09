@@ -13,7 +13,7 @@
 - [x] 7 Laufwerk (Abnahme gegen einen lokalen Ordner; am eingehängten Uni-Laufwerk offen)
 - [x] 8 Hinweise & Rat (Rat mit Ersatzmodell geprüft; mit Mistral am echten Datenbestand offen)
 
-**Aktuell:** Alle acht Stufen gebaut (03.10.2026), Design 05.10. übernommen. Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7), dazu der Rat (Stufe 8) mit Mistral. Danach: Betrieb (VM, Anmeldung per Magic-Link) und die offenen Fragen unten.
+**Aktuell:** Alle acht Stufen gebaut (03.10.2026), Design 05.10. übernommen, Antworten vom 09.10. gebaut (Events schließen sich, Mitteilungen, Rat auf den Seiten). Nächster Schritt: Test mit echten Konten (siehe Offene Fragen). Offen sind die Tests an den echten Quellen: Postfach (Stufe 4 und 5), Kalender (Stufe 6), Laufwerk (Stufe 7), dazu der Rat (Stufe 8) mit Mistral. Danach: Betrieb (VM, Anmeldung per Magic-Link) und die offenen Fragen unten.
 
 ## Stufe 1 – erledigt
 
@@ -78,6 +78,27 @@
     2. `npm run eval:zuordnung`.
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
+
+## Antworten 09.10. – gebaut
+
+- **Vergangene Events schließen sich selbst** (`lib/hinweise/abschluss.ts`): am Tag nach ihrem Datum, im Lauf um 06:30 und nach jedem Sync. Danach fragt „Wie lief’s?“ wie bei einem Abschluss von Hand.
+- **Hinweise als Mitteilung aufs Gerät** (`lib/hinweise/push.ts`, `lib/push/senden.ts`, `public/sw.js`): Web Push, keine Mail.
+  - Die Mitteilung sagt in einer Zeile, worum es geht. Tippen öffnet die Stelle mit den Einzelheiten: den Mail-Verlauf, das Thema, die Aufgabe, den Termin.
+  - Mehrere neue Hinweise eines Laufs kommen als eine Mitteilung („3 neue Hinweise“) und öffnen Heute.
+  - Einschalten je Gerät unter Einstellungen → Benachrichtigungen (auch im Kontomenü), mit „Probe senden“ und der Liste der eigenen Geräte. iPhone/iPad: erst zum Home-Bildschirm hinzufügen (`app/manifest.ts`).
+  - Neu: Tabelle `push_subscriptions` (Migration 0011, RLS: nur eigene), Spalte `hints.notified_at`, Aktionen `push.subscribe`, `push.unsubscribe`, `hint.notified`.
+- **Rat auch auf den anderen Seiten:** auf der Seite des Themas („Aus früheren Fällen“, mit Belegen und Knöpfen, auch die Frage nach dem Vorgänger), im Termin, der zum Thema gehört, und im Chat-Werkzeug `get_matter` (damit „Kollege fragen“ auf der Seite denselben Rat kennt).
+- **Einrichtung vorbereitet:** `npm run einrichten` legt `.env` an und erzeugt `APP_SECRET`, `AUTH_SECRET` und die Push-Schlüssel, ohne sie anzuzeigen (Datei nur für den Besitzer lesbar). `npm run modell:pruefen` prüft MODEL_FAST und MODEL_THINK mit einem erfundenen Satz: Antwort, strukturierte Ausgabe, Werkzeugaufruf, Dauer, Tokens.
+- **Befund bei der Simulation:** Ein vergangener Termin bot „Einladung senden“ an, aber kein „Entwurf verwerfen“. Jetzt geht für Vergangenes keine Einladung mehr raus (auch in der Aktion geprüft), ein Entwurf lässt sich weiter verwerfen. Dazu drei Tests mit festen Daten, die mit der Zeit in die Vergangenheit gerutscht wären, auf relative bzw. spätere Daten umgestellt.
+- **Prüfung:** `tsc` sauber, Vitest 233 Tests (neu `tests/push.test.ts`, Ergänzungen in `hinweise.test.ts` und `kalender.test.ts`), Playwright 15, Simulation 8 Läufe mit 189 Prüfschritten ohne Befund. Nicht prüfbar hier: die Zustellung an ein echtes Gerät (der Browser im Container lehnt Push-Anmeldungen ab) – dafür „Probe senden“.
+
+Entscheidungen:
+
+- Entscheidung 47: „Vergangen“ gilt für Bereiche mit Datum (`matter_kind = dated`, also Events). Das Datum ist `date_end`, sonst `date_start`, sonst das erste Datumsfeld des Bereichs („Datum“). Geschlossen wird einmal: Öffnet jemand das Event wieder, bleibt es offen. Auch ungeprüfte Events schließen sich, verworfene nicht.
+- Entscheidung 48: Mitteilungen gehen nur für persönliche Hinweise raus, werktags 7–20 Uhr. Was nachts oder am Wochenende entsteht, kommt am nächsten Werktag um 7 Uhr. Die Anweisungen zu Hinweisen gelten wie auf Heute: „aus“ heißt nie, „nur montags“ wartet auf Montag. Jeder Hinweis kommt höchstens einmal; älter als 3 Tage kommt er nicht mehr. Wer kein Gerät eingeschaltet hat, bekommt später keinen Schwall alter Hinweise.
+- Entscheidung 49: Die Anmeldung eines Geräts ist ein Zugang zu diesem Gerät. Sie wird verschlüsselt gespeichert (wie Postfach-Passwörter), auch im Aktionsprotokoll nie im Klartext. Nur die Person selbst schaltet ein, nie das Modell. Inhalte gehen Ende-zu-Ende-verschlüsselt über den Push-Dienst von Apple, Google oder Mozilla; der Dienst sieht weder Text noch Link.
+- Entscheidung 50: Der Rat bleibt auf der Seite des Themas, auch nach „Danke, gemerkt“ (auf Heute verschwindet er). Der Merker „zu wenig Erfahrung“ ist kein Rat und erscheint nirgends.
+- Entscheidung 51: Für vergangene Termine geht keine Einladung mehr raus; einen nie gesendeten Entwurf kann man immer verwerfen.
 
 ## Design 05.10. – übernommen
 
@@ -432,10 +453,14 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
   - Suche: „Zuletzt geöffnet“ braucht ein Protokoll, wer was geöffnet hat. Gewollt? Tippfehler-Toleranz (Trigramme) dazu?
   - „Nacheinander durchgehen“ für Entscheiden, „Archivieren“ im ⋯-Menü, Kontomenü-Punkte Profil und Benachrichtigungen (die Seiten gibt es nicht).
   - Kalender: Erinnerung, Wiederholung und Meeting-Link im Formular (E53); Feld „Was kam raus?“ in der Termin-Ansicht.
-- **Hinweise** (Stufe 8):
-  - Sollen vergangene Events von selbst als erledigt gelten (Datum vorbei), damit sie als frühere Fälle zählen und „Wie lief’s?“ fragen? Jetzt schließt sie ein Mensch.
-  - Sollen Hinweise auch außerhalb der App ankommen (morgendliche Mail, Handy)? Nicht in der Bauvorlage.
-  - Soll der Rat zusätzlich auf der Seite des Themas stehen, nicht nur in Heute?
+- **Hinweise** (Stufe 8): ~~vergangene Events schließen, Hinweise außerhalb der App, Rat auf der Seite des Themas~~ beantwortet und gebaut am 09.10. (Entscheidungen 47–51). Neu offen:
+  - Team-Hinweise (z. B. eine Mail ans StartHub-Postfach wartet auf Antwort) gehören niemandem allein. Sie kommen jetzt nicht als Mitteilung. An wen sollen sie gehen – an die Person, die für das Thema zuständig ist, oder an alle?
+  - Ruhezeit fest werktags 7–20 Uhr. Passt das, oder soll jede Person sie per Anweisung ändern können?
+  - Beim automatischen Abschluss bleibt die Phase stehen (z. B. „Einladung raus“). Soll sie auf die letzte Phase („vorbei“) springen?
+- **Test mit echten Konten** – was vor dem ersten Lauf noch fehlt:
+  - Anmeldung: `next start` (Docker) hat noch keine Anmeldung, nur `npm run dev` den Dev-Login. Für einen Test allein am eigenen Rechner reicht der Dev-Login; für das Team braucht es den Magic-Link (Bauvorlage §3, „folgt“).
+  - Team und Bereiche stehen fest in `fixtures/config.json`, der Seed legt dazu die erfundenen Testquellen an. Für echte Daten braucht es eine eigene Konfiguration ohne Testdaten (Vorschlag: `KOLLEGE_CONFIG=config/team.json`, Seed ohne Fixture-Quellen).
+  - Mitteilungen auf dem Handy brauchen HTTPS (Service Worker). Lokal (`localhost`) gehen sie nur im Browser am selben Rechner.
 - **Laufwerk** (Stufe 7):
   - Adresse der Freigabe (`\\…\…`) und ein Dienstkonto mit Lesezugriff beim Rechenzentrum erfragen. Kollege braucht nur Lesen.
   - Gibt es Ordner, die nicht ins Team gehören (Personal, Finanzen)? Sie lassen sich ausschließen, indem nur ein Unterordner eingehängt wird.
