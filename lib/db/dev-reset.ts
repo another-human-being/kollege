@@ -5,11 +5,14 @@ import pg from 'pg';
 import { closeDb } from './client';
 import { runMigrations } from './migrate';
 import { seed } from './seed';
+import { teamConfig } from '@/lib/config';
 
 async function main() {
   if (process.env.NODE_ENV === 'production') throw new Error('nicht in Produktion');
   if (!process.argv.includes('--ja')) throw new Error('löscht die Datenbank – mit --ja bestätigen');
   if (process.env.MODEL_FAST !== 'oracle') throw new Error('Testdaten brauchen MODEL_FAST=oracle');
+  // never wipe a database with real data
+  if (!teamConfig().testdaten) throw new Error('dev:reset nur mit den Testdaten (KOLLEGE_CONFIG leer lassen)');
   const url = new URL(process.env.DATABASE_URL!);
   const name = url.pathname.slice(1);
   const admin = new pg.Client({ connectionString: new URL('/postgres', url).toString() });

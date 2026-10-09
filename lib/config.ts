@@ -1,7 +1,8 @@
 // Configuration.
 //  - team domain: env TEAM_DOMAIN; freemail list: JSON file (env FREEMAIL_FILE,
 //    default config/freemail.json) – decision 2026-10-01
-//  - seed data (team, mailboxes, start areas): fixtures/config.json
+//  - seed data (team, start areas): env KOLLEGE_CONFIG, default fixtures/config.json (the made-up
+//    test team with its fixture sources, "testdaten": true). A real team: config/team.json (not in git).
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
@@ -27,11 +28,15 @@ export const AreaConfig = z.object({
 });
 
 const TeamConfig = z.object({
-  users: z.array(z.object({ key: z.string(), name: z.string(), email: z.email(), is_admin: z.boolean() })),
+  // addresses in lower case: login and mailbox owner compare them that way
+  users: z.array(z.object({ key: z.string(), name: z.string(), email: z.email().transform((e) => e.trim().toLowerCase()), is_admin: z.boolean() })),
+  /** fixture mailboxes (test data only); real mailboxes are connected with npm run quelle:imap */
   mailboxes: z.array(
     z.object({ key: z.string(), owner: z.string().nullable(), address: z.email(), team: z.boolean().optional() }),
-  ),
+  ).default([]),
   areas: z.array(AreaConfig),
+  /** the made-up test data: the seed adds the fixture sources, dev:reset may wipe the database */
+  testdaten: z.boolean().default(false),
 });
 export type TeamConfig = z.infer<typeof TeamConfig>;
 
@@ -42,7 +47,7 @@ const defaultFreemailFile = join(process.cwd(), 'config', 'freemail.json');
 let cached: TeamConfig | undefined;
 
 export function teamConfig(): TeamConfig {
-  cached ??= TeamConfig.parse(JSON.parse(readFileSync(`${fixturesDir}/config.json`, 'utf8')));
+  cached ??= TeamConfig.parse(JSON.parse(readFileSync(process.env.KOLLEGE_CONFIG || `${fixturesDir}/config.json`, 'utf8')));
   return cached;
 }
 

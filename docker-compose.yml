@@ -14,6 +14,9 @@ services:
       POSTGRES_PASSWORD: kollege
       POSTGRES_DB: kollege
       TZ: Europe/Berlin
+    # reachable from this computer only (npm run dev / worker outside Docker), not from the network
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

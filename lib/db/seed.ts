@@ -1,4 +1,5 @@
-// Seed from fixtures/config.json: team, areas, fixture connections.
+// Seed from the team configuration (KOLLEGE_CONFIG, default fixtures/config.json): team, areas,
+// and – for the test data only – the fixture connections.
 // Users and connections have no action in §6 – they are written directly
 // (infrastructure exception, decision 2026-10-01). Areas go through runAction.
 import { fileURLToPath } from 'node:url';
@@ -38,6 +39,9 @@ export async function seed(opts: { now?: Date } = {}): Promise<SeedResult> {
     const exists = await withSystem((tx) => tx.select({ id: areas.id }).from(areas).where(eq(areas.key, a.key)));
     if (!exists.length) await runAction({ type: 'system' }, 'area.create', { ...a, sort: i });
   }
+
+  // fixture sources only for the made-up test team; real sources: npm run quelle:imap / quelle:kalender
+  if (!cfg.testdaten) return { users: userIds, connections: [] };
 
   const wanted: (typeof connections.$inferInsert)[] = [
     ...cfg.mailboxes.map((m) => ({

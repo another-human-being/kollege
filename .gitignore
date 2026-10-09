@@ -8,3 +8,5 @@ node_modules/
 next-env.d.ts
 test-results/
 playwright-report/
+# the real team (names, addresses) stays on the machine
+config/team.json

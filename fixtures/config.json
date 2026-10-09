@@ -1,4 +1,5 @@
 {
+  "testdaten": true,
   "users": [
     { "key": "andreas", "name": "Andreas", "email": "andreas@gruendung.uni-augsburg.example", "is_admin": true },
     { "key": "julia", "name": "Julia", "email": "julia@gruendung.uni-augsburg.example", "is_admin": false },

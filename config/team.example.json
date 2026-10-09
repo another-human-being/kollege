@@ -1,0 +1,152 @@
+{
+  "users": [
+    {
+      "key": "andreas",
+      "name": "Andreas",
+      "email": "DEINE-ADRESSE@uni-augsburg.de",
+      "is_admin": true
+    }
+  ],
+  "areas": [
+    {
+      "key": "founding_teams",
+      "name_singular": "Gründungsteam",
+      "name_plural": "Gründungsteams",
+      "matter_kind": "org_based",
+      "description": "Beratung und Betreuung von Gründungsteams und Gründungsinteressierten: Erstberatungen, Förderanträge (z. B. EXIST), Finanzpläne, Pitchdecks, Folgetermine.",
+      "fields": [
+        {
+          "key": "phase",
+          "label": "Phase",
+          "type": "select",
+          "options": [
+            "Idee",
+            "Vorgründung",
+            "gegründet",
+            "ruht"
+          ]
+        },
+        {
+          "key": "owner",
+          "label": "betreut von",
+          "type": "person"
+        },
+        {
+          "key": "next_step",
+          "label": "nächster Schritt",
+          "type": "text"
+        }
+      ],
+      "phases": [
+        "Idee",
+        "Vorgründung",
+        "gegründet",
+        "ruht"
+      ],
+      "actions": [
+        "new"
+      ]
+    },
+    {
+      "key": "events",
+      "name_singular": "Event",
+      "name_plural": "Events",
+      "matter_kind": "dated",
+      "description": "Veranstaltungen des StartHub: Gründungsnacht, Pitch-Abende, Workshops. Raum, Referierende, Jury, Einladung, Catering, Nachbereitung.",
+      "fields": [
+        {
+          "key": "date",
+          "label": "Datum",
+          "type": "date"
+        },
+        {
+          "key": "location",
+          "label": "Ort",
+          "type": "text",
+          "carry_over": true
+        },
+        {
+          "key": "capacity",
+          "label": "Plätze",
+          "type": "number",
+          "carry_over": true
+        },
+        {
+          "key": "registrations",
+          "label": "Anmeldungen",
+          "type": "number"
+        }
+      ],
+      "phases": [
+        "Planung",
+        "Einladung raus",
+        "vorbei"
+      ],
+      "actions": [
+        "new",
+        "from_previous"
+      ]
+    },
+    {
+      "key": "teaching",
+      "name_singular": "Lehrveranstaltung",
+      "name_plural": "Lehre",
+      "matter_kind": "period",
+      "description": "Lehrveranstaltungen und ihre Organisation: Räume, Sitzungen, Gastvorträge, Materialien, Prüfungen.",
+      "fields": [
+        {
+          "key": "semester",
+          "label": "Semester",
+          "type": "text"
+        },
+        {
+          "key": "format",
+          "label": "Veranstaltungsart",
+          "type": "select",
+          "options": [
+            "Vorlesung",
+            "Seminar",
+            "Workshop"
+          ]
+        }
+      ],
+      "phases": [],
+      "actions": [
+        "new",
+        "from_previous"
+      ]
+    },
+    {
+      "key": "social",
+      "name_singular": "Beitrag",
+      "name_plural": "Social Media",
+      "matter_kind": "item",
+      "description": "Social-Media-Beiträge (Instagram, LinkedIn): Ankündigungen, Rückblicke, Porträts von Gründungsteams.",
+      "fields": [
+        {
+          "key": "planned_for",
+          "label": "geplant für",
+          "type": "date"
+        },
+        {
+          "key": "channel",
+          "label": "Kanal",
+          "type": "select",
+          "options": [
+            "Instagram",
+            "LinkedIn",
+            "beide"
+          ]
+        }
+      ],
+      "phases": [
+        "Entwurf",
+        "geplant",
+        "veröffentlicht"
+      ],
+      "actions": [
+        "new"
+      ]
+    }
+  ]
+}
