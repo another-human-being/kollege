@@ -10,3 +10,5 @@ test-results/
 playwright-report/
 # the real team (names, addresses) stays on the machine
 config/team.json
+# experiments on real data stay on the machine
+experimente/
