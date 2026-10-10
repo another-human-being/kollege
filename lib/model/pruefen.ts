@@ -4,6 +4,7 @@
 // duration and tokens; the key itself is never printed.
 import { generateText, isStepCount, Output, tool } from 'ai';
 import { z } from 'zod';
+import { webFrage, webModell } from '@/lib/kontakte/websuche';
 import { getModel, MISTRAL_EU, modelName, modelSpec, type Role } from './models';
 
 async function pruefe(role: Role): Promise<boolean> {
@@ -51,4 +52,21 @@ if (modelSpec('fast').startsWith('mistral:') || modelSpec('think').startsWith('m
   console.log(`Mistral-Endpunkt: ${process.env.MISTRAL_BASE_URL || `${MISTRAL_EU} (EU)`}${process.env.MISTRAL_API_KEY ? '' : ' – MISTRAL_API_KEY fehlt in .env'}`);
 }
 const ergebnis = [await pruefe('fast'), await pruefe('think')];
+
+// web search (WEBSUCHE=an): a public question, no person
+const web = webModell();
+if (web) {
+  const t0 = Date.now();
+  try {
+    const e = await webFrage('Welche Hochschulen gibt es in Neu-Ulm? Antworte in einem Satz.', 'Antworte kurz auf Deutsch.', web);
+    const ok = e.quellen.length > 0 && e.text.length > 0;
+    console.log(`web   mistral:${web}: ${ok ? 'ok' : 'FEHLER'} – ${e.quellen.length} Quellen · ${Date.now() - t0} ms`);
+    ergebnis.push(ok);
+  } catch (err) {
+    console.log(`web   mistral:${web}: FEHLER – ${err instanceof Error ? err.message.slice(0, 300) : String(err)}`);
+    ergebnis.push(false);
+  }
+} else {
+  console.log('web   aus (WEBSUCHE=an in .env schaltet die Websuche zu neuen Kontakten ein)');
+}
 process.exit(ergebnis.every(Boolean) ? 0 : 1);

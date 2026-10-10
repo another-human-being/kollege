@@ -3,6 +3,8 @@
 import { sql } from 'drizzle-orm';
 import { withUser } from '@/lib/db/client';
 import { commitmentsOf, type Commitment, type TaskStatus } from './areas';
+import type { WebStand } from '@/lib/kontakte/websuche';
+import { belegeZu, type BelegZeile } from './belege';
 import { timeline, type EntryRef, type NoteRef, type TimelineItem } from './timeline';
 
 export interface ContactRow {
@@ -11,6 +13,10 @@ export interface ContactRow {
   name: string;
   /** person: their organisation; org: its role */
   detail: string | null;
+  /** person: their organisation; org: none */
+  org: string | null;
+  /** person: role (founder, mentor …); org: role (founding_team, university …) */
+  rolle: string;
   emails: string[];
   unreviewed: boolean;
 }
@@ -18,13 +24,13 @@ export interface ContactRow {
 export async function contactList(userId: string, filter: { unreviewed?: boolean } = {}) {
   return withUser(userId, async (tx) => {
     const r = await tx.execute<Record<string, unknown>>(sql`
-      SELECT 'person' AS type, p.id, p.name, o.name AS detail,
+      SELECT 'person' AS type, p.id, p.name, o.name AS detail, o.name AS org, p.role::text AS rolle,
              ARRAY(SELECT pe.email FROM person_emails pe WHERE pe.person_id = p.id ORDER BY pe.email) AS emails,
              p.review_state = 'unreviewed' AS unreviewed
       FROM people p LEFT JOIN orgs o ON o.id = p.org_id
       WHERE p.review_state <> 'discarded' AND p.merged_into_id IS NULL
       UNION ALL
-      SELECT 'org', o.id, o.name, o.role::text, '{}'::text[], o.review_state = 'unreviewed'
+      SELECT 'org', o.id, o.name, o.role::text, NULL, o.role::text, '{}'::text[], o.review_state = 'unreviewed'
       FROM orgs o WHERE o.review_state <> 'discarded' AND o.merged_into_id IS NULL
       ORDER BY name`);
     const all = r.rows as unknown as ContactRow[];
@@ -48,6 +54,9 @@ export interface PersonDetail {
   timeline: TimelineItem[];
   systemSteps: number;
   files: EntryRef[];
+  /** what the contact rests on: entries that mention them, and the web search */
+  belege: BelegZeile[];
+  web: WebStand | null;
 }
 
 export async function personDetail(userId: string, personId: string, now = new Date()): Promise<PersonDetail | null> {
@@ -88,6 +97,8 @@ export async function personDetail(userId: string, personId: string, now = new D
       timeline: tl.items,
       systemSteps: tl.systemSteps,
       files: tl.files,
+      belege: await belegeZu(tx, 'person', personId),
+      web: (p.web as WebStand | null) ?? null,
     };
   });
 }
@@ -112,6 +123,7 @@ export interface OrgDetail {
   systemSteps: number;
   notes: NoteRef[];
   files: EntryRef[];
+  belege: BelegZeile[];
 }
 
 export async function orgDetail(userId: string, orgId: string, now = new Date()): Promise<OrgDetail | null> {
@@ -153,6 +165,7 @@ export async function orgDetail(userId: string, orgId: string, now = new Date())
       systemSteps: tl.systemSteps,
       notes: tl.notes,
       files: tl.files,
+      belege: await belegeZu(tx, 'org', orgId),
     };
   });
 }

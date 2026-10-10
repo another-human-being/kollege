@@ -13,6 +13,7 @@ import { berlinEndOfDay } from '@/lib/time';
 import type { Fixed } from './assign';
 import type { Candidates } from './candidates';
 import { senderOf } from './participants';
+import { orgFuer } from '@/lib/kontakte/organisation';
 
 type Entry = typeof entries.$inferSelect;
 const SYSTEM = { type: 'system' } as const;
@@ -108,12 +109,19 @@ export async function applyAssignment(
               'person.create',
               {
                 name: p.new.name,
-                org_id: await resolveOrg(p.new.org),
+                // the org of this mail by name, else by domain or name (lib/kontakte/organisation.ts)
+                org_id: (await resolveOrg(p.new.org)) ?? (await orgFuer(tx, { email, name: p.new.org, reason: out.summary })),
                 emails: [{ email, source: entry.kind === 'event' ? 'calendar' : 'mail' }],
               },
               { tx, reason: out.summary },
             )
           ).result.id;
+    }
+    // a known person without organisation: this mail may tell it (by domain or the name the model read)
+    if (!('id' in p)) {
+      const [ohne] = await tx.select({ id: people.id }).from(people).where(sql`${people.id} = ${id} AND ${people.org_id} IS NULL`);
+      const org = ohne ? await orgFuer(tx, { email: p.new.email.toLowerCase(), name: p.new.org, reason: out.summary }) : undefined;
+      if (org) await runAction(SYSTEM, 'person.update', { id, org_id: org }, { tx, reason: out.summary });
     }
     personIds.push(id);
     await link('person', id, 'model', conf);

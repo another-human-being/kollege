@@ -2,6 +2,7 @@
 // A founding team is also a contact; its work lives in the "Beratungsakte" (E30).
 import { currentUserId } from '@/auth';
 import { Auswahl, Feld, Pruefen, Tu, type Zeile as ListZeile } from '@/components/bearbeiten';
+import { Grundlage } from '@/components/belege';
 import { Abschnitt, Etikett, Leer, Vermutung, Verlauf, type VerlaufEintrag } from '@/components/kg';
 import { faellig, monat, tag } from '@/lib/format';
 import { contactList, orgDetail, personDetail } from '@/lib/views/contacts';
@@ -12,6 +13,8 @@ export const dynamic = 'force-dynamic';
 type Search = { typ?: string; id?: string; art?: string; ungeprueft?: string; q?: string; voll?: string };
 
 const ORG_ROLLE: Record<string, string> = { founding_team: 'Gründungsteam', partner: 'Partner', university: 'Universität', other: 'Sonstige' };
+/** a person's role in the list; "other" is no information */
+const personArt = (r: string) => (r === 'other' ? '–' : (ROLLE[r] ?? r));
 const ART: Record<string, VerlaufEintrag['art']> = { mail: 'Mail', event: 'Termin', note: 'Notiz', file: 'Datei' };
 
 export default async function Kontakte({ searchParams }: { searchParams: Promise<Search> }) {
@@ -32,14 +35,15 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
   const person = sp.typ === 'person' && sp.id ? await personDetail(userId, sp.id, now) : null;
   const org = sp.typ === 'org' && sp.id ? await orgDetail(userId, sp.id, now) : null;
   const offen = Boolean(person || org);
-  const raster = offen ? 'minmax(0,1.3fr) minmax(0,1fr)' : 'minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr)';
+  const raster = offen ? 'minmax(0,1.3fr) minmax(0,1fr) minmax(0,.7fr)' : 'minmax(0,1.2fr) minmax(0,1fr) minmax(0,.7fr) minmax(0,1.3fr)';
   const zeilen: ListZeile[] = rows.map((c) => ({
     id: c.id, typ: c.type,
     href: url({ typ: c.type, id: c.id }),
     aktiv: c.id === sp.id,
     zellen: [
       { text: c.name, klasse: 't1' },
-      { text: c.type === 'person' ? (c.detail ?? '–') : (ORG_ROLLE[c.detail ?? ''] ?? '–') },
+      { text: c.org ?? '–' },
+      { text: c.type === 'person' ? personArt(c.rolle) : (ORG_ROLLE[c.rolle] ?? '–') },
       ...(offen ? [] : [{ text: c.emails.join(', ') || '–', klasse: 'tm' }]),
     ],
   }));
@@ -66,7 +70,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
           </div>
         </div>
         <div className="tkopf" style={{ gridTemplateColumns: raster, paddingLeft: sp.ungeprueft === '1' ? 40 : 20 }}>
-          <span>Name</span><span>Organisation · Art</span>{offen ? null : <span>Adressen</span>}
+          <span>Name</span><span>Organisation</span><span>Art</span>{offen ? null : <span>Adressen</span>}
         </div>
         <div className="ld-scroll">
           {sp.ungeprueft === '1'
@@ -88,6 +92,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
               <Tu type="review.accept" payload={{ items: [{ type: 'person', id: person.id }] }} text="Übernommen">Übernehmen</Tu>
               <Tu type="review.discard" payload={{ items: [{ type: 'person', id: person.id }] }} text="Verworfen" variante="text">Verwerfen</Tu></div>
           ) : null}
+          <Grundlage key={`g${person.id}`} belege={person.belege} web={person.web} />
           <div className="label" style={{ color: 'var(--ink-muted)' }}>Person</div>
           <Feld id="p-name" gross wert={person.name} label="Name" change={{ type: 'person.update', base: { id: person.id }, key: 'name' }} />
           <div className="felder">
@@ -123,6 +128,7 @@ export default async function Kontakte({ searchParams }: { searchParams: Promise
               <Tu type="review.accept" payload={{ items: [{ type: 'org', id: org.id }] }} text="Übernommen">Übernehmen</Tu>
               <Tu type="review.discard" payload={{ items: [{ type: 'org', id: org.id }] }} text="Verworfen" variante="text">Verwerfen</Tu></div>
           ) : null}
+          <Grundlage key={`g${org.id}`} belege={org.belege} />
           <div className="label" style={{ color: 'var(--ink-muted)' }}>Organisation</div>
           <Feld id="o-name" gross wert={org.name} label="Name" change={{ type: 'org.update', base: { id: org.id }, key: 'name' }} />
           <div className="felder">

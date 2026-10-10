@@ -15,6 +15,7 @@ import { rueckschreiben } from '@/lib/mail/rueckschreiben';
 import { sendeEntwurf, wartendeSendungen } from '@/lib/mail/senden';
 import { processEntry } from '@/lib/pipeline/process';
 import { hinweiseLauf } from '@/lib/hinweise';
+import { anreichernLauf } from '@/lib/kontakte/websuche';
 
 type Connection = typeof connections.$inferSelect;
 
@@ -40,6 +41,7 @@ async function scheduleSync(boss: PgBoss, conns: Connection[]) {
 export async function startJobs(boss: PgBoss): Promise<void> {
   for (const q of ['import', 'sync', 'process', 'senden', 'senden-nachholen']) await boss.createQueue(q);
   await boss.createQueue('hinweise', { policy: 'stately' });
+  await boss.createQueue('anreichern', { policy: 'stately' });
   // after a sync the new entries are still being processed – the run waits a little for them
   const hinweiseBald = () => boss.send('hinweise', {}, { startAfter: 60 });
 
@@ -82,6 +84,9 @@ export async function startJobs(boss: PgBoss): Promise<void> {
   await boss.schedule('senden-nachholen', '* * * * *', {}, { tz: 'Europe/Berlin' });
 
   await boss.work('hinweise', async () => hinweiseLauf());
+  // web search about new contacts (decision 10.10.): a few at a time, only with WEBSUCHE=an
+  await boss.work('anreichern', async () => anreichernLauf());
+  await boss.schedule('anreichern', '*/5 * * * *', {}, { tz: 'Europe/Berlin' });
   await boss.schedule('hinweise', '30 6 * * *', {}, { tz: 'Europe/Berlin' });
   // push notifications wait for 07:00 on working days (lib/hinweise/push.ts): what came up overnight goes out then
   await boss.schedule('hinweise', '1 7 * * 1-5', {}, { tz: 'Europe/Berlin', key: 'morgens' });

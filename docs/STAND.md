@@ -79,6 +79,22 @@
     3. `npm run quelle:imap -- --benutzer <RZ-Kennung> --besitzer <deine Team-Adresse> --seit <Datum vor 1–2 Wochen>`.
     4. Worker starten und Heute bzw. die Prüfansicht ansehen.
 
+## Kontakte beim ersten echten Import (10.10.) – gebaut
+
+Befund beim Test mit dem eigenen Postfach: Bei vielen Kontakten blieb die Organisation leer. Ursache: Pro Mail legte Kollege höchstens eine Organisation an, die der Haupt-Absenderin. Andere Personen bekamen nur dann eine, wenn es eine Organisation genau dieses Namens schon gab. Die Domain ihrer Adresse (z. B. `hnu.de`) wurde nicht genutzt.
+
+- **Organisation** (`lib/kontakte/organisation.ts`): Die Domain der Adresse zählt zuerst (nie Freemail, nie Team), dann der Name. Sonst legt Kollege eine neue, ungeprüfte Organisation mit dieser Domain an. Bekannte Personen ohne Organisation bekommen sie aus späteren Mails. Für die schon angelegten: `npm run kontakte:anreichern`.
+- **Kontaktliste:** Organisation und Art als eigene Spalten.
+- **Worauf das beruht** (Kontaktseite, Person und Organisation): Die Mails, Termine und Dateien, die den Kontakt nennen, mit den Leserechten der Person (RLS). Ein Klick öffnet den Eintrag rechts unten (`components/belege.tsx`, `/api/eintrag/[id]`); ‹ › und die Pfeiltasten gehen durch alle, Escape schließt.
+- **Websuche zu neuen Kontakten** (`lib/kontakte/websuche.ts`), automatisch, wie am 10.10. entschieden. Eingeschaltet mit `WEBSUCHE=an`. Sie nutzt Mistrals eingebaute Websuche (Conversations-Schnittstelle, `store: false`). Das Ergebnis erscheint unter „Worauf das beruht“ als KI-Vermutung mit den Quellseiten. Prüfung: `npm run modell:pruefen` (Zeile `web`).
+- **Prüfung:** `tsc` sauber, Vitest 242 (neu `tests/kontakte.test.ts` mit simulierter Mistral-Antwort), Playwright 16 (neu `e2e/kontakte.spec.ts`), Simulation 189 Schritte ohne Befund. Nicht geprüft: die echte Websuche über den EU-Endpunkt. Der Container erreicht Mistral nicht, deshalb zeigt erst `modell:pruefen` auf dem Mac, ob es geht.
+
+Entscheidungen:
+
+- Entscheidung 53: Organisation eines Kontakts in dieser Reihenfolge: Domain → Name → neue ungeprüfte Organisation. Ohne Name und ohne bekannte Domain bleibt sie leer: lieber leer als geraten.
+- Entscheidung 54: Websuche nur nach dienstlichen Angaben (Organisation, Art, Funktion), nichts Privates. Geschickt werden nur Name, Mail-Domain und eine bekannte Organisation, nie Mailinhalte. Übernommen wird nur, was eindeutig passt und mit Quellseiten belegt ist, die die Suche wirklich geliefert hat. Eine Organisation setzt die Suche nur, wo keine bekannt ist; die Rolle nur, wo „sonstige“ steht. Jede Person wird einmal gesucht, eine gescheiterte Suche nach einem Tag noch einmal; höchstens 10 Personen alle 5 Minuten. Gesucht wird nur bei vollem Namen (Vor- und Nachname).
+- Entscheidung 55: „Worauf das beruht“ zeigt nur, was die Person auch sonst lesen darf. Die Begründung der Systemaktion selbst bleibt im Aktionsprotokoll (das ist nur für die eigene Person lesbar).
+
 ## Antworten 09.10. – gebaut
 
 - **Vergangene Events schließen sich selbst** (`lib/hinweise/abschluss.ts`): am Tag nach ihrem Datum, im Lauf um 06:30 und nach jedem Sync. Danach fragt „Wie lief’s?“ wie bei einem Abschluss von Hand.
@@ -463,6 +479,7 @@ Durch Tests gegen den echten IMAP-Server gefunden, mit Fixtures unsichtbar:
   - Anmeldung: `next start` (Docker) hat noch keine Anmeldung, nur `npm run dev` den Dev-Login. Für einen Test allein am eigenen Rechner reicht der Dev-Login; für das Team braucht es den Magic-Link (Bauvorlage §3, „folgt“).
   - Team und Bereiche stehen fest in `fixtures/config.json`, der Seed legt dazu die erfundenen Testquellen an. Für echte Daten braucht es eine eigene Konfiguration ohne Testdaten (Vorschlag: `KOLLEGE_CONFIG=config/team.json`, Seed ohne Fixture-Quellen).
   - Mitteilungen auf dem Handy brauchen HTTPS (Service Worker). Lokal (`localhost`) gehen sie nur im Browser am selben Rechner.
+- **Websuche zu Kontakten** (10.10.): Automatisch über jede neue Person zu suchen, ist eine eigene Verarbeitung personenbezogener Daten Dritter (Profilbildung) mit Informationspflicht nach Art. 14 DSGVO. Bitte mit dem Datenschutzbeauftragten klären, bevor `WEBSUCHE=an` für das ganze Team gilt.
 - **Laufwerk** (Stufe 7):
   - Adresse der Freigabe (`\\…\…`) und ein Dienstkonto mit Lesezugriff beim Rechenzentrum erfragen. Kollege braucht nur Lesen.
   - Gibt es Ordner, die nicht ins Team gehören (Personal, Finanzen)? Sie lassen sich ausschließen, indem nur ein Unterordner eingehängt wird.

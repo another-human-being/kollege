@@ -120,6 +120,8 @@ export const people = pgTable('people', {
   review_state: reviewState('review_state').notNull().default('accepted'),
   discard_reason: text('discard_reason'),
   merged_into_id: uuid('merged_into_id').references((): AnyPgColumn => people.id),
+  /** web search about the person (decision 10.10.): null = not yet; { am, status, organisation, funktion, quellen } */
+  web: jsonb('web'),
 });
 
 export const personEmails = pgTable('person_emails', {

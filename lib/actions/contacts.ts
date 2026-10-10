@@ -109,3 +109,25 @@ export const orgUpdate = defineAction({
     return { result: { id }, inverse: [await updateWithInverse(tx, orgs, 'orgs', id, set)] };
   },
 });
+
+/** result of the web search about a person (decision 10.10.): what was found, with its sources */
+export const personWeb = defineAction({
+  type: 'person.web',
+  schema: z.object({
+    id: z.uuid(),
+    web: z.object({
+      am: z.iso.datetime({ offset: true }),
+      status: z.enum(['gefunden', 'unklar', 'fehler']),
+      organisation: z.string().nullable().optional(),
+      art: z.enum(['founding_team', 'partner', 'university', 'other']).nullable().optional(),
+      funktion: z.string().nullable().optional(),
+      quellen: z.array(z.object({ url: z.url(), titel: z.string().nullable() })).optional(),
+      fehler: z.string().optional(),
+    }),
+  }),
+  external: false,
+  allowedActors: ['system'],
+  async apply(tx, { id, web }) {
+    return { result: { id }, inverse: [await updateWithInverse(tx, people, 'people', id, { web })] };
+  },
+});
